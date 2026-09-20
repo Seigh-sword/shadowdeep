@@ -94,6 +94,7 @@ jobs:
           ls -R
           echo "---build-debug.log---"
           cat build-debug.log || echo "no log"
+          echo "test log" > dummy.log
         shell: bash
 
       - name: Upload Windows logs
@@ -104,6 +105,7 @@ jobs:
           path: |
             build-debug.log
             build-release.log
+            dummy.log
             build/**/*.log
 
       - name: Test
