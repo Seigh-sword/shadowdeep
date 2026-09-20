@@ -58,9 +58,14 @@ jobs:
       - name: Configure (Windows)
         if: runner.os == 'Windows'
         run: |
+          set -o pipefail
+          echo "Configuring debug-windows"
           cmake --preset debug-windows --verbose 2>&1 | tee configure-debug.log
+          echo "Configure debug exit code: ${PIPESTATUS[0]}"
           cat configure-debug.log
+          echo "Configuring release-windows"
           cmake --preset release-windows --verbose 2>&1 | tee configure-release.log
+          echo "Configure release exit code: ${PIPESTATUS[0]}"
           cat configure-release.log
         shell: bash
 
@@ -100,8 +105,12 @@ jobs:
         if: ${{ always() && runner.os == 'Windows' }}
         run: |
           ls -R
+          echo "---configure-debug.log---"
+          cat configure-debug.log || echo "no configure log"
+          echo "---configure-release.log---"
+          cat configure-release.log || echo "no configure release log"
           echo "---build-debug.log---"
-          cat build-debug.log || echo "no log"
+          cat build-debug.log || echo "no build log"
           echo "test log" > dummy.log
           echo "---DUMMY---"
           cat dummy.log
@@ -110,12 +119,15 @@ jobs:
       - name: Show log tail (Windows)
         if: ${{ always() && runner.os == 'Windows' }}
         run: |
+          echo "=== CONFIGURE DEBUG LOG TAIL ==="
+          tail -n 500 configure-debug.log || echo "no configure log"
+          echo "=== CONFIGURE DEBUG LOG HEAD ==="
+          head -n 500 configure-debug.log || echo "no configure log"
           echo "=== BUILD DEBUG LOG TAIL ==="
-          tail -n 200 build-debug.log || echo "no log"
-          echo "=== BUILD DEBUG LOG HEAD ==="
-          head -n 200 build-debug.log || echo "no log"
+          tail -n 200 build-debug.log || echo "no build log"
           echo "=== CMAKE CACHE ==="
-          cat build/debug/CMakeCache.txt | head -n 100 || echo "no cache"
+          cat build/debug/CMakeCache.txt | head -n 200 || echo "no cache"
+          cat build/CMakeCache.txt | head -n 200 || echo "no cache root"
         shell: bash
 
       - name: Upload Windows logs
