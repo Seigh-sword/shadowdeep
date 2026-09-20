@@ -74,7 +74,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           set -o pipefail
-          cmake --build --preset debug --verbose 2>&1 | tee build-debug.log
+          cmake --build --preset debug --verbose 2>&1 | tee build-debug.log || (echo "Build failed"; cat build-debug.log; echo "::error::$(head -n 100 build-debug.log)"; exit 1)
           echo "---BUILD LOG---"
           cat build-debug.log
         shell: bash
@@ -83,7 +83,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           set -o pipefail
-          cmake --build --preset release --verbose 2>&1 | tee build-release.log
+          cmake --build --preset release --verbose 2>&1 | tee build-release.log || (echo "Build failed"; cat build-release.log; exit 1)
           echo "---BUILD LOG---"
           cat build-release.log
         shell: bash
@@ -95,6 +95,19 @@ jobs:
           echo "---build-debug.log---"
           cat build-debug.log || echo "no log"
           echo "test log" > dummy.log
+          echo "---DUMMY---"
+          cat dummy.log
+        shell: bash
+
+      - name: Show log tail (Windows)
+        if: ${{ always() && runner.os == 'Windows' }}
+        run: |
+          echo "=== BUILD DEBUG LOG TAIL ==="
+          tail -n 200 build-debug.log || echo "no log"
+          echo "=== BUILD DEBUG LOG HEAD ==="
+          head -n 200 build-debug.log || echo "no log"
+          echo "=== CMAKE CACHE ==="
+          cat build/debug/CMakeCache.txt | head -n 100 || echo "no cache"
         shell: bash
 
       - name: Upload Windows logs
@@ -107,6 +120,28 @@ jobs:
             build-release.log
             dummy.log
             build/**/*.log
+          if-no-files-found: warn
+
+      - name: Post log to issue on failure (Windows)
+        if: ${{ failure() && runner.os == 'Windows' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let log = "";
+            try {
+              log = fs.readFileSync('build-debug.log', 'utf8');
+            } catch (e) {
+              log = "Could not read log: " + e.message;
+            }
+            log = log.slice(-5000);
+            const body = "Windows build failed log tail:\n```\n" + log + "\n```\n";
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "Windows build failure log " + context.sha.slice(0,7),
+              body: body
+            });
 
       - name: Test
         run: ctest --preset debug --output-on-failure
