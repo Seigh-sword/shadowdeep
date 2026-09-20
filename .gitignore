@@ -1,0 +1,13 @@
+build/
+dist/
+*.o
+*.a
+*.so
+*.exe
+*.log
+.cache/
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store

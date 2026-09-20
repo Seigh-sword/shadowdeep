@@ -1,0 +1,47 @@
+name: Cross Compile
+
+on:
+  push:
+    branches: [ main, arena/* ]
+  workflow_dispatch:
+
+jobs:
+  linux-cross:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [aarch64, armv7, riscv64]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Build via Docker
+        run: |
+          case "${{ matrix.target }}" in
+            aarch64)
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:2023-12-10 cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:2023-12-10 cmake --build build/${{ matrix.target }}
+              ;;
+            armv7)
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:2023-12-10 cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:2023-12-10 cmake --build build/${{ matrix.target }}
+              ;;
+            riscv64)
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:2023-12-10 cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:2023-12-10 cmake --build build/${{ matrix.target }}
+              ;;
+          esac
+
+  freebsd:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build FreeBSD x86_64
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: pkg install -y cmake ninja
+          run: |
+            cmake --preset release
+            cmake --build --preset release
