@@ -1,0 +1,12 @@
+[
+  {"id": "monster.giant_rat", "name": "giant rat", "glyph": "r", "color": "brown", "family": "beast", "hp": 4, "atk": 2, "def": 0, "xp": 3, "depth": [1,4], "speed": 100},
+  {"id": "monster.goblin", "name": "goblin", "glyph": "g", "color": "green", "family": "humanoid", "hp": 11, "atk": 4, "def": 1, "xp": 10, "depth": [2,6], "speed": 100},
+  {"id": "monster.skeleton", "name": "skeleton", "glyph": "s", "color": "bright_white", "family": "undead", "hp": 16, "atk": 5, "def": 2, "xp": 18, "depth": [3,7], "speed": 100},
+  {"id": "monster.orc", "name": "orc", "glyph": "o", "color": "green", "family": "humanoid", "hp": 26, "atk": 7, "def": 3, "xp": 30, "depth": [4,9], "speed": 100},
+  {"id": "monster.ogre", "name": "ogre", "glyph": "O", "color": "brown", "family": "humanoid", "hp": 40, "atk": 10, "def": 4, "xp": 48, "depth": [5,9], "speed": 80},
+  {"id": "monster.wraith", "name": "wraith", "glyph": "w", "color": "bright_cyan", "family": "undead", "hp": 30, "atk": 11, "def": 5, "xp": 60, "depth": [6,10], "speed": 120},
+  {"id": "monster.vampire", "name": "vampire", "glyph": "V", "color": "bright_red", "family": "undead", "hp": 46, "atk": 12, "def": 5, "xp": 85, "depth": [6,10], "speed": 110},
+  {"id": "monster.troll", "name": "troll", "glyph": "T", "color": "green", "family": "humanoid", "hp": 65, "atk": 14, "def": 7, "xp": 110, "depth": [7,10], "speed": 80},
+  {"id": "monster.demon", "name": "demon", "glyph": "d", "color": "bright_red", "family": "demon", "hp": 80, "atk": 17, "def": 9, "xp": 160, "depth": [8,15], "speed": 100},
+  {"id": "monster.ancient_dragon", "name": "ancient dragon", "glyph": "D", "color": "gold", "family": "dragon", "hp": 240, "atk": 26, "def": 13, "xp": 800, "depth": [30,30], "speed": 90, "boss": true}
+]

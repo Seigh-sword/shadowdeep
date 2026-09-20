@@ -1,0 +1,102 @@
+[
+  {
+    "id": "region.forgotten_cellars",
+    "name": "Forgotten Cellars",
+    "minDepth": 1,
+    "maxDepth": 3,
+    "description": "Damp stone and forgotten supplies.",
+    "theme": "cellar",
+    "terrain": ["wall", "floor", "rubble"],
+    "monsters": ["monster.giant_rat", "monster.cave_bat", "monster.kobold"]
+  },
+  {
+    "id": "region.goblin_warrens",
+    "name": "Goblin Warrens",
+    "minDepth": 3,
+    "maxDepth": 6,
+    "description": "Crude tunnels stinking of goblin camps.",
+    "theme": "warrens",
+    "terrain": ["wall", "floor", "door"],
+    "monsters": ["monster.goblin", "monster.goblin_archer", "monster.goblin_shaman"]
+  },
+  {
+    "id": "region.sunken_crypts",
+    "name": "Sunken Crypts",
+    "minDepth": 5,
+    "maxDepth": 9,
+    "description": "Ancient burial halls flooded with shadows.",
+    "theme": "crypt",
+    "terrain": ["wall", "floor", "water", "statue"],
+    "monsters": ["monster.skeleton", "monster.zombie", "monster.ghoul"]
+  },
+  {
+    "id": "region.fungal_depths",
+    "name": "Fungal Depths",
+    "minDepth": 7,
+    "maxDepth": 12,
+    "description": "Bioluminescent fungi and spore clouds.",
+    "theme": "fungal",
+    "terrain": ["wall", "floor", "fungus", "water"],
+    "monsters": ["monster.giant_spider", "monster.venom_spider", "monster.slime"]
+  },
+  {
+    "id": "region.crystal_caverns",
+    "name": "Crystal Caverns",
+    "minDepth": 10,
+    "maxDepth": 15,
+    "description": "Glittering crystals humming with arcane power.",
+    "theme": "crystal",
+    "terrain": ["wall", "floor", "crystal"],
+    "monsters": ["monster.elemental_fire", "monster.elemental_frost", "monster.golem"]
+  },
+  {
+    "id": "region.drowned_halls",
+    "name": "Drowned Halls",
+    "minDepth": 13,
+    "maxDepth": 18,
+    "description": "Waterlogged corridors and sunken statues.",
+    "theme": "drowned",
+    "terrain": ["wall", "floor", "water", "deep_water"],
+    "monsters": ["monster.slime", "monster.wraith", "monster.cultist"]
+  },
+  {
+    "id": "region.infernal_foundry",
+    "name": "Infernal Foundry",
+    "minDepth": 16,
+    "maxDepth": 22,
+    "description": "Molten metal and infernal forges.",
+    "theme": "foundry",
+    "terrain": ["wall", "floor", "lava", "rubble"],
+    "monsters": ["monster.ogre", "monster.demon", "monster.dark_knight"]
+  },
+  {
+    "id": "region.ashen_fortress",
+    "name": "Ashen Fortress",
+    "minDepth": 20,
+    "maxDepth": 26,
+    "description": "Charred ramparts of a fallen stronghold.",
+    "theme": "ashen",
+    "terrain": ["wall", "floor", "rubble", "statue"],
+    "monsters": ["monster.orc_warrior", "monster.orc_shaman", "monster.troll"]
+  },
+  {
+    "id": "region.abyssal_temple",
+    "name": "Abyssal Temple",
+    "minDepth": 24,
+    "maxDepth": 29,
+    "description": "A temple dedicated to void gods.",
+    "theme": "abyssal",
+    "terrain": ["wall", "floor", "altar", "chasm"],
+    "monsters": ["monster.necromancer", "monster.lich", "monster.shadow_beast"]
+  },
+  {
+    "id": "region.shadowdeep",
+    "name": "Shadowdeep",
+    "minDepth": 28,
+    "maxDepth": 30,
+    "description": "The heart of darkness where the Amulet rests.",
+    "theme": "shadowdeep",
+    "terrain": ["wall", "floor", "lava", "altar"],
+    "monsters": ["monster.dragon_young", "monster.ancient_dragon", "monster.demon"]
+  }
+]

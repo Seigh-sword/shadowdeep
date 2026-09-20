@@ -29,6 +29,28 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
+    },
+    {
+      "name": "debug-windows",
+      "displayName": "Debug Windows",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "SHADOWDEEP_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "release-windows",
+      "displayName": "Release Windows",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SHADOWDEEP_BUILD_TESTS": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -39,12 +61,28 @@
     {
       "name": "release",
       "configurePreset": "release"
+    },
+    {
+      "name": "debug-windows",
+      "configurePreset": "debug-windows",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release-windows",
+      "configurePreset": "release-windows",
+      "configuration": "Release"
     }
   ],
   "testPresets": [
     {
       "name": "debug",
       "configurePreset": "debug",
+      "output": {"outputOnFailure": true}
+    },
+    {
+      "name": "debug-windows",
+      "configurePreset": "debug-windows",
+      "configuration": "Debug",
       "output": {"outputOnFailure": true}
     }
   ]
