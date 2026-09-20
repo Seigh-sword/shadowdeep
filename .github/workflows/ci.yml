@@ -72,13 +72,28 @@ jobs:
 
       - name: Build Debug (Windows)
         if: runner.os == 'Windows'
-        run: cmake --build --preset debug --verbose
+        run: |
+          cmake --build --preset debug --verbose 2>&1 | tee build-debug.log
+          cat build-debug.log
         shell: bash
 
       - name: Build Release (Windows)
         if: runner.os == 'Windows'
-        run: cmake --build --preset release --verbose
+        run: |
+          cmake --build --preset release --verbose 2>&1 | tee build-release.log
+          cat build-release.log
         shell: bash
+
+      - name: Upload Windows logs
+        if: always() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-logs-${{ matrix.compiler }}
+          path: |
+            build-debug.log
+            build-release.log
+            build/debug/CMakeFiles/CMakeOutput.log
+            build/debug/CMakeFiles/CMakeError.log
 
       - name: Test
         run: ctest --preset debug --output-on-failure
