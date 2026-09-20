@@ -53,8 +53,11 @@ jobs:
       - name: Configure (Windows)
         if: runner.os == 'Windows'
         run: |
-          cmake --preset debug
-          cmake --preset release
+          cmake --preset debug --verbose 2>&1 | tee configure-debug.log
+          cat configure-debug.log
+          cmake --preset release --verbose 2>&1 | tee configure-release.log
+          cat configure-release.log
+        shell: bash
 
       - name: Build Debug (Unix)
         if: runner.os != 'Windows'
@@ -118,6 +121,8 @@ jobs:
           path: |
             build-debug.log
             build-release.log
+            configure-debug.log
+            configure-release.log
             dummy.log
             build/**/*.log
           if-no-files-found: warn
