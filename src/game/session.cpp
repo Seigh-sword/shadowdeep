@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <limits>
 #include <random>
+#include <cstdio>
 
 namespace shadowdeep {
 
