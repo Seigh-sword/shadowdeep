@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   build:
     name: ${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }}
@@ -136,18 +140,27 @@ jobs:
             const fs = require('fs');
             let log = "";
             try {
-              log = fs.readFileSync('build-debug.log', 'utf8');
+              log = fs.readFileSync('configure-debug.log', 'utf8');
             } catch (e) {
-              log = "Could not read log: " + e.message;
+              try {
+                log = fs.readFileSync('build-debug.log', 'utf8');
+              } catch (e2) {
+                log = "Could not read logs: " + e.message + " / " + e2.message;
+              }
             }
-            log = log.slice(-5000);
-            const body = "Windows build failed log tail:\n```\n" + log + "\n```\n";
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: "Windows build failure log " + context.sha.slice(0,7),
-              body: body
-            });
+            log = log.slice(-8000);
+            const body = "Windows build failed log tail for " + context.sha.slice(0,7) + ":\n```\n" + log + "\n```\n";
+            try {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: "Windows build failure " + context.sha.slice(0,7),
+                body: body
+              });
+            } catch (err) {
+              console.log("Failed to create issue: " + err.message);
+              console.log(body);
+            }
 
       - name: Test
         run: ctest --preset debug --output-on-failure
