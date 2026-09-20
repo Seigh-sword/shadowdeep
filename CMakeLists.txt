@@ -45,13 +45,18 @@ set(SHADOWDEEP_SOURCES
     src/app/cli.cpp
     src/app/app.cpp
     src/game/session.cpp
+    src/quests/quest.cpp
+    src/npc/npc.cpp
+    src/shops/shop.cpp
+    src/codex/bestiary.cpp
+    src/update/update_manager.cpp
 )
 
 add_library(shadowdeep_lib STATIC ${SHADOWDEEP_SOURCES})
 target_include_directories(shadowdeep_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(WIN32)
-    target_link_libraries(shadowdeep_lib PUBLIC shlwapi)
+    target_link_libraries(shadowdeep_lib PUBLIC shlwapi shell32 ole32)
 endif()
 
 add_executable(shadowdeep src/main.cpp)

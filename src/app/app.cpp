@@ -6,6 +6,8 @@
 #include <fstream>
 #include <chrono>
 #include <algorithm>
+#include <cstdlib>
+#include <cstdio>
 
 namespace shadowdeep {
 

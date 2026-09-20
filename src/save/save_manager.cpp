@@ -7,6 +7,8 @@
 #include <chrono>
 #include <random>
 #include <algorithm>
+#include <cstdlib>
+#include <cstdio>
 
 namespace shadowdeep {
 
