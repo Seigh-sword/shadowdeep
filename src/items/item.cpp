@@ -66,7 +66,7 @@ std::string Item::fullName() const {
     }
     std::string result = prefix + name;
     if (power > 0 && isEquipment()) {
-        result += " +" + std::to_string(power);
+        result += std::string(" +") + std::to_string(power);
     }
     return result;
 }

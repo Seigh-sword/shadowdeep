@@ -475,13 +475,13 @@ void GameSession::autoPickup() {
                 int g = items()[i].valueGold;
                 player_.stats.gold += g;
                 goldEarned_ += g;
-                addMessage("You pick up " + std::to_string(g) + " gold.", Color::Gold);
+                addMessage(std::string("You pick up ") + std::to_string(g) + " gold.", Color::Gold);
                 items().erase(items().begin() + i);
                 return;
             } else if (items()[i].kind == ItemKind::Ruby) {
                 int r = items()[i].valueGold;
                 player_.stats.rubies += r;
-                addMessage("You pick up " + std::to_string(r) + " ruby.", Color::BrightRed);
+                addMessage(std::string("You pick up ") + std::to_string(r) + " ruby.", Color::BrightRed);
                 items().erase(items().begin() + i);
                 return;
             }
@@ -502,7 +502,7 @@ bool GameSession::pickup() {
         player_.stats.gold += it.valueGold;
         goldEarned_ += it.valueGold;
         items().erase(items().begin() + idx);
-        addMessage("You collect " + std::to_string(it.valueGold) + " gold.", Color::Gold);
+        addMessage(std::string("You collect ") + std::to_string(it.valueGold) + " gold.", Color::Gold);
         return true;
     }
 
@@ -523,7 +523,7 @@ bool GameSession::pickup() {
         addMessage("You seize the Amulet of Shadowdeep!", Color::BrightYellow);
         addMessage("Return to the surface.", Color::Gold);
     } else {
-        addMessage("You pick up " + it.name + ".", it.color);
+        addMessage(std::string("You pick up ") + it.name + ".", it.color);
     }
 
     player_.inventory.add(it);
@@ -544,7 +544,7 @@ bool GameSession::descend() {
     ensureFloor(depth_);
     player_.pos = dungeon().stairsUp;
     computeFov();
-    addMessage("You descend to level " + std::to_string(depth_) + " (" + regionNameForDepth(depth_) + ").", Color::BrightYellow);
+    addMessage(std::string("You descend to level ") + std::to_string(depth_) + std::string(" (") + regionNameForDepth(depth_) + ").", Color::BrightYellow);
     if (depth_ == kMaxDepth) addMessage("A tremendous heat fills the darkness.", Color::BrightRed);
     return false;
 }
@@ -568,7 +568,7 @@ bool GameSession::ascend() {
     --depth_;
     player_.pos = dungeon().stairsDown;
     computeFov();
-    addMessage("You ascend to level " + std::to_string(depth_) + ".", Color::BrightCyan);
+    addMessage(std::string("You ascend to level ") + std::to_string(depth_) + ".", Color::BrightCyan);
     return false;
 }
 
@@ -588,7 +588,7 @@ void GameSession::playerAttack(Monster& m) {
     m.aware = true;
     m.aiState = AiState::Hunting;
 
-    addMessage("You hit the " + m.name + " for " + std::to_string(damage) + " damage.", Color::White);
+    addMessage(std::string("You hit the ") + m.name + std::string(" for ") + std::to_string(damage) + " damage.", Color::White);
 
     if (m.hp <= 0) killMonster(m);
 }
@@ -596,10 +596,10 @@ void GameSession::playerAttack(Monster& m) {
 void GameSession::killMonster(Monster& m) {
     m.alive = false;
     ++kills_;
-    addMessage("The " + m.name + " dies.", Color::BrightGreen);
+    addMessage(std::string("The ") + m.name + " dies.", Color::BrightGreen);
     bool level = player_.gainXp(m.xp);
-    addMessage("You gain " + std::to_string(m.xp) + " XP.", Color::Gray);
-    if (level) addMessage("You advance to level " + std::to_string(player_.stats.level) + "!", Color::BrightYellow);
+    addMessage(std::string("You gain ") + std::to_string(m.xp) + " XP.", Color::Gray);
+    if (level) addMessage(std::string("You advance to level ") + std::to_string(player_.stats.level) + "!", Color::BrightYellow);
 
     if (!m.boss && rng_.chance(20)) {
         Item drop = randomItem(m.pos, depth_);
@@ -637,7 +637,7 @@ void GameSession::endTurn() {
         int dmg = player_.effects.getPower(EffectId::Poison);
         if (dmg < 1) dmg = 1;
         player_.stats.hp -= dmg;
-        addMessage("You suffer " + std::to_string(dmg) + " poison damage.", Color::Green);
+        addMessage(std::string("You suffer ") + std::to_string(dmg) + " poison damage.", Color::Green);
     }
 
     if (player_.effects.has(EffectId::Regeneration)) {
@@ -707,7 +707,7 @@ std::vector<Vec2> GameSession::pathToPlayer(const Monster& source) {
 void GameSession::monsterAttack(Monster& m) {
     int dmg = std::max(1, rng_.range(1, m.atk) - player_.defensePower());
     player_.stats.hp -= dmg;
-    addMessage("The " + m.name + " hits you for " + std::to_string(dmg) + " damage!", Color::BrightRed);
+    addMessage(std::string("The ") + m.name + std::string(" hits you for ") + std::to_string(dmg) + " damage!", Color::BrightRed);
 
     if (rng_.chance(10)) {
         if (m.damageType == DamageType::Poison) {
@@ -722,7 +722,7 @@ void GameSession::monsterAttack(Monster& m) {
     if (player_.stats.hp <= 0) {
         player_.stats.hp = 0;
         dead_ = true;
-        addMessage("You are slain by the " + m.name + ".", Color::BrightRed);
+        addMessage(std::string("You are slain by the ") + m.name + ".", Color::BrightRed);
     }
 }
 
@@ -806,7 +806,7 @@ bool GameSession::useItem(size_t idx) {
     if (it.kind == ItemKind::PotionHeal) {
         int before = player_.stats.hp;
         player_.stats.hp = std::min(player_.stats.maxHp, player_.stats.hp + it.power);
-        addMessage("You recover " + std::to_string(player_.stats.hp - before) + " HP.", Color::BrightGreen);
+        addMessage(std::string("You recover ") + std::to_string(player_.stats.hp - before) + " HP.", Color::BrightGreen);
         player_.inventory.remove(idx);
         return true;
     }
@@ -837,7 +837,7 @@ bool GameSession::useItem(size_t idx) {
         int before = player_.stats.hp;
         player_.stats.hp = std::min(player_.stats.maxHp, player_.stats.hp + it.power);
         player_.inventory.remove(idx);
-        addMessage("You eat the ration and recover " + std::to_string(player_.stats.hp - before) + " HP.", Color::BrightGreen);
+        addMessage(std::string("You eat the ration and recover ") + std::to_string(player_.stats.hp - before) + " HP.", Color::BrightGreen);
         return true;
     }
 
@@ -850,7 +850,7 @@ bool GameSession::useItem(size_t idx) {
         }
         player_.inventory.remove(idx);
         if (prev) player_.inventory.add(*prev);
-        addMessage("You equip the " + it.name + ".", Color::BrightCyan);
+        addMessage(std::string("You equip the ") + it.name + ".", Color::BrightCyan);
         return true;
     }
 
@@ -871,7 +871,7 @@ bool GameSession::useItem(size_t idx) {
         int dmg = it.power + player_.stats.level * 2;
         target->hp -= dmg;
         target->aware = true;
-        addMessage("Lightning strikes the " + target->name + " for " + std::to_string(dmg) + " damage!", Color::BrightYellow);
+        addMessage("Lightning strikes the " + target->name + std::string(" for ") + std::to_string(dmg) + " damage!", Color::BrightYellow);
         if (target->hp <= 0) killMonster(*target);
         return true;
     }
@@ -888,7 +888,7 @@ bool GameSession::useItem(size_t idx) {
             int dmg = it.power + player_.stats.level * 2;
             m->hp -= dmg;
             m->aware = true;
-            addMessage("Fire engulfs the " + m->name + " for " + std::to_string(dmg) + " damage!", Color::BrightRed);
+            addMessage("Fire engulfs the " + m->name + std::string(" for ") + std::to_string(dmg) + " damage!", Color::BrightRed);
             if (m->hp <= 0) killMonster(*m);
         }
         return true;
@@ -928,7 +928,7 @@ bool GameSession::dropItem(size_t idx) {
     it.pos = player_.pos;
     items().push_back(it);
     player_.inventory.remove(idx);
-    addMessage("You drop the " + it.name + ".", Color::Gray);
+    addMessage(std::string("You drop the ") + it.name + ".", Color::Gray);
     return true;
 }
 

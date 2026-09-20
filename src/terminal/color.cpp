@@ -7,7 +7,7 @@ std::string ansiColorCode(Color c, bool bg) {
     int brightBase = bg ? 100 : 90;
     switch (c) {
         case Color::Default: return bg ? "\033[49m" : "\033[39m";
-        case Color::Black: return "\033[" + std::to_string(base) + "m";
+        case Color::Black: return std::string("\033[") + std::to_string(base) + "m";
         case Color::Gray: return "\033[90m";
         case Color::White: return "\033[37m";
         case Color::Red: return "\033[31m";

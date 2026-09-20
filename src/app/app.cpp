@@ -141,7 +141,7 @@ void App::renderEntries(const std::vector<EntryMetadata>& entries, int cursor, i
             line += e.entryName.substr(0, 18);
             line += "  ";
             line += e.characterName.substr(0, 10);
-            line += "  Lv" + std::to_string(e.level);
+            line += std::string("  Lv") + std::to_string(e.level);
             line += "  " + e.regionName.substr(0, 12);
             line += "  " + e.playTimeString();
             line += "  " + e.statusString();
@@ -169,7 +169,7 @@ void App::renderNewEntryScreen(std::string& entryName, std::string& charName, in
         "Entry Name: " + entryName,
         "Character Name: " + charName,
         "Class: " + Player::className(static_cast<PlayerClass>(pclass)),
-        "Seed: " + std::to_string(seed) + " (0=random)",
+        std::string("Seed: ") + std::to_string(seed) + " (0=random)",
         "Create",
         "Back"
     };
@@ -187,12 +187,12 @@ void App::renderGameplay(const GameSession& session) {
     int w = screen_.width();
     int h = screen_.height();
 
-    std::string title = "SHADOWDEEP " + std::string(kGameVersion) + " Depth " + std::to_string(session.depth()) + "/" + std::to_string(kMaxDepth) + " " + regionNameForDepth(session.depth()) + " Seed " + std::to_string(session.rng().seedValue());
+    std::string title = std::string("SHADOWDEEP ") + std::string(kGameVersion) + std::string(" Depth ") + std::to_string(session.depth()) + std::string("/") + std::to_string(kMaxDepth) + std::string(" ") + regionNameForDepth(session.depth()) + std::string(" Seed ") + std::to_string(session.rng().seedValue());
     screen_.text(0, 0, title.substr(0, w), Color::BrightCyan, true);
 
     auto& p = session.player();
-    std::string status = "HP " + std::to_string(p.stats.hp) + "/" + std::to_string(p.stats.maxHp) + " Lv " + std::to_string(p.stats.level) + " XP " + std::to_string(p.stats.xp) + "/" + std::to_string(p.stats.xpNext) + " Atk " + std::to_string(p.attackPower()) + " Def " + std::to_string(p.defensePower()) + " Gold " + std::to_string(p.stats.gold) + " Rubies " + std::to_string(p.stats.rubies);
-    if (p.hasteTurns > 0) status += " Haste " + std::to_string(p.hasteTurns);
+    std::string status = std::string("HP ") + std::to_string(p.stats.hp) + std::string("/") + std::to_string(p.stats.maxHp) + std::string(" Lv ") + std::to_string(p.stats.level) + std::string(" XP ") + std::to_string(p.stats.xp) + std::string("/") + std::to_string(p.stats.xpNext) + std::string(" Atk ") + std::to_string(p.attackPower()) + std::string(" Def ") + std::to_string(p.defensePower()) + std::string(" Gold ") + std::to_string(p.stats.gold) + std::string(" Rubies ") + std::to_string(p.stats.rubies);
+    if (p.hasteTurns > 0) status += std::string(" Haste ") + std::to_string(p.hasteTurns);
     if (!p.effects.all().empty()) {
         status += " [";
         for (auto& e : p.effects.all()) status += e.displayName() + " ";
@@ -207,7 +207,7 @@ void App::renderGameplay(const GameSession& session) {
 
     if (w < mapW + 10 || h < mapH + 10) {
         screen_.text(2, 4, "Terminal too small. Please resize to at least 80x33.", Color::BrightRed, true);
-        std::string sz = "Current: " + std::to_string(w) + "x" + std::to_string(h);
+        std::string sz = std::string("Current: ") + std::to_string(w) + std::string("x") + std::to_string(h);
         screen_.text(2, 5, sz, Color::White);
         return;
     }
@@ -255,7 +255,7 @@ void App::renderGameplay(const GameSession& session) {
     for (int i = 0; i < msgCount; ++i) {
         auto& msg = session.messages()[start + i];
         std::string txt = msg.text;
-        if (msg.count > 1) txt += " (x" + std::to_string(msg.count) + ")";
+        if (msg.count > 1) txt += std::string(" (x") + std::to_string(msg.count) + ")";
         if (txt.size() > static_cast<size_t>(w - 2)) txt = txt.substr(0, w - 2);
         screen_.text(2, msgTop + i, txt, msg.color);
     }
@@ -310,7 +310,7 @@ void App::renderHelp() {
 
     screen_.drawBox(left, top, w, h, Color::BrightYellow);
     std::vector<std::string> lines = {
-        "SHADOWDEEP " + std::string(kGameVersion),
+        std::string("SHADOWDEEP ") + std::string(kGameVersion),
         "",
         "Arrow keys / hjkl / yubn    Move or melee attack",
         "g or ,                      Pick up item",
@@ -348,15 +348,15 @@ void App::renderSettings() {
 
     auto& cfg = configMgr_->get();
     std::vector<std::string> lines = {
-        "Theme: " + cfg.theme,
-        "Animations: " + std::string(cfg.animations ? "On" : "Off"),
-        "Reduced Motion: " + std::string(cfg.reducedMotion ? "On" : "Off"),
-        "Screen Shake: " + std::string(cfg.screenShake ? "On" : "Off"),
-        "High Contrast: " + std::string(cfg.highContrast ? "On" : "Off"),
-        "Mouse Support: " + std::string(cfg.mouseSupport ? "On" : "Off"),
-        "Auto Pickup Gold: " + std::string(cfg.autoPickupGold ? "On" : "Off"),
-        "Auto Check Update: " + std::string(cfg.autoCheckUpdate ? "On" : "Off"),
-        "Update Channel: " + cfg.updateChannel,
+        std::string("Theme: ") + cfg.theme,
+        std::string("Animations: ") + std::string(cfg.animations ? "On" : "Off"),
+        std::string("Reduced Motion: ") + std::string(cfg.reducedMotion ? "On" : "Off"),
+        std::string("Screen Shake: ") + std::string(cfg.screenShake ? "On" : "Off"),
+        std::string("High Contrast: ") + std::string(cfg.highContrast ? "On" : "Off"),
+        std::string("Mouse Support: ") + std::string(cfg.mouseSupport ? "On" : "Off"),
+        std::string("Auto Pickup Gold: ") + std::string(cfg.autoPickupGold ? "On" : "Off"),
+        std::string("Auto Check Update: ") + std::string(cfg.autoCheckUpdate ? "On" : "Off"),
+        std::string("Update Channel: ") + cfg.updateChannel,
         "",
         "Press Esc to return"
     };
@@ -369,7 +369,7 @@ void App::renderSettings() {
 void App::renderChangelog() {
     screen_.clear();
     int w = screen_.width();
-    screen_.text(2, 0, "Changelog - " + std::string(kGameVersion) + " Early Alpha", Color::BrightYellow, true);
+    screen_.text(2, 0, std::string("Changelog - ") + std::string(kGameVersion) + " Early Alpha", Color::BrightYellow, true);
     screen_.drawHLine(0, 1, w, "-", Color::Gray);
 
     std::vector<std::string> lines = {
@@ -435,10 +435,10 @@ void App::renderCredits() {
         "",
         "Licensed under the ISC License.",
         "",
-        "Version: " + std::string(kGameVersion) + " (" + std::string(kVersionHuman) + ")",
-        "Save schema: " + std::to_string(kSaveSchemaVersion),
-        "Config schema: " + std::to_string(kConfigSchemaVersion),
-        "Build revision: " + std::to_string(kBuildRevision),
+        std::string("Version: ") + std::string(kGameVersion) + std::string(" (") + std::string(kVersionHuman) + ")",
+        std::string("Save schema: ") + std::to_string(kSaveSchemaVersion),
+        std::string("Config schema: ") + std::to_string(kConfigSchemaVersion),
+        std::string("Build revision: ") + std::to_string(kBuildRevision),
         "",
         "Third-party:",
         "  - fmt (MIT)",
@@ -467,7 +467,7 @@ void App::renderMessageLog(const GameSession& session) {
     int y = 2;
     for (auto it = session.messages().rbegin(); it != session.messages().rend() && y < screen_.height() - 2; ++it) {
         std::string txt = it->text;
-        if (it->count > 1) txt += " (x" + std::to_string(it->count) + ")";
+        if (it->count > 1) txt += std::string(" (x") + std::to_string(it->count) + ")";
         screen_.text(2, y++, txt.substr(0, screen_.width() - 4), it->color);
     }
 
