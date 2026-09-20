@@ -4,6 +4,7 @@
 #include "shadowdeep/entities/player.hpp"
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <chrono>
 #include <algorithm>
 #include <cstdlib>
@@ -592,7 +593,7 @@ int App::runHome() {
                                         std::ofstream f(tmp, std::ios::binary);
                                         f.write(reinterpret_cast<const char*>(data.data()), data.size());
                                     }
-                                    std::filesystem::rename(tmp, p);
+                                    std::filesystem::rename(std::filesystem::path(tmp), p);
 
                                     entries = saveMgr_->listEntries();
                                     cursor = 0;
@@ -638,7 +639,7 @@ int App::runHome() {
                                     std::ofstream out(tmp, std::ios::binary);
                                     out.write(reinterpret_cast<const char*>(outData.data()), outData.size());
                                 }
-                                std::filesystem::rename(tmp, path);
+                                std::filesystem::rename(std::filesystem::path(tmp), path);
                             }
 
                             entries = saveMgr_->listEntries();

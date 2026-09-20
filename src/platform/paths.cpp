@@ -7,6 +7,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shlobj.h>
+#include <knownfolders.h>
+#include <combaseapi.h>
+#include <objbase.h>
 #else
 #include <unistd.h>
 #include <pwd.h>

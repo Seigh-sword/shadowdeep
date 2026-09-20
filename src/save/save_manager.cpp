@@ -4,6 +4,7 @@
 #include "shadowdeep/save/save_header.hpp"
 #include "shadowdeep/version.hpp"
 #include <fstream>
+#include <filesystem>
 #include <chrono>
 #include <random>
 #include <algorithm>
@@ -209,7 +210,7 @@ bool SaveManager::createEntry(const std::string& entryName, const std::string& c
         f.flush();
         f.close();
 
-        fs::rename(tmpPath, path);
+        fs::rename(fs::path(tmpPath), path);
         return true;
     } catch (...) {
         return false;

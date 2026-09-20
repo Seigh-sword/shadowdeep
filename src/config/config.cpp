@@ -1,5 +1,6 @@
 #include "shadowdeep/config/config.hpp"
 #include <fstream>
+#include <filesystem>
 #include <iostream>
 
 namespace shadowdeep {
@@ -106,7 +107,7 @@ bool ConfigManager::save() {
         f << "}\n";
         f.flush();
         f.close();
-        fs::rename(tmpPath, paths_.configFile);
+        fs::rename(fs::path(tmpPath), paths_.configFile);
         return true;
     } catch (...) {
         return false;
