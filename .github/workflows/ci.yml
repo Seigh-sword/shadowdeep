@@ -57,18 +57,33 @@ jobs:
           cmake --preset release
 
       - name: Build Debug
-        run: cmake --build --preset debug --verbose
+        run: |
+          cmake --build --preset debug --verbose 2>&1 | tee build-debug.log
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then echo "Build failed, log:"; cat build-debug.log; exit 1; fi
+        shell: bash
 
       - name: Build Release
-        run: cmake --build --preset release --verbose
+        run: |
+          cmake --build --preset release --verbose 2>&1 | tee build-release.log
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then echo "Build failed, log:"; cat build-release.log; exit 1; fi
+        shell: bash
 
       - name: Test
         run: ctest --preset debug --output-on-failure
 
       - name: Check version
         run: |
-          ./build/debug/shadowdeep --version || ./build/debug/Debug/shadowdeep --version || ./build/release/shadowdeep --version || echo "binary check done"
+          ./build/debug/shadowdeep --version || ./build/debug/Debug/shadowdeep --version || ./build/release/shadowdeep --version || ./build/release/Release/shadowdeep --version || echo "binary check done"
         shell: bash
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ matrix.os }}-${{ matrix.compiler }}
+          path: |
+            build-debug.log
+            build-release.log
 
   sanitizers:
     name: Sanitizers (Ubuntu Clang)
