@@ -32,7 +32,26 @@ enum class ItemKind : uint8_t {
     Amulet = 20,
     Key = 21,
     Bomb = 22,
-    AmuletShadowdeep = 23
+    AmuletShadowdeep = 23,
+    GuideFragment = 24,
+    LoreScroll = 25,
+    PotionGreaterHeal = 26,
+    PotionMana = 27,
+    PotionAntidote = 28,
+    PotionFireResist = 29,
+    PotionFrostResist = 30,
+    PotionShadowResist = 31,
+    FoodBread = 32,
+    FoodMeat = 33,
+    FoodRation = 34,
+    FoodFruit = 35,
+    ScrollEnchant = 36,
+    ScrollBanishment = 37,
+    ScrollSummon = 38,
+    BombDynamite = 39,
+    WeaponRanged = 40,
+    WeaponThrown = 41,
+    Tool = 42
 };
 
 enum class ItemRarity : uint8_t {

@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 #include <deque>
 #include <vector>
 #include <string>
@@ -10,11 +9,14 @@
 #include "../items/item.hpp"
 #include "../world/region.hpp"
 #include "../terminal/color.hpp"
+#include "../codex/guide_codex.hpp"
 
 namespace shadowdeep {
 
-constexpr int kMaxDepth = 30;
-constexpr int kMsgLines = 6;
+constexpr int kMaxDepth = 200;
+constexpr int kOriginalMaxDepth = 30;
+constexpr int kInfiniteDepthStart = 31;
+constexpr int kMsgLines = 10;
 
 struct Floor {
     Dungeon dungeon;
@@ -23,6 +25,8 @@ struct Floor {
     bool initialized = false;
     int depth = 1;
     RegionId region = RegionId::ForgottenCellars;
+    Biome biome = Biome::Stone;
+    int monsterPowerScale = 0;
 };
 
 struct GameMessage {
@@ -85,11 +89,17 @@ public:
     void setEntryId(const std::string& id);
     std::string entryId() const;
 
+    GuideCodex& codex();
+    const GuideCodex& codex() const;
+
+    int monsterScaleForDepth(int d) const;
+    bool isInfiniteDepth() const { return depth_ >= kInfiniteDepthStart; }
+
 private:
     Rng rng_;
     bool hasSeed_ = false;
     Player player_;
-    std::array<Floor, kMaxDepth + 1> floors_;
+    std::vector<Floor> floors_;
     int depth_ = 1;
     bool running_ = false;
     bool dead_ = false;
@@ -99,9 +109,10 @@ private:
     long long startedMs_ = 0;
     std::deque<GameMessage> messages_;
     std::string entryId_;
+    GuideCodex codex_;
 
     void resetFloors();
-    Monster createMonster(const MonsterTemplate& t, Vec2 p);
+    Monster createMonster(const MonsterTemplate& t, Vec2 p, int depth);
     Item randomItem(Vec2 pos, int depth);
     Item makeHealPotion(Vec2 pos);
     Vec2 randomWalkable();
@@ -118,6 +129,8 @@ private:
     std::vector<Vec2> pathToPlayer(const Monster& src);
     void monsterAttack(Monster& m);
     void autoPickup();
+    void handleGuideFragment(const Item& it);
+    void handleLoreScroll(const Item& it);
 };
 
 }

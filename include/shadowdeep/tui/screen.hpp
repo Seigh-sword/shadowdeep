@@ -31,6 +31,7 @@ public:
     void textClipped(int x, int y, int maxW, const std::string& s, Color fg = Color::Default, bool bold = false);
     void fillRect(int x, int y, int w, int h, const Cell& cell);
     void drawBox(int x, int y, int w, int h, Color border = Color::White);
+    void drawBox(int x, int y, int w, int h, Color border, bool useUnicode);
     void drawHLine(int x, int y, int w, const std::string& ch = "-", Color c = Color::White);
     void drawVLine(int x, int y, int h, const std::string& ch = "|", Color c = Color::White);
 

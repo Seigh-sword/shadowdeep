@@ -23,7 +23,8 @@ enum class Tile : uint8_t {
     Altar = 16,
     Fountain = 17,
     Chest = 18,
-    Statue = 19
+    Statue = 19,
+    Trap = 20
 };
 
 inline bool tileBlocksMove(Tile t) {

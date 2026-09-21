@@ -24,7 +24,8 @@ enum class EffectId : uint16_t {
     Blessed = 15,
     Fear = 16,
     Strength = 17,
-    Count = 18
+    Invisible = 18,
+    Count = 19
 };
 
 struct StatusEffect {

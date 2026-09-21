@@ -37,6 +37,8 @@ public:
     static std::string getArchDisplay();
     static std::vector<std::string> getCandidateArtifactNames();
     static std::string getCurrentPlatformString();
+    static std::string getDirectDownloadUrl(const std::string& version, const std::string& artifactName = "");
+    static std::string getDirectDownloadUrlForCurrent(const std::string& version);
 
     std::optional<UpdateInfo> checkForUpdate(const std::string& currentVersion);
     bool downloadUpdate(const UpdateInfo& info, const std::string& destPath);

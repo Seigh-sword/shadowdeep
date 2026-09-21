@@ -13,7 +13,7 @@ const std::vector<RegionInfo>& allRegions() {
         {RegionId::InfernalFoundry, "region.infernal_foundry", "Infernal Foundry", "Molten metal and infernal forges.", 16, 22, "foundry"},
         {RegionId::AshenFortress, "region.ashen_fortress", "Ashen Fortress", "Charred ramparts of a fallen stronghold.", 20, 26, "ashen"},
         {RegionId::AbyssalTemple, "region.abyssal_temple", "Abyssal Temple", "A temple dedicated to void gods.", 24, 29, "abyssal"},
-        {RegionId::Shadowdeep, "region.shadowdeep", "Shadowdeep", "The heart of darkness where the Amulet rests.", 28, 30, "shadowdeep"},
+        {RegionId::Shadowdeep, "region.shadowdeep", "Shadowdeep", "The heart of darkness where the Amulet rests. Beyond lies infinite void.", 28, 9999, "shadowdeep"},
     };
     return regions;
 }
@@ -27,6 +27,7 @@ const RegionInfo& regionInfo(RegionId id) {
 }
 
 RegionId regionForDepth(int depth) {
+    if (depth <= 0) return RegionId::ForgottenCellars;
     if (depth <= 3) return RegionId::ForgottenCellars;
     if (depth <= 6) return RegionId::GoblinWarrens;
     if (depth <= 9) return RegionId::SunkenCrypts;
@@ -40,6 +41,14 @@ RegionId regionForDepth(int depth) {
 }
 
 std::string regionNameForDepth(int depth) {
+    if (depth > 30) {
+        int tier = (depth - 30) / 10 + 1;
+        std::string base = regionInfo(regionForDepth(depth)).name;
+        if (depth >= 100) return base + " (Depth " + std::to_string(depth) + " - Void Tier " + std::to_string(tier) + ")";
+        if (depth >= 60) return base + " (Depth " + std::to_string(depth) + " - Abyss Tier " + std::to_string(tier) + ")";
+        if (depth >= 40) return base + " (Depth " + std::to_string(depth) + " - Deep Tier " + std::to_string(tier) + ")";
+        return base + " (Depth " + std::to_string(depth) + ")";
+    }
     return regionInfo(regionForDepth(depth)).name;
 }
 

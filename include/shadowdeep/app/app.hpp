@@ -36,6 +36,7 @@ private:
     void renderGameplay(const GameSession& session);
     void renderInventory(GameSession& session, int cursor);
     void renderHelp();
+    void renderCodex(GameSession& session, int tab, int cursor);
     void renderSettings();
     void renderChangelog();
     void renderCredits();

@@ -1,7 +1,31 @@
 #include "shadowdeep/world/dungeon.hpp"
 #include <cmath>
+#include <algorithm>
 
 namespace shadowdeep {
+
+void Camera::centerOn(Vec2 target, int mapW, int mapH) {
+    int halfW = viewW / 2;
+    int halfH = viewH / 2;
+    pos.x = target.x - halfW;
+    pos.y = target.y - halfH;
+    if (pos.x < 0) pos.x = 0;
+    if (pos.y < 0) pos.y = 0;
+    if (pos.x + viewW > mapW) pos.x = std::max(0, mapW - viewW);
+    if (pos.y + viewH > mapH) pos.y = std::max(0, mapH - viewH);
+}
+
+Vec2 Camera::worldToScreen(Vec2 world) const {
+    return {world.x - pos.x, world.y - pos.y};
+}
+
+Vec2 Camera::screenToWorld(Vec2 screen) const {
+    return {screen.x + pos.x, screen.y + pos.y};
+}
+
+bool Camera::inView(Vec2 world) const {
+    return world.x >= pos.x && world.x < pos.x + viewW && world.y >= pos.y && world.y < pos.y + viewH;
+}
 
 Dungeon::Dungeon() {
     clear();
@@ -19,13 +43,20 @@ void Dungeon::clear() {
     stairsUp = {-1, -1};
     stairsDown = {-1, -1};
     depth = 1;
+    mapW = kMapW;
+    mapH = kMapH;
+    camera.pos = {0, 0};
+    camera.viewW = kViewportW;
+    camera.viewH = kViewportH;
+    biome = Biome::Stone;
 }
 
 bool Dungeon::inBounds(Vec2 p) const {
-    return p.x >= 0 && p.x < kMapW && p.y >= 0 && p.y < kMapH;
+    return p.x >= 0 && p.x < mapW && p.y >= 0 && p.y < mapH;
 }
 
 Tile Dungeon::at(Vec2 p) const {
+    if (!inBounds(p)) return Tile::Wall;
     return tiles[p.y][p.x];
 }
 
@@ -100,6 +131,50 @@ void Dungeon::computeFov(Vec2 origin, int radius) {
     if (inBounds(origin)) {
         visible[origin.y][origin.x] = true;
         explored[origin.y][origin.x] = true;
+    }
+}
+
+void Dungeon::updateCamera(Vec2 playerPos) {
+    camera.centerOn(playerPos, mapW, mapH);
+}
+
+Vec2 Dungeon::cameraOrigin() const {
+    return camera.pos;
+}
+
+bool Dungeon::isInViewport(Vec2 p) const {
+    return camera.inView(p);
+}
+
+std::string Dungeon::biomeName() const {
+    switch (biome) {
+        case Biome::Stone: return "Stone Depths";
+        case Biome::Fungal: return "Fungal Bloom";
+        case Biome::Crystal: return "Crystal Caverns";
+        case Biome::Infernal: return "Infernal Foundry";
+        case Biome::Abyssal: return "Abyssal Temple";
+        case Biome::Flooded: return "Flooded Halls";
+        case Biome::Frozen: return "Frozen Vault";
+        case Biome::Overgrown: return "Overgrown Ruins";
+        case Biome::Ruins: return "Ancient Ruins";
+        case Biome::Void: return "Void Tear";
+        default: return "Unknown";
+    }
+}
+
+Color Dungeon::biomeColor() const {
+    switch (biome) {
+        case Biome::Stone: return Color::Gray;
+        case Biome::Fungal: return Color::Green;
+        case Biome::Crystal: return Color::BrightCyan;
+        case Biome::Infernal: return Color::BrightRed;
+        case Biome::Abyssal: return Color::Purple;
+        case Biome::Flooded: return Color::BrightCyan;
+        case Biome::Frozen: return Color::BrightWhite;
+        case Biome::Overgrown: return Color::BrightGreen;
+        case Biome::Ruins: return Color::Brown;
+        case Biome::Void: return Color::BrightMagenta;
+        default: return Color::White;
     }
 }
 

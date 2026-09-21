@@ -181,6 +181,21 @@ std::string UpdateManager::getReleasesPageUrl() {
     return "https://github.com/Seigh-sword/shadowdeep/releases";
 }
 
+std::string UpdateManager::getDirectDownloadUrl(const std::string& version, const std::string& artifactName) {
+    std::string ver = version.empty() ? "Zv1" : version;
+    std::string art = artifactName;
+    if (art.empty()) {
+        auto cands = getCandidateArtifactNames();
+        if (!cands.empty()) art = cands.front();
+        else art = "shadowdeep-" + ver + "-" + getOS() + "-" + getArch() + ".tar.gz";
+    }
+    return "https://github.com/Seigh-sword/shadowdeep/releases/download/" + ver + "/" + art;
+}
+
+std::string UpdateManager::getDirectDownloadUrlForCurrent(const std::string& version) {
+    return getDirectDownloadUrl(version, "");
+}
+
 #if SHADOWDEEP_HAS_CURL
 static size_t curlWriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     std::string* s = static_cast<std::string*>(userp);

@@ -50,6 +50,7 @@ set(SHADOWDEEP_SOURCES
     src/npc/npc.cpp
     src/shops/shop.cpp
     src/codex/bestiary.cpp
+    src/codex/guide_codex.cpp
     src/update/update_manager.cpp
 )
 

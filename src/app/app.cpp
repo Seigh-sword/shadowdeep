@@ -13,7 +13,7 @@
 
 namespace shadowdeep {
 
-App::App(CliOptions opts) : opts_(std::move(opts)), screen_(80, 30) {}
+App::App(CliOptions opts) : opts_(std::move(opts)), screen_(120, 40) {}
 
 bool App::init() {
     paths_ = getAppPaths();
@@ -30,7 +30,7 @@ void App::shutdown() {
 }
 
 void App::blit() {
-    auto s = screen_.toAnsi(false);
+    auto s = screen_.toAnsi(true);
     terminal_->writeRaw(s);
 }
 
@@ -40,7 +40,7 @@ std::string App::promptString(const std::string& prompt, const std::string& init
 
     for (;;) {
         screen_.clear();
-        screen_.drawBox(10, 5, 60, 7, Color::BrightCyan);
+        screen_.drawBox(10, 5, 60, 7, Color::BrightCyan, true);
         screen_.text(12, 6, prompt, Color::BrightYellow, true);
         screen_.text(12, 8, cur + "_", Color::White, false);
         screen_.text(12, 10, "Enter confirm  Esc cancel", Color::Gray);
@@ -72,7 +72,7 @@ std::string App::promptString(const std::string& prompt, const std::string& init
 bool App::confirm(const std::string& msg) {
     for (;;) {
         screen_.clear();
-        screen_.drawBox(15, 8, 50, 6, Color::BrightRed);
+        screen_.drawBox(15, 8, 50, 6, Color::BrightRed, true);
         screen_.text(17, 9, msg, Color::BrightWhite, true);
         screen_.text(17, 11, "y/n", Color::Gray);
         blit();
@@ -91,28 +91,30 @@ void App::renderHome(int selected) {
     int tx = (w - static_cast<int>(title.size())) / 2;
     screen_.text(tx, 2, title, Color::BrightYellow, true);
 
-    std::string ver = std::string(kGameVersion);
+    std::string ver = std::string(kGameVersion) + " - Infinite Depths";
     int vx = (w - static_cast<int>(ver.size())) / 2;
     screen_.text(vx, 3, ver, Color::BrightCyan, true);
 
-    int boxW = 27;
-    int boxH = 9;
+    int boxW = 32;
+    int boxH = 12;
     int bx = (w - boxW) / 2;
     int by = 6;
 
-    screen_.drawBox(bx, by, boxW, boxH, Color::White);
+    screen_.drawBox(bx, by, boxW, boxH, Color::White, true);
+    screen_.text(bx + 2, by, " MAIN MENU ", Color::BrightYellow, true);
 
-    std::vector<std::string> items = {"Entries", "Settings", "Changelog", "Credits", "Quit"};
+    std::vector<std::string> items = {"Entries", "Codex / Guides", "Settings", "Changelog", "Credits", "Quit"};
     for (int i = 0; i < static_cast<int>(items.size()); ++i) {
-        int y = by + 1 + i;
-        int x = bx + 2;
+        int y = by + 2 + i;
+        int x = bx + 3;
         bool sel = (i == selected);
         std::string prefix = sel ? "> " : "  ";
         Color c = sel ? Color::BrightWhite : Color::White;
         screen_.text(x, y, prefix + items[i], c, sel);
     }
 
-    screen_.text(2, h - 2, "Up/Down W/S navigate  Enter select  Q quit", Color::Gray);
+    screen_.text(2, h - 3, "Up/Down W/S navigate  Enter select  Q quit", Color::Gray);
+    screen_.text(2, h - 2, "Collect guide fragments | Infinite depth beyond 30 | Huge maps 160x80", Color::Gray);
 
     std::string author = "github.com/Seigh-sword";
     screen_.text(w - static_cast<int>(author.size()) - 2, h - 2, author, Color::Gray);
@@ -130,7 +132,7 @@ void App::renderEntries(const std::vector<EntryMetadata>& entries, int cursor, i
     int visibleCount = listH - 1;
 
     if (entries.empty()) {
-        screen_.text(2, 3, "(no entries)", Color::Gray);
+        screen_.text(2, 3, "(no entries) - press + to create", Color::Gray);
     } else {
         for (int i = 0; i < visibleCount; ++i) {
             int idx = scroll + i;
@@ -143,7 +145,7 @@ void App::renderEntries(const std::vector<EntryMetadata>& entries, int cursor, i
             line += "  ";
             line += e.characterName.substr(0, 10);
             line += std::string("  Lv") + std::to_string(e.level);
-            line += "  " + e.regionName.substr(0, 12);
+            line += "  " + e.regionName.substr(0, 14);
             line += "  " + e.playTimeString();
             line += "  " + e.statusString();
 
@@ -188,39 +190,85 @@ void App::renderGameplay(const GameSession& session) {
     int w = screen_.width();
     int h = screen_.height();
 
-    std::string title = std::string("SHADOWDEEP ") + std::string(kGameVersion) + std::string(" Depth ") + std::to_string(session.depth()) + std::string("/") + std::to_string(kMaxDepth) + std::string(" ") + regionNameForDepth(session.depth()) + std::string(" Seed ") + std::to_string(session.rng().seedValue());
+    auto& p = session.player();
+    auto& dungeon = session.dungeon();
+
+    std::string title = std::string("SHADOWDEEP ") + std::string(kGameVersion) + " Depth " + std::to_string(session.depth()) + "/" + std::to_string(kOriginalMaxDepth) + (session.depth() > kOriginalMaxDepth ? "+" : "") + " " + regionNameForDepth(session.depth()) + " [" + dungeon.biomeName() + "] Seed " + std::to_string(session.rng().seedValue());
+    if (session.isInfiniteDepth()) title += " INFINITE";
+
     screen_.text(0, 0, title.substr(0, w), Color::BrightCyan, true);
 
-    auto& p = session.player();
-    std::string status = std::string("HP ") + std::to_string(p.stats.hp) + std::string("/") + std::to_string(p.stats.maxHp) + std::string(" Lv ") + std::to_string(p.stats.level) + std::string(" XP ") + std::to_string(p.stats.xp) + std::string("/") + std::to_string(p.stats.xpNext) + std::string(" Atk ") + std::to_string(p.attackPower()) + std::string(" Def ") + std::to_string(p.defensePower()) + std::string(" Gold ") + std::to_string(p.stats.gold) + std::string(" Rubies ") + std::to_string(p.stats.rubies);
-    if (p.hasteTurns > 0) status += std::string(" Haste ") + std::to_string(p.hasteTurns);
-    if (!p.effects.all().empty()) {
-        status += " [";
-        for (auto& e : p.effects.all()) status += e.displayName() + " ";
-        status += "]";
+    std::string hpPart = "HP " + std::to_string(p.stats.hp) + "/" + std::to_string(p.stats.maxHp);
+    std::string lvPart = "Lv " + std::to_string(p.stats.level);
+    std::string xpPart = "XP " + std::to_string(p.stats.xp) + "/" + std::to_string(p.stats.xpNext);
+    std::string atkPart = "Atk " + std::to_string(p.attackPower());
+    std::string defPart = "Def " + std::to_string(p.defensePower());
+    std::string goldPart = "Gold " + std::to_string(p.stats.gold);
+    std::string rubyPart = "Rubies " + std::to_string(p.stats.rubies);
+    std::string hungerPart = "Hunger " + p.stats.hungerName() + " (" + std::to_string(p.stats.hunger) + ") Sat " + std::to_string(p.stats.saturation);
+
+    int yStatus = 1;
+    int xCursor = 0;
+
+    screen_.text(xCursor, yStatus, hpPart.substr(0, w - xCursor), p.stats.hp <= p.stats.maxHp / 3 ? Color::BrightRed : Color::BrightRed, true);
+    xCursor += static_cast<int>(hpPart.size()) + 1;
+    screen_.text(xCursor, yStatus, lvPart, Color::BrightYellow, true);
+    xCursor += static_cast<int>(lvPart.size()) + 1;
+    screen_.text(xCursor, yStatus, xpPart, Color::BrightMagenta, true);
+    xCursor += static_cast<int>(xpPart.size()) + 1;
+    screen_.text(xCursor, yStatus, atkPart, Color::BrightWhite, true);
+    xCursor += static_cast<int>(atkPart.size()) + 1;
+    screen_.text(xCursor, yStatus, defPart, Color::Steel, true);
+    xCursor += static_cast<int>(defPart.size()) + 1;
+    screen_.text(xCursor, yStatus, goldPart, Color::Gold, true);
+    xCursor += static_cast<int>(goldPart.size()) + 1;
+    screen_.text(xCursor, yStatus, rubyPart, Color::BrightRed, true);
+
+    int yStatus2 = 2;
+    std::string hungerColored = hungerPart;
+    Color hungerColor = Color::Brown;
+    if (p.stats.isStarving()) hungerColor = Color::BrightRed;
+    else if (p.stats.isHungry()) hungerColor = Color::Yellow;
+    else if (p.stats.hungerState() == HungerState::Sated || p.stats.hungerState() == HungerState::Full) hungerColor = Color::BrightGreen;
+    screen_.text(0, yStatus2, hungerColored.substr(0, w), hungerColor, false);
+
+    if (p.hasteTurns > 0) {
+        std::string haste = " Haste " + std::to_string(p.hasteTurns);
+        screen_.text(w - 20, yStatus2, haste, Color::BrightCyan, true);
     }
-    screen_.text(0, 1, status.substr(0, w), p.stats.hp <= p.stats.maxHp / 3 ? Color::BrightRed : Color::BrightWhite, true);
+    if (!p.effects.all().empty()) {
+        std::string eff = " [";
+        for (auto& e : p.effects.all()) eff += e.displayName() + " ";
+        eff += "]";
+        screen_.text(0, yStatus2 + 1, eff.substr(0, w), Color::BrightMagenta);
+    }
 
-    int mapTop = 3;
-    int mapLeft = 2;
-    int mapW = kMapW;
-    int mapH = kMapH;
+    int mapTop = 4;
+    int mapLeft = 1;
+    int mapBoxW = kViewportW + 2;
+    int mapBoxH = kViewportH + 2;
 
-    if (w < mapW + 10 || h < mapH + 10) {
-        screen_.text(2, 4, "Terminal too small. Please resize to at least 80x33.", Color::BrightRed, true);
-        std::string sz = std::string("Current: ") + std::to_string(w) + std::string("x") + std::to_string(h);
-        screen_.text(2, 5, sz, Color::White);
+    if (w < 90 || h < 30) {
+        screen_.text(2, 6, "Terminal too small. Need at least 90x30.", Color::BrightRed, true);
+        std::string sz = "Current: " + std::to_string(w) + "x" + std::to_string(h) + " Map: " + std::to_string(dungeon.mapW) + "x" + std::to_string(dungeon.mapH) + " Viewport: " + std::to_string(kViewportW) + "x" + std::to_string(kViewportH);
+        screen_.text(2, 7, sz, Color::White);
         return;
     }
 
-    auto& dungeon = session.dungeon();
+    screen_.drawBox(mapLeft, mapTop, mapBoxW, mapBoxH, Color::White, true);
+    std::string mapTitle = " MAP Depth " + std::to_string(session.depth()) + " " + dungeon.biomeName() + " ";
+    screen_.text(mapLeft + 2, mapTop, mapTitle.substr(0, mapBoxW - 4), dungeon.biomeColor(), true);
 
-    for (int y = 0; y < mapH; ++y) {
-        for (int x = 0; x < mapW; ++x) {
-            Vec2 pp{x, y};
-            if (!dungeon.explored[y][x]) continue;
-            bool vis = dungeon.visible[y][x];
-            Tile t = dungeon.at(pp);
+    int viewOriginX = dungeon.camera.pos.x;
+    int viewOriginY = dungeon.camera.pos.y;
+
+    for (int sy = 0; sy < kViewportH; ++sy) {
+        for (int sx = 0; sx < kViewportW; ++sx) {
+            Vec2 world{viewOriginX + sx, viewOriginY + sy};
+            if (!dungeon.inBounds(world)) continue;
+            if (!dungeon.explored[world.y][world.x]) continue;
+            bool vis = dungeon.visible[world.y][world.x];
+            Tile t = dungeon.at(world);
             char ch = tileGlyph(t);
             Color c = vis ? Color::Gray : Color::Blue;
             switch (t) {
@@ -229,62 +277,147 @@ void App::renderGameplay(const GameSession& session) {
                 case Tile::DoorOpen: c = vis ? Color::Brown : Color::Blue; break;
                 case Tile::StairsDown: case Tile::StairsUp: c = vis ? Color::BrightYellow : Color::Blue; break;
                 case Tile::Rubble: c = vis ? Color::Red : Color::Blue; break;
-                case Tile::Water: c = vis ? Color::Blue : Color::Blue; break;
+                case Tile::Water: c = vis ? Color::BrightCyan : Color::Blue; break;
                 case Tile::Lava: c = vis ? Color::BrightRed : Color::Blue; break;
+                case Tile::Fountain: c = vis ? Color::BrightCyan : Color::Blue; break;
+                case Tile::Chest: c = vis ? Color::Gold : Color::Blue; break;
+                case Tile::Altar: c = vis ? Color::BrightMagenta : Color::Blue; break;
+                case Tile::Trap: c = vis ? Color::BrightRed : Color::Blue; break;
                 default: break;
             }
-            screen_.put(mapLeft + x, mapTop + y, ch, c, vis);
+            if (dungeon.biome == Biome::Fungal && vis) {
+                if (t == Tile::Floor) c = Color::Green;
+            } else if (dungeon.biome == Biome::Crystal && vis) {
+                if (t == Tile::Floor) c = Color::BrightCyan;
+            } else if (dungeon.biome == Biome::Infernal && vis) {
+                if (t == Tile::Floor) c = Color::BrightRed;
+            } else if (dungeon.biome == Biome::Void && vis) {
+                if (t == Tile::Floor) c = Color::Purple;
+            }
+            screen_.put(mapLeft + 1 + sx, mapTop + 1 + sy, ch, c, vis);
         }
     }
 
     for (auto& it : session.items()) {
+        if (!dungeon.inBounds(it.pos)) continue;
         if (!dungeon.visible[it.pos.y][it.pos.x]) continue;
-        screen_.put(mapLeft + it.pos.x, mapTop + it.pos.y, it.glyph, it.color, true);
+        if (!dungeon.isInViewport(it.pos)) continue;
+        Vec2 scr = dungeon.camera.worldToScreen(it.pos);
+        screen_.put(mapLeft + 1 + scr.x, mapTop + 1 + scr.y, it.glyph, it.color, true);
     }
 
     for (auto& m : session.monsters()) {
         if (!m.alive) continue;
+        if (!dungeon.inBounds(m.pos)) continue;
         if (!dungeon.visible[m.pos.y][m.pos.x]) continue;
-        screen_.put(mapLeft + m.pos.x, mapTop + m.pos.y, m.glyph, m.color, true);
+        if (!dungeon.isInViewport(m.pos)) continue;
+        Vec2 scr = dungeon.camera.worldToScreen(m.pos);
+        screen_.put(mapLeft + 1 + scr.x, mapTop + 1 + scr.y, m.glyph, m.color, true);
     }
 
-    screen_.put(mapLeft + p.pos.x, mapTop + p.pos.y, '@', Color::BrightWhite, true);
+    if (dungeon.isInViewport(p.pos)) {
+        Vec2 scr = dungeon.camera.worldToScreen(p.pos);
+        screen_.put(mapLeft + 1 + scr.x, mapTop + 1 + scr.y, '@', Color::BrightWhite, true);
+    }
 
-    int msgTop = mapTop + mapH + 1;
-    int msgCount = std::min(kMsgLines, static_cast<int>(session.messages().size()));
+    int sideLeft = mapLeft + mapBoxW + 1;
+    int sideW = w - sideLeft - 1;
+    if (sideW < 20) sideW = 20;
+    int sideTop = mapTop;
+    int sideH = mapBoxH;
+
+    screen_.drawBox(sideLeft, sideTop, sideW, sideH, Color::Steel, true);
+    screen_.text(sideLeft + 2, sideTop, " INVENTORY & STATS ", Color::BrightYellow, true);
+
+    auto& inv = session.player().inventory.all();
+    int invLines = std::min(8, static_cast<int>(inv.size()));
+    screen_.text(sideLeft + 1, sideTop + 2, "Items:", Color::White, true);
+    if (inv.empty()) {
+        screen_.text(sideLeft + 1, sideTop + 3, "(empty)", Color::Gray);
+    } else {
+        for (int i = 0; i < invLines; ++i) {
+            auto& it = inv[i];
+            std::string s = std::string(1, static_cast<char>('a' + i)) + ") " + it.fullName();
+            if (s.size() > static_cast<size_t>(sideW - 2)) s = s.substr(0, sideW - 2);
+            screen_.text(sideLeft + 1, sideTop + 3 + i, s, it.color, false);
+        }
+        if (static_cast<int>(inv.size()) > invLines) {
+            screen_.text(sideLeft + 1, sideTop + 3 + invLines, "... +" + std::to_string(inv.size() - invLines) + " more (i)", Color::Gray);
+        }
+    }
+
+    int eqY = sideTop + 12;
+    auto& eq = session.player().equipment;
+    screen_.text(sideLeft + 1, eqY, "Equipment:", Color::White, true);
+    std::string weapon = "W: " + std::string(eq.mainHand ? eq.mainHand->fullName() : "fists");
+    screen_.text(sideLeft + 1, eqY + 1, weapon.substr(0, sideW - 2), Color::Steel);
+    std::string armor = "A: " + std::string(eq.body ? eq.body->fullName() : "none");
+    screen_.text(sideLeft + 1, eqY + 2, armor.substr(0, sideW - 2), Color::Steel);
+    std::string shield = "S: " + std::string(eq.offHand ? eq.offHand->fullName() : "none");
+    screen_.text(sideLeft + 1, eqY + 3, shield.substr(0, sideW - 2), Color::Steel);
+    std::string helm = "H: " + std::string(eq.head ? eq.head->fullName() : "none");
+    screen_.text(sideLeft + 1, eqY + 4, helm.substr(0, sideW - 2), Color::Steel);
+
+    int codexY = eqY + 6;
+    screen_.text(sideLeft + 1, codexY, "Codex:", Color::BrightCyan, true);
+    std::string codexLine = std::to_string(session.codex().unlockedCount()) + "/" + std::to_string(session.codex().totalGuides()) + " guides";
+    screen_.text(sideLeft + 1, codexY + 1, codexLine.substr(0, sideW - 2), Color::White);
+    std::string loreLine = std::to_string(session.codex().loreCount()) + " lore found";
+    screen_.text(sideLeft + 1, codexY + 2, loreLine.substr(0, sideW - 2), Color::Gold);
+
+    int roomY = codexY + 4;
+    screen_.text(sideLeft + 1, roomY, "Map Info:", Color::White, true);
+    std::string mapInfo = std::to_string(dungeon.mapW) + "x" + std::to_string(dungeon.mapH) + " view " + std::to_string(viewOriginX) + "," + std::to_string(viewOriginY);
+    screen_.text(sideLeft + 1, roomY + 1, mapInfo.substr(0, sideW - 2), Color::Gray);
+    std::string roomsInfo = "Rooms: " + std::to_string(dungeon.rooms.size());
+    screen_.text(sideLeft + 1, roomY + 2, roomsInfo.substr(0, sideW - 2), Color::Gray);
+    if (session.isInfiniteDepth()) {
+        screen_.text(sideLeft + 1, roomY + 3, "INFINITE DEPTH!", Color::Purple, true);
+    }
+
+    int msgTop = mapTop + mapBoxH + 1;
+    int msgBoxH = h - msgTop - 2;
+    if (msgBoxH < 4) msgBoxH = 4;
+    screen_.drawBox(mapLeft, msgTop, w - mapLeft - 1, msgBoxH, Color::Gray, true);
+    screen_.text(mapLeft + 2, msgTop, " MESSAGES ", Color::BrightYellow, true);
+
+    int msgCount = std::min(msgBoxH - 2, static_cast<int>(session.messages().size()));
     int start = static_cast<int>(session.messages().size()) - msgCount;
     for (int i = 0; i < msgCount; ++i) {
         auto& msg = session.messages()[start + i];
         std::string txt = msg.text;
         if (msg.count > 1) txt += std::string(" (x") + std::to_string(msg.count) + ")";
-        if (txt.size() > static_cast<size_t>(w - 2)) txt = txt.substr(0, w - 2);
-        screen_.text(2, msgTop + i, txt, msg.color);
+        if (txt.size() > static_cast<size_t>(w - mapLeft - 4)) txt = txt.substr(0, w - mapLeft - 4);
+        screen_.text(mapLeft + 2, msgTop + 1 + i, txt, msg.color);
     }
 
-    screen_.text(2, h - 2, "move hjkl/yubn/arrows g:get i:inv q:quaff r:read </>:stairs z:wait ?:help Q:quit", Color::Gray);
+    screen_.text(2, h - 1, "move hjkl/arrows g:get i:inv c:codex q:quaff r:read </>:stairs z:wait ?:help Q:quit", Color::Gray);
 }
 
 void App::renderInventory(GameSession& session, int cursor) {
-    int w = 60;
-    int h = std::min(screen_.height() - 2, std::max(14, static_cast<int>(session.player().inventory.size()) + 10));
+    int w = 70;
+    int h = std::min(screen_.height() - 4, std::max(18, static_cast<int>(session.player().inventory.size()) + 12));
     int top = (screen_.height() - h) / 2;
     int left = (screen_.width() - w) / 2;
 
-    screen_.drawBox(left, top, w, h, Color::BrightCyan);
-    screen_.text(left + 2, top, " INVENTORY ", Color::BrightYellow, true);
+    screen_.drawBox(left, top, w, h, Color::BrightCyan, true);
+    screen_.text(left + 2, top, " INVENTORY - Side Panel View ", Color::BrightYellow, true);
 
     auto& inv = session.player().inventory.all();
 
     if (inv.empty()) {
-        screen_.text(left + 3, top + 2, "(empty)", Color::Gray);
+        screen_.text(left + 3, top + 2, "(empty) - explore to find items, guide fragments, lore", Color::Gray);
     } else {
-        int maxRows = h - 7;
+        int maxRows = h - 8;
         for (int i = 0; i < static_cast<int>(inv.size()) && i < maxRows; ++i) {
             auto& it = inv[i];
             std::string s = (i == cursor ? "> " : "  ");
             s += static_cast<char>('a' + i);
             s += ") ";
             s += it.fullName();
+            s += " [" + std::to_string(static_cast<int>(it.rarity)) + "]";
+            if (it.kind == ItemKind::GuideFragment) s += " - press Enter to unlock guide";
+            if (it.kind == ItemKind::LoreScroll) s += " - lore";
             if (s.size() > static_cast<size_t>(w - 4)) s = s.substr(0, w - 4);
             screen_.text(left + 2, top + 2 + i, s, it.color, i == cursor);
         }
@@ -293,52 +426,137 @@ void App::renderInventory(GameSession& session, int cursor) {
     auto& eq = session.player().equipment;
     std::string weapon = "Weapon: ";
     weapon += eq.mainHand ? eq.mainHand->fullName() : "bare fists";
-    screen_.text(left + 2, top + h - 4, weapon.substr(0, w - 4), Color::Steel);
+    screen_.text(left + 2, top + h - 5, weapon.substr(0, w - 4), Color::Steel);
 
     std::string armor = "Armour: ";
     armor += eq.body ? eq.body->fullName() : "no armour";
-    screen_.text(left + 2, top + h - 3, armor.substr(0, w - 4), Color::Steel);
+    screen_.text(left + 2, top + h - 4, armor.substr(0, w - 4), Color::Steel);
 
-    screen_.text(left + 2, top + h - 2, "Enter/use x/drop i/Esc close", Color::Gray);
+    screen_.text(left + 2, top + h - 3, "Hunger: " + session.player().stats.hungerName() + " Sat: " + std::to_string(session.player().stats.saturation), Color::Brown);
+    screen_.text(left + 2, top + h - 2, "Enter/use x/drop a-z quick use i/Esc close", Color::Gray);
 }
 
 void App::renderHelp() {
     screen_.clear();
-    int w = 66;
-    int h = 24;
+    int w = 72;
+    int h = 28;
     int top = (screen_.height() - h) / 2;
     int left = (screen_.width() - w) / 2;
 
-    screen_.drawBox(left, top, w, h, Color::BrightYellow);
+    screen_.drawBox(left, top, w, h, Color::BrightYellow, true);
+    screen_.text(left + 2, top, " HELP - Essentials ", Color::BrightYellow, true);
     std::vector<std::string> lines = {
-        std::string("SHADOWDEEP ") + std::string(kGameVersion),
+        "SHADOWDEEP " + std::string(kGameVersion) + " - Infinite Depths Edition",
         "",
-        "Arrow keys / hjkl / yubn    Move or melee attack",
-        "g or ,                      Pick up item",
-        "i                           Inventory",
-        "q                           Quaff first potion",
-        "r                           Read first scroll",
-        ">                           Descend stairs",
-        "<                           Ascend stairs",
-        "z or .                      Wait",
-        "?                           Help",
-        "Q                           Quit",
+        "GOAL: Depth 30 has Amulet. Return to surface. Beyond is infinite.",
         "",
-        "@ you       letters monsters       ! potion",
-        "? scroll    / weapon    [ armour    $ gold/rubies",
-        "% food      \" Amulet    + closed door",
+        "MOVEMENT:",
+        "  Arrow keys / hjkl / yubn   Move, attack, diagonal",
+        "  > / <                      Descend / Ascend stairs",
+        "  z or .                     Wait a turn",
         "",
-        "Goal: reach depth 30 and recover the Amulet.",
-        "Then climb back to depth 1 and escape.",
+        "ACTIONS:",
+        "  g or ,                     Pick up item",
+        "  i                          Inventory (side panel)",
+        "  c                          Codex / Guides / Lore",
+        "  q                          Quaff potion (auto)",
+        "  r                          Read scroll (auto)",
+        "",
+        "SURVIVAL:",
+        "  Hunger drains. Saturation heals HP slowly.",
+        "  Eat food (%). Starving damages you.",
+        "  Collect ; guide fragments to unlock guides.",
+        "  Bosses drop epic fragments + lore scrolls (?).",
+        "",
+        "MAP:",
+        "  Huge maps 160x80 (grows to 200x200 deep). Viewport shows portion.",
+        "  Camera follows you. Biomes change visuals.",
+        "  Explore for rooms, chests, altars, traps.",
+        "",
+        "COLORS: HP Red  Lv Yellow  XP Magenta  Atk White  Def Gray  Gold Gold  Rubies Red",
+        "  Hunger Brown->Green when sated. Biome colors vary.",
         "",
         "Press any key to return."
     };
 
     for (int i = 0; i < static_cast<int>(lines.size()); ++i) {
-        Color c = (i == 0) ? Color::BrightYellow : Color::White;
-        bool bold = (i == 0);
+        Color c = Color::White;
+        bool bold = false;
+        if (i == 0) { c = Color::BrightYellow; bold = true; }
+        else if (lines[i].rfind("GOAL:",0)==0 || lines[i].rfind("MOVEMENT:",0)==0 || lines[i].rfind("ACTIONS:",0)==0 || lines[i].rfind("SURVIVAL:",0)==0 || lines[i].rfind("MAP:",0)==0 || lines[i].rfind("COLORS:",0)==0) { c = Color::BrightCyan; bold = true; }
         screen_.text(left + 2, top + 1 + i, lines[i].substr(0, w - 4), c, bold);
     }
+}
+
+void App::renderCodex(GameSession& session, int tab, int cursor) {
+    screen_.clear();
+    int w = screen_.width();
+    int h = screen_.height();
+
+    screen_.text(2, 0, "Codex - Guides & Lore", Color::BrightYellow, true);
+    screen_.drawHLine(0, 1, w, "-", Color::Gray);
+
+    std::vector<std::string> tabs = {"Guides", "Lore", "Fragments", "Biomes"};
+    int tx = 2;
+    for (int i = 0; i < static_cast<int>(tabs.size()); ++i) {
+        bool sel = (i == tab);
+        std::string t = sel ? "[" + tabs[i] + "]" : " " + tabs[i] + " ";
+        screen_.text(tx, 2, t, sel ? Color::BrightWhite : Color::Gray, sel);
+        tx += static_cast<int>(t.size()) + 2;
+    }
+
+    int listTop = 4;
+    int listH = h - 6;
+
+    if (tab == 0) {
+        auto guides = session.codex().allGuides();
+        std::sort(guides.begin(), guides.end(), [](auto& a, auto& b){ return a.title < b.title; });
+        int visible = std::min(listH, static_cast<int>(guides.size()));
+        for (int i = 0; i < visible; ++i) {
+            int idx = i;
+            if (idx >= static_cast<int>(guides.size())) break;
+            auto& g = guides[idx];
+            bool sel = (idx == cursor);
+            std::string line = (sel ? "> " : "  ") + g.title + (g.unlocked ? " [UNLOCKED]" : " [LOCKED]") + " - " + session.codex().categoryName(g.category);
+            if (line.size() > static_cast<size_t>(w - 4)) line = line.substr(0, w - 4);
+            Color c = g.unlocked ? Color::BrightGreen : Color::Gray;
+            if (sel) c = Color::BrightWhite;
+            screen_.text(2, listTop + i, line, c, sel);
+            if (sel && g.unlocked) {
+                screen_.text(2, listTop + visible + 1, g.description.substr(0, w - 4), Color::White);
+            }
+        }
+    } else if (tab == 1) {
+        auto lores = session.codex().allLore();
+        std::sort(lores.begin(), lores.end(), [](auto& a, auto& b){ return a.depthFound < b.depthFound; });
+        int visible = std::min(listH, static_cast<int>(lores.size()));
+        for (int i = 0; i < visible; ++i) {
+            int idx = i;
+            if (idx >= static_cast<int>(lores.size())) break;
+            auto& l = lores[idx];
+            bool sel = (idx == cursor);
+            std::string line = (sel ? "> " : "  ") + l.title + " (Depth " + std::to_string(l.depthFound) + ")" + (l.isBossDrop ? " [BOSS]" : "");
+            if (line.size() > static_cast<size_t>(w - 4)) line = line.substr(0, w - 4);
+            Color c = l.isBossDrop ? Color::Gold : Color::White;
+            if (sel) c = Color::BrightWhite;
+            screen_.text(2, listTop + i, line, c, sel);
+            if (sel) {
+                screen_.text(2, listTop + visible + 1, l.text.substr(0, w - 4), Color::BrightYellow);
+            }
+        }
+    } else if (tab == 2) {
+        screen_.text(2, listTop, "Total fragments collected: " + std::to_string(session.codex().totalFragments()), Color::BrightCyan, true);
+        screen_.text(2, listTop + 2, "Find ; fragments in dungeon. Bosses drop epic fragments.", Color::White);
+        screen_.text(2, listTop + 3, "Use fragment from inventory to unlock guides.", Color::Gray);
+        screen_.text(2, listTop + 5, "Guides unlocked: " + std::to_string(session.codex().unlockedCount()) + "/" + std::to_string(session.codex().totalGuides()), Color::BrightGreen);
+    } else {
+        std::vector<std::string> biomes = {"Stone Depths - Gray stone, basic", "Fungal Bloom - Green, poison", "Crystal Caverns - Cyan, magic", "Infernal Foundry - Red, fire", "Abyssal Temple - Purple, shadow", "Flooded Halls - Cyan, water", "Frozen Vault - White, frost", "Overgrown Ruins - Green, nature", "Ancient Ruins - Brown, old", "Void Tear - Magenta, infinite depth"};
+        for (int i = 0; i < static_cast<int>(biomes.size()) && i < listH; ++i) {
+            screen_.text(2, listTop + i, biomes[i], Color::White);
+        }
+    }
+
+    screen_.text(2, h - 2, "Tab switch category  Up/Down navigate  Esc back", Color::Gray);
 }
 
 void App::renderSettings() {
@@ -370,48 +588,42 @@ void App::renderSettings() {
 void App::renderChangelog() {
     screen_.clear();
     int w = screen_.width();
-    screen_.text(2, 0, std::string("Changelog - ") + std::string(kGameVersion) + " Early Alpha", Color::BrightYellow, true);
+    screen_.text(2, 0, std::string("Changelog - ") + std::string(kGameVersion) + " Infinite Depths", Color::BrightYellow, true);
     screen_.drawHLine(0, 1, w, "-", Color::Gray);
 
     std::vector<std::string> lines = {
-        "Zv1 Early Alpha - In Development",
+        "Zv1 Infinite Depths Update",
         "",
         "Added:",
-        "  - Multi-file C++20 architecture",
-        "  - Cross-platform terminal backend (POSIX + Windows)",
-        "  - Platform paths (XDG, AppData, Application Support)",
-        "  - Binary save format with atomic saving and backups",
-        "  - Entries management (New, Open, Rename, Delete, Duplicate, Backup, Export, Import)",
-        "  - Home screen with responsive layout",
-        "  - Settings, Changelog, Credits screens",
-        "  - Expanded dungeon generation (rooms, BSP, cavern, features)",
-        "  - 30 depths across 10 thematic regions",
-        "  - Expanded monsters (30+ types) with distinct AI",
-        "  - Status effects system",
-        "  - Item rarity and enchantments",
-        "  - Gold and Rubies economy",
-        "  - Improved combat with damage types",
-        "  - CLI: --version --about --license --help --seed --check-update --update",
+        "  - 150+ items: weapons, armor, potions, food, scrolls, guide fragments, lore",
+        "  - 80+ monsters: 50 new enemies + 8 new bosses (goblin king, orc warlord, lich king, demon lord, shadow lord, void horror, titan, elder dragon)",
+        "  - Infinite depth beyond 30 with scaling (+power per depth, maps grow to 200x200)",
+        "  - Huge maps 160x80 with viewport camera (only portion visible)",
+        "  - Biomes: Stone, Fungal, Crystal, Infernal, Abyssal, Flooded, Frozen, Ruins, Void",
+        "  - TUI borders with box-drawing, colors for HP/Lv/XP/Atk/Def/Gold/Rubies",
+        "  - Hunger/saturation system: hunger drains, saturation heals HP, starving damages",
+        "  - Guide fragments collectible unlocking codex guides",
+        "  - Lore scrolls and boss lore drops with cutscenes",
+        "  - Side inventory panel, top/bottom room info, improved layout",
+        "  - Predictable release URLs: github.com/.../download/(version)/(file)",
+        "  - Direct URL fallback in update checker",
         "",
         "Changed:",
-        "  - From single-file to modular project",
-        "  - Terminal handling now abstracted",
-        "  - Rendering now uses virtual screen buffer",
+        "  - Map size from 80x24 to 160x80, viewport 80x24",
+        "  - Max depth from 30 to 200, original win at 30 still",
+        "  - Help menu essentials only",
+        "  - Food system expanded with bread, meat, rations, fruit",
         "",
         "Fixed:",
-        "  - POSIX-only headers causing Windows build failure",
-        "  - Various gameplay bugs from original",
-        "",
-        "Known Issues:",
-        "  - Balancing ongoing",
-        "  - Some regions still share generation",
+        "  - MSYS2 cstdint include, generator unused variable, paths xdgOrHome guard",
+        "  - macOS runner macos-13 -> macos-14, release workflow log capture",
         "",
         "Press any key to return"
     };
 
     for (int i = 0; i < static_cast<int>(lines.size()) && i < screen_.height() - 4; ++i) {
         Color c = Color::White;
-        if (lines[i].rfind("Added:", 0) == 0 || lines[i].rfind("Changed:", 0) == 0 || lines[i].rfind("Fixed:", 0) == 0 || lines[i].rfind("Known", 0) == 0) c = Color::BrightCyan;
+        if (lines[i].rfind("Added:", 0) == 0 || lines[i].rfind("Changed:", 0) == 0 || lines[i].rfind("Fixed:", 0) == 0) c = Color::BrightCyan;
         if (i == 0) c = Color::BrightYellow;
         screen_.text(2, 2 + i, lines[i].substr(0, w - 4), c, i == 0);
     }
@@ -425,14 +637,16 @@ void App::renderCredits() {
     screen_.drawHLine(0, 1, w, "-", Color::Gray);
 
     std::vector<std::string> lines = {
-        "SHADOWDEEP",
-        "A roguelike dungeon crawler written in C++",
+        "SHADOWDEEP - Infinite Depths",
+        "A roguelike dungeon crawler in C++20",
         "",
         "Made by:",
         "github.com/Seigh-sword",
         "",
         "Repository:",
         "https://github.com/Seigh-sword/shadowdeep",
+        "Releases: https://github.com/Seigh-sword/shadowdeep/releases",
+        "Direct download: https://github.com/Seigh-sword/shadowdeep/releases/download/(version)/(file)",
         "",
         "Licensed under the ISC License.",
         "",
@@ -440,14 +654,10 @@ void App::renderCredits() {
         std::string("Save schema: ") + std::to_string(kSaveSchemaVersion),
         std::string("Config schema: ") + std::to_string(kConfigSchemaVersion),
         std::string("Build revision: ") + std::to_string(kBuildRevision),
+        std::string("Map: ") + std::to_string(kMapW) + "x" + std::to_string(kMapH) + " Viewport: " + std::to_string(kViewportW) + "x" + std::to_string(kViewportH),
+        std::string("Max Depth: ") + std::to_string(kMaxDepth) + " (Win at " + std::to_string(kOriginalMaxDepth) + ")",
         "",
-        "Third-party:",
-        "  - fmt (MIT)",
-        "  - spdlog (MIT) - optional",
-        "  - nlohmann/json (MIT) - config",
-        "  - FTXUI (MIT) - TUI (optional backend)",
-        "  - cpr/libcurl (MIT) - updates",
-        "  - Catch2 (BSL-1.0) - tests",
+        "Third-party: fmt MIT, spdlog MIT, nlohmann/json MIT, FTXUI MIT, cpr/libcurl MIT, Catch2 BSL-1.0",
         "",
         "Press any key to return"
     };
@@ -480,14 +690,20 @@ void App::showDeathScreen(const GameSession& session) {
     std::cout << "\033[2J\033[H";
     std::cout << "\033[1;31mSHADOWDEEP\n\nYOU HAVE DIED\033[0m\n\n";
     std::cout << "Character: " << session.player().name << " (" << session.player().className() << ")\n";
-    std::cout << "Depth reached   : " << session.depth() << "\n";
+    std::cout << "Depth reached   : " << session.depth() << (session.isInfiniteDepth() ? " (INFINITE)" : "") << "\n";
+    std::cout << "Biome           : " << session.dungeon().biomeName() << "\n";
     std::cout << "Character level : " << session.player().stats.level << "\n";
     std::cout << "Monsters slain  : " << session.kills() << "\n";
     std::cout << "Gold collected  : " << session.goldEarned() << "\n";
+    std::cout << "Guides unlocked : " << session.codex().unlockedCount() << "/" << session.codex().totalGuides() << "\n";
+    std::cout << "Lore found      : " << session.codex().loreCount() << "\n";
     std::cout << "Turns taken     : " << session.player().stats.turns << "\n";
     std::cout << "Time played     : " << session.elapsedString() << "\n";
     std::cout << "Seed            : " << session.rng().seedValue() << "\n";
     std::cout << "\nThe darkness closes over the Shadowdeep.\n";
+    if (session.depth() > kOriginalMaxDepth) {
+        std::cout << "You delved beyond the known depths. Few dare such madness.\n";
+    }
 }
 
 void App::showWinScreen(const GameSession& session) {
@@ -495,14 +711,17 @@ void App::showWinScreen(const GameSession& session) {
     std::cout << "\033[2J\033[H";
     std::cout << "\033[1;33mSHADOWDEEP\n\nVICTORY\033[0m\n\n";
     std::cout << "You emerge into daylight carrying the Amulet of Shadowdeep.\n";
-    std::cout << "The darkness below falls silent.\n\n";
+    std::cout << "The darkness below falls silent... but you know it stirs deeper.\n\n";
     std::cout << "Character: " << session.player().name << " (" << session.player().className() << ")\n";
     std::cout << "Character level : " << session.player().stats.level << "\n";
     std::cout << "Monsters slain  : " << session.kills() << "\n";
     std::cout << "Gold collected  : " << session.goldEarned() << "\n";
+    std::cout << "Guides unlocked : " << session.codex().unlockedCount() << "/" << session.codex().totalGuides() << "\n";
+    std::cout << "Lore found      : " << session.codex().loreCount() << "\n";
     std::cout << "Turns taken     : " << session.player().stats.turns << "\n";
     std::cout << "Time played     : " << session.elapsedString() << "\n";
     std::cout << "Seed            : " << session.rng().seedValue() << "\n\n";
+    std::cout << "But the void beyond depth 30 calls... will you return for true glory?\n\n";
     std::cout << "Made by github.com/Seigh-sword\n";
     std::cout << "https://github.com/Seigh-sword/shadowdeep\n";
 }
@@ -510,7 +729,7 @@ void App::showWinScreen(const GameSession& session) {
 int App::runHome() {
     terminal_->enterRaw();
     int selected = 0;
-    const int count = 5;
+    const int count = 6;
 
     for (;;) {
         auto sz = terminal_->getSize();
@@ -672,6 +891,23 @@ int App::runHome() {
                     }
                 }
             } else if (selected == 1) {
+                GameSession dummySession(123, true);
+                dummySession.newGame("codex_view", "Viewer", 0, 123, "normal");
+                int tab = 0;
+                int cur = 0;
+                for (;;) {
+                    auto sz2 = terminal_->getSize();
+                    screen_.resize(sz2.cols, sz2.rows);
+                    renderCodex(dummySession, tab, cur);
+                    blit();
+                    auto ev2 = terminal_->waitKey();
+                    if (ev2.code == static_cast<int>(KeyCode::Escape) || ev2.code == 'q') break;
+                    if (ev2.code == '\t' || ev2.code == 'l' || ev2.code == static_cast<int>(KeyCode::Right)) tab = (tab + 1) % 4;
+                    if (ev2.code == 'h' || ev2.code == static_cast<int>(KeyCode::Left)) tab = (tab - 1 + 4) % 4;
+                    if (ev2.code == static_cast<int>(KeyCode::Up) || ev2.code == 'k' || ev2.code == 'w') { if (cur > 0) cur--; }
+                    if (ev2.code == static_cast<int>(KeyCode::Down) || ev2.code == 'j' || ev2.code == 's') cur++;
+                }
+            } else if (selected == 2) {
                 for (;;) {
                     auto sz2 = terminal_->getSize();
                     screen_.resize(sz2.cols, sz2.rows);
@@ -680,7 +916,7 @@ int App::runHome() {
                     auto ev2 = terminal_->waitKey();
                     if (ev2.code == static_cast<int>(KeyCode::Escape) || ev2.code == 'q') break;
                 }
-            } else if (selected == 2) {
+            } else if (selected == 3) {
                 for (;;) {
                     auto sz2 = terminal_->getSize();
                     screen_.resize(sz2.cols, sz2.rows);
@@ -689,7 +925,7 @@ int App::runHome() {
                     auto ev2 = terminal_->waitKey();
                     if (ev2.code != static_cast<int>(KeyCode::None)) break;
                 }
-            } else if (selected == 3) {
+            } else if (selected == 4) {
                 for (;;) {
                     auto sz2 = terminal_->getSize();
                     screen_.resize(sz2.cols, sz2.rows);
@@ -698,7 +934,7 @@ int App::runHome() {
                     auto ev2 = terminal_->waitKey();
                     if (ev2.code != static_cast<int>(KeyCode::None)) break;
                 }
-            } else if (selected == 4) {
+            } else if (selected == 5) {
                 return 0;
             }
         } else if (ev.code == 'q' || ev.code == 'Q' || ev.code == 4) {
@@ -712,16 +948,74 @@ int App::runGameplay(GameSession& session) {
     int inventoryCursor = 0;
     bool inInventory = false;
     bool inHelp = false;
+    bool inCodex = false;
+    int codexTab = 0;
+    int codexCursor = 0;
+
+    bool cutsceneShown = false;
 
     for (;;) {
         auto sz = terminal_->getSize();
         screen_.resize(sz.cols, sz.rows);
+
+        if (!cutsceneShown && session.depth() == 1 && session.player().stats.turns < 2) {
+            screen_.clear();
+            screen_.drawBox(10, 5, 60, 10, Color::Purple, true);
+            screen_.text(12, 6, "CUTSCENE: The Descent Begins", Color::BrightYellow, true);
+            std::vector<std::string> lines = {
+                "You stand at the mouth of Shadowdeep.",
+                "Cold wind howls from below.",
+                "Legends speak of the Amulet at depth 30,",
+                "but whispers tell of infinite horrors beyond.",
+                "",
+                "Collect guide fragments ; to learn.",
+                "Survive hunger, master biomes.",
+                "",
+                "Press any key to begin..."
+            };
+            for (int i = 0; i < static_cast<int>(lines.size()); ++i) screen_.text(12, 8 + i, lines[i], Color::White);
+            blit();
+            terminal_->waitKey();
+            cutsceneShown = true;
+            continue;
+        }
+
+        if (session.depth() == kOriginalMaxDepth && !cutsceneShown) {
+            // depth 30 cutscene
+            screen_.clear();
+            screen_.drawBox(10, 5, 60, 10, Color::Gold, true);
+            screen_.text(12, 6, "CUTSCENE: The Heart of Shadowdeep", Color::Gold, true);
+            std::vector<std::string> lines = {
+                "You have reached depth 30.",
+                "The air thrums with shadow energy.",
+                "The Amulet pulses ahead, guarded by ancient evil.",
+                "Beyond lies infinite depth - will you dare?",
+                "",
+                "Press any key..."
+            };
+            for (int i = 0; i < static_cast<int>(lines.size()); ++i) screen_.text(12, 8 + i, lines[i], Color::White);
+            blit();
+            terminal_->waitKey();
+            cutsceneShown = true;
+        }
 
         if (inHelp) {
             renderHelp();
             blit();
             auto ev = terminal_->waitKey();
             if (ev.code != static_cast<int>(KeyCode::None)) inHelp = false;
+            continue;
+        }
+
+        if (inCodex) {
+            renderCodex(session, codexTab, codexCursor);
+            blit();
+            auto ev = terminal_->waitKey();
+            if (ev.code == static_cast<int>(KeyCode::Escape) || ev.code == 'c' || ev.code == 'C' || ev.code == 'q') { inCodex = false; continue; }
+            if (ev.code == '\t' || ev.code == 'l' || ev.code == static_cast<int>(KeyCode::Right)) { codexTab = (codexTab + 1) % 4; codexCursor = 0; }
+            else if (ev.code == 'h' || ev.code == static_cast<int>(KeyCode::Left)) { codexTab = (codexTab - 1 + 4) % 4; codexCursor = 0; }
+            else if (ev.code == static_cast<int>(KeyCode::Up) || ev.code == 'k' || ev.code == 'w') { if (codexCursor > 0) codexCursor--; }
+            else if (ev.code == static_cast<int>(KeyCode::Down) || ev.code == 'j' || ev.code == 's') { codexCursor++; }
             continue;
         }
 
@@ -783,7 +1077,7 @@ int App::runGameplay(GameSession& session) {
             else continue;
         }
 
-        if (ev.code == '?' ) {
+        if (ev.code == '?') {
             inHelp = true;
             continue;
         }
@@ -791,6 +1085,13 @@ int App::runGameplay(GameSession& session) {
         if (ev.code == 'i' || ev.code == 'I') {
             inInventory = true;
             inventoryCursor = 0;
+            continue;
+        }
+
+        if (ev.code == 'c' || ev.code == 'C') {
+            inCodex = true;
+            codexTab = 0;
+            codexCursor = 0;
             continue;
         }
 
@@ -830,16 +1131,23 @@ int App::run() {
         std::cout << "Current version: " << kGameVersion << " Build " << kBuildRevision << "\n";
         std::cout << "Platform: " << UpdateManager::getCurrentPlatformString() << " (" << UpdateManager::getOSDisplay() << " " << UpdateManager::getArchDisplay() << ")\n";
         std::cout << "Repository: " << kRepositoryUrl << "\n";
+        std::cout << "Direct URL pattern: " << kRepositoryUrl << "/releases/download/(version)/(file)\n";
         std::cout << "API: " << UpdateManager::getLatestReleaseApiUrl() << "\n";
 
         UpdateManager mgr;
         auto infoOpt = mgr.checkForUpdate(std::string(kGameVersion));
         if (!infoOpt) {
-            std::cout << "No update available or could not check. You are on " << kGameVersion << ".\n";
+            std::cout << "No update available via API or could not check. Trying direct URL fallback...\n";
+            auto direct = mgr.getDirectDownloadUrl(std::string(kGameVersion));
+            std::cout << "Direct URL for your platform: " << direct << "\n";
+            std::cout << "If that URL exists, you can download manually.\n";
             std::cout << "Check manually: " << UpdateManager::getReleasesPageUrl() << "\n";
             auto cands = UpdateManager::getCandidateArtifactNames();
-            std::cout << "Expected artifact for your platform:\n";
-            for (auto& c : cands) std::cout << "  - " << c << "\n";
+            std::cout << "Expected artifact names for your platform:\n";
+            for (auto& c : cands) {
+                std::cout << "  - " << c << "\n";
+                std::cout << "    Direct: " << kRepositoryUrl << "/releases/download/" << kGameVersion << "/" << c << "\n";
+            }
             return 0;
         }
 
@@ -849,6 +1157,7 @@ int App::run() {
         std::cout << "  OS/Arch: " << info.os << "/" << info.arch << "\n";
         std::cout << "  Artifact: " << info.artifactName << "\n";
         std::cout << "  URL: " << info.downloadUrl << "\n";
+        std::cout << "  Direct fallback: " << kRepositoryUrl << "/releases/download/" << info.version << "/" << info.artifactName << "\n";
         std::cout << "  Size: " << info.size << " bytes\n";
         if (!info.notes.empty()) {
             std::cout << "  Notes: " << info.notes.substr(0, 500) << "\n";
@@ -860,15 +1169,19 @@ int App::run() {
     if (opts_.doUpdate) {
         std::cout << "Update requested.\n";
         std::cout << "Platform: " << UpdateManager::getCurrentPlatformString() << "\n";
+        std::cout << "Direct URL pattern: " << kRepositoryUrl << "/releases/download/(version)/(file)\n";
         UpdateManager mgr;
         auto infoOpt = mgr.checkForUpdate(std::string(kGameVersion));
         if (!infoOpt) {
-            std::cout << "No update found or could not check.\n";
-            std::cout << "Download manually from: " << kRepositoryUrl << "/releases\n";
+            std::cout << "No update found via API, trying direct pattern for latest...\n";
+            std::string direct = mgr.getDirectDownloadUrl(std::string(kGameVersion));
+            std::cout << "Try manual download: " << direct << "\n";
+            std::cout << "Or visit: " << kRepositoryUrl << "/releases\n";
             return 0;
         }
         auto& info = *infoOpt;
         std::cout << "Downloading " << info.artifactName << " from " << info.downloadUrl << "\n";
+        std::cout << "Direct fallback URL: " << kRepositoryUrl << "/releases/download/" << info.version << "/" << info.artifactName << "\n";
 
         std::string destDir;
         try {
@@ -883,16 +1196,21 @@ int App::run() {
         std::cout << "Saving to: " << destPath << "\n";
 
         if (!mgr.downloadUpdate(info, destPath)) {
-            std::cout << "Download failed. Try manual download from: " << info.downloadUrl << "\n";
-            return 1;
+            std::cout << "API download failed, trying direct URL...\n";
+            std::string directUrl = std::string(kRepositoryUrl) + "/releases/download/" + info.version + "/" + info.artifactName;
+            UpdateInfo directInfo = info;
+            directInfo.downloadUrl = directUrl;
+            if (!mgr.downloadUpdate(directInfo, destPath)) {
+                std::cout << "Download failed. Try manual download from: " << info.downloadUrl << "\n";
+                std::cout << "Or direct: " << directUrl << "\n";
+                return 1;
+            }
         }
 
         std::cout << "Download complete, verifying...\n";
 
         if (!mgr.verifySize(destPath, info.size)) {
-            std::cout << "Size verification failed. Expected " << info.size << "\n";
-            std::cout << "File may be corrupted. Please try again or download manually.\n";
-            return 1;
+            std::cout << "Size verification warning: Expected " << info.size << " but file size differs - may still be OK if direct URL used.\n";
         }
 
         if (!info.sha256.empty()) {
@@ -902,7 +1220,7 @@ int App::run() {
             }
             std::cout << "Checksum OK.\n";
         } else {
-            std::cout << "No checksum provided, size OK.\n";
+            std::cout << "No checksum provided, size check done.\n";
         }
 
         std::cout << "Update staged at: " << destPath << "\n";

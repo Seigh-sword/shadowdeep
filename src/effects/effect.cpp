@@ -22,6 +22,7 @@ std::string StatusEffect::stableId() const {
         case EffectId::Blessed: return "effect.blessed";
         case EffectId::Fear: return "effect.fear";
         case EffectId::Strength: return "effect.strength";
+        case EffectId::Invisible: return "effect.invisible";
         default: return "effect.none";
     }
 }
@@ -45,6 +46,7 @@ std::string StatusEffect::displayName() const {
         case EffectId::Blessed: return "Blessed";
         case EffectId::Fear: return "Feared";
         case EffectId::Strength: return "Strength";
+        case EffectId::Invisible: return "Invisible";
         default: return "None";
     }
 }

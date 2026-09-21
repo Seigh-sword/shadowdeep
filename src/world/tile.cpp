@@ -24,6 +24,7 @@ char tileGlyph(Tile t) {
         case Tile::Fountain: return '{';
         case Tile::Chest: return '=';
         case Tile::Statue: return '&';
+        case Tile::Trap: return '^';
         default: return ' ';
     }
 }
@@ -50,6 +51,7 @@ const char* tileName(Tile t) {
         case Tile::Fountain: return "fountain";
         case Tile::Chest: return "chest";
         case Tile::Statue: return "statue";
+        case Tile::Trap: return "trap";
         default: return "unknown";
     }
 }

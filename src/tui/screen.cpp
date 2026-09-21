@@ -51,9 +51,21 @@ void ScreenBuffer::put(int x, int y, char ch, Color fg, bool bold) {
 }
 
 void ScreenBuffer::text(int x, int y, const std::string& s, Color fg, bool bold) {
-    for (size_t i = 0; i < s.size(); ++i) {
-        if (x + static_cast<int>(i) >= w_) break;
-        put(x + static_cast<int>(i), y, s[i], fg, bold);
+    int curX = x;
+    for (size_t i = 0; i < s.size(); ) {
+        unsigned char c = s[i];
+        size_t len = 1;
+        if ((c & 0x80) == 0) len = 1;
+        else if ((c & 0xE0) == 0xC0) len = 2;
+        else if ((c & 0xF0) == 0xE0) len = 3;
+        else if ((c & 0xF8) == 0xF0) len = 4;
+        else len = 1;
+        if (i + len > s.size()) len = 1;
+        std::string grapheme = s.substr(i, len);
+        if (curX >= w_) break;
+        set(curX, y, grapheme, fg, bold);
+        curX++;
+        i += len;
     }
 }
 
@@ -71,18 +83,37 @@ void ScreenBuffer::fillRect(int x, int y, int w, int h, const Cell& cell) {
 }
 
 void ScreenBuffer::drawBox(int x, int y, int w, int h, Color border) {
+    drawBox(x, y, w, h, border, true);
+}
+
+void ScreenBuffer::drawBox(int x, int y, int w, int h, Color border, bool useUnicode) {
     if (w < 2 || h < 2) return;
-    put(x, y, '+', border, true);
-    put(x + w - 1, y, '+', border, true);
-    put(x, y + h - 1, '+', border, true);
-    put(x + w - 1, y + h - 1, '+', border, true);
-    for (int i = 1; i < w - 1; ++i) {
-        put(x + i, y, '-', border, true);
-        put(x + i, y + h - 1, '-', border, true);
-    }
-    for (int i = 1; i < h - 1; ++i) {
-        put(x, y + i, '|', border, true);
-        put(x + w - 1, y + i, '|', border, true);
+    if (useUnicode) {
+        set(x, y, "┌", border, true);
+        set(x + w - 1, y, "┐", border, true);
+        set(x, y + h - 1, "└", border, true);
+        set(x + w - 1, y + h - 1, "┘", border, true);
+        for (int i = 1; i < w - 1; ++i) {
+            set(x + i, y, "─", border, true);
+            set(x + i, y + h - 1, "─", border, true);
+        }
+        for (int i = 1; i < h - 1; ++i) {
+            set(x, y + i, "│", border, true);
+            set(x + w - 1, y + i, "│", border, true);
+        }
+    } else {
+        put(x, y, '+', border, true);
+        put(x + w - 1, y, '+', border, true);
+        put(x, y + h - 1, '+', border, true);
+        put(x + w - 1, y + h - 1, '+', border, true);
+        for (int i = 1; i < w - 1; ++i) {
+            put(x + i, y, '-', border, true);
+            put(x + i, y + h - 1, '-', border, true);
+        }
+        for (int i = 1; i < h - 1; ++i) {
+            put(x, y + i, '|', border, true);
+            put(x + w - 1, y + i, '|', border, true);
+        }
     }
 }
 
@@ -106,7 +137,7 @@ Cell& ScreenBuffer::at(int x, int y) {
 
 std::string ScreenBuffer::toAnsi(bool diff) {
     std::string out;
-    out.reserve(w_ * h_ * 2);
+    out.reserve(w_ * h_ * 4);
     out += "\033[H";
 
     Color lastFg = Color::Default;
