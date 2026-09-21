@@ -196,6 +196,136 @@ std::string UpdateManager::getDirectDownloadUrlForCurrent(const std::string& ver
     return getDirectDownloadUrl(version, "");
 }
 
+std::string UpdateManager::getCurrentExecutablePath() {
+#ifdef _WIN32
+    char buf[MAX_PATH];
+    DWORD len = GetModuleFileNameA(nullptr, buf, MAX_PATH);
+    if (len == 0) return "";
+    return std::string(buf, len);
+#else
+    try {
+        auto p = fs::read_symlink("/proc/self/exe");
+        return p.string();
+    } catch (...) {
+        try {
+            char buf[4096];
+            ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+            if (len > 0) {
+                buf[len] = '\0';
+                return std::string(buf);
+            }
+        } catch (...) {}
+        return "";
+    }
+#endif
+}
+
+bool UpdateManager::isExecutableWritable(const std::string& path) {
+    if (path.empty()) return false;
+    try {
+        auto p = fs::path(path);
+        if (!fs::exists(p)) return false;
+        auto perms = fs::status(p).permissions();
+        (void)perms;
+        std::ofstream test(p.string(), std::ios::app | std::ios::binary);
+        if (!test) return false;
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool UpdateManager::extractAndReplace(const std::string& archivePath, const std::string& exePath) {
+    try {
+        fs::path arch(archivePath);
+        fs::path exe(exePath);
+        fs::path tmpDir = arch.parent_path() / "extract_tmp";
+        fs::create_directories(tmpDir);
+
+        std::string cmd;
+        if (arch.extension() == ".zip" || arch.string().find(".zip") != std::string::npos) {
+#ifdef _WIN32
+            cmd = "powershell -Command \"Expand-Archive -Path '\" + archivePath + \"' -DestinationPath '\" + tmpDir.string() + \"' -Force\"";
+#else
+            cmd = "unzip -o \"" + archivePath + "\" -d \"" + tmpDir.string() + "\" 2>/dev/null";
+#endif
+        } else {
+            cmd = "tar xzf \"" + archivePath + "\" -C \"" + tmpDir.string() + "\" 2>/dev/null";
+        }
+        int ret = std::system(cmd.c_str());
+        (void)ret;
+
+        fs::path foundExe;
+        for (auto& entry : fs::recursive_directory_iterator(tmpDir)) {
+            if (!entry.is_regular_file()) continue;
+            auto name = entry.path().filename().string();
+            if (name == "shadowdeep" || name == "shadowdeep.exe") {
+                foundExe = entry.path();
+                break;
+            }
+        }
+        if (foundExe.empty()) return false;
+
+        fs::path backup = exe;
+        backup += ".bak";
+        try {
+            if (fs::exists(backup)) fs::remove(backup);
+            fs::rename(exe, backup);
+        } catch (...) {
+            return false;
+        }
+        try {
+            fs::copy_file(foundExe, exe, fs::copy_options::overwrite_existing);
+#ifdef __linux__
+            fs::permissions(exe, fs::perms::owner_exec | fs::perms::group_exec | fs::perms::others_exec | fs::perms::owner_read | fs::perms::group_read | fs::perms::others_read, fs::perm_options::add);
+#endif
+            fs::remove_all(tmpDir);
+            return true;
+        } catch (...) {
+            try {
+                if (fs::exists(backup)) {
+                    if (fs::exists(exe)) fs::remove(exe);
+                    fs::rename(backup, exe);
+                }
+            } catch (...) {}
+            return false;
+        }
+    } catch (...) {
+        return false;
+    }
+}
+
+bool UpdateManager::attemptAutoInstall(const std::string& downloadedPath, const UpdateInfo& info) {
+    (void)info;
+    std::string exePath = getCurrentExecutablePath();
+    if (exePath.empty()) return false;
+    if (!isExecutableWritable(exePath)) {
+#ifdef _WIN32
+        try {
+            std::string batchPath = (fs::path(downloadedPath).parent_path() / "shadowdeep_updater.bat").string();
+            std::ofstream bat(batchPath);
+            bat << "@echo off\n";
+            bat << "echo Updating SHADOWDEEP...\n";
+            bat << "timeout /t 2 /nobreak > NUL\n";
+            bat << "powershell -Command \"Expand-Archive -Path '" << downloadedPath << "' -DestinationPath '" << fs::path(downloadedPath).parent_path().string() << "/extract_tmp' -Force\"\n";
+            bat << "copy /Y \"" << (fs::path(downloadedPath).parent_path() / "extract_tmp" / "shadowdeep.exe").string() << "\" \"" << exePath << "\"\n";
+            bat << "echo Update complete! You can now run shadowdeep.exe\n";
+            bat << "pause\n";
+            bat << "del \"%~f0\"\n";
+            bat.close();
+            std::string cmd = "start \"\" \"" + batchPath + "\"";
+            std::system(cmd.c_str());
+            return true;
+        } catch (...) {
+            return false;
+        }
+#else
+        return false;
+#endif
+    }
+    return extractAndReplace(downloadedPath, exePath);
+}
+
 #if SHADOWDEEP_HAS_CURL
 static size_t curlWriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     std::string* s = static_cast<std::string*>(userp);

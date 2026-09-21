@@ -27,6 +27,17 @@ struct Floor {
     RegionId region = RegionId::ForgottenCellars;
     Biome biome = Biome::Stone;
     int monsterPowerScale = 0;
+    bool hasShop = false;
+    int shopRoomIdx = -1;
+    std::vector<Item> shopItems;
+    Vec2 shopkeeperPos{-1,-1};
+    bool shopkeeperAlive = false;
+    bool altarUsed = false;
+    bool fountainUsed = false;
+    bool fountainDry = false;
+    int altarBlessing = 0;
+    int mimicCount = 0;
+    int randomEventCooldown = 0;
 };
 
 struct GameMessage {
@@ -131,6 +142,24 @@ private:
     void autoPickup();
     void handleGuideFragment(const Item& it);
     void handleLoreScroll(const Item& it);
+    void handleShop();
+    void handleAltar();
+    void handleFountain();
+    void handleChestInteraction();
+    void triggerRandomEvent();
+    void revealMimicsNear(Vec2 pos);
+    void trySpawnMimic(Vec2 pos);
+    void populateShop(int depth);
+    bool buyShopItem(size_t idx);
+    void handleTileEffects();
+public:
+    bool isInShop() const;
+    const std::vector<Item>& shopItems() const;
+    bool buyItemFromShop(size_t idx);
+    int shopRoomIndex() const;
+    void useAltar();
+    void drinkFountain();
+    std::string minimapString(int w, int h) const;
 };
 
 }

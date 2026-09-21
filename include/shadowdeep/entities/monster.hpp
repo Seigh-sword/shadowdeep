@@ -32,6 +32,7 @@ struct MonsterTemplate {
     std::string stableId;
     std::string name;
     char glyph;
+    std::string unicodeGlyph;
     Color color;
     MonsterFamily family;
     int baseHp;
@@ -53,6 +54,7 @@ struct Monster {
     std::string stableId;
     std::string name;
     char glyph = '?';
+    std::string unicodeGlyph;
     Color color = Color::White;
     Vec2 pos{0, 0};
     int hp = 1;
@@ -78,6 +80,11 @@ struct Monster {
 
     bool isHostile() const {
         return alive;
+    }
+
+    std::string displayGlyph() const {
+        if (!unicodeGlyph.empty()) return unicodeGlyph;
+        return std::string(1, glyph);
     }
 };
 

@@ -13,6 +13,7 @@ struct CliOptions {
     bool showLicense = false;
     bool checkUpdate = false;
     bool doUpdate = false;
+    bool autoUpdate = false;
     bool runTests = false;
     std::optional<uint32_t> seed;
     std::string entryToLoad;

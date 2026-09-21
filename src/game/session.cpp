@@ -79,6 +79,7 @@ void GameSession::newGame(const std::string& entryId, const std::string& charNam
     dagger.name = "dagger";
     dagger.kind = ItemKind::Weapon;
     dagger.glyph = '/';
+    dagger.unicodeGlyph = "⚔";
     dagger.color = Color::Steel;
     dagger.power = 2 + (pclass == 1 ? 1 : 0);
     dagger.slot = EquipSlot::MainHand;
@@ -98,6 +99,7 @@ void GameSession::newGame(const std::string& entryId, const std::string& charNam
         scroll.name = "scroll of lightning";
         scroll.kind = ItemKind::ScrollLightning;
         scroll.glyph = '?';
+        scroll.unicodeGlyph = "📜";
         scroll.color = Color::BrightYellow;
         scroll.power = 18;
         player_.inventory.add(scroll);
@@ -108,6 +110,7 @@ void GameSession::newGame(const std::string& entryId, const std::string& charNam
     ration.name = "food ration";
     ration.kind = ItemKind::Food;
     ration.glyph = '%';
+    ration.unicodeGlyph = "🍖";
     ration.color = Color::Brown;
     ration.power = 10;
     player_.inventory.add(ration);
@@ -208,6 +211,7 @@ Item GameSession::makeHealPotion(Vec2 pos) {
     i.name = "potion of healing";
     i.kind = ItemKind::PotionHeal;
     i.glyph = '!';
+    i.unicodeGlyph = "🧪";
     i.color = Color::BrightRed;
     i.power = 18;
     i.pos = pos;
@@ -229,6 +233,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "potion of greater healing";
         i.kind = ItemKind::PotionGreaterHeal;
         i.glyph = '!';
+        i.unicodeGlyph = "🧪";
         i.color = Color::BrightRed;
         i.power = 35;
     } else if (r <= 16 && d >= 3) {
@@ -236,6 +241,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "potion of strength";
         i.kind = ItemKind::PotionStrength;
         i.glyph = '!';
+        i.unicodeGlyph = "🧪";
         i.color = Color::BrightMagenta;
         i.power = 1;
     } else if (r <= 18 && d >= 3) {
@@ -243,6 +249,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "potion of haste";
         i.kind = ItemKind::PotionHaste;
         i.glyph = '!';
+        i.unicodeGlyph = "🧪";
         i.color = Color::BrightCyan;
         i.power = 18;
     } else if (r <= 20 && d >= 6) {
@@ -250,12 +257,14 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "potion of rejuvenation";
         i.kind = ItemKind::PotionRejuvenation;
         i.glyph = '!';
+        i.unicodeGlyph = "🧪";
         i.color = Color::BrightYellow;
     } else if (r <= 22 && d >= 8) {
         i.stableId = "item.potion_invisibility";
         i.name = "potion of invisibility";
         i.kind = ItemKind::PotionInvisibility;
         i.glyph = '!';
+        i.unicodeGlyph = "🧪";
         i.color = Color::Gray;
         i.power = 20;
     } else if (r <= 24) {
@@ -263,6 +272,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "potion of mana";
         i.kind = ItemKind::PotionMana;
         i.glyph = '!';
+        i.unicodeGlyph = "🧪";
         i.color = Color::BrightCyan;
         i.power = 15;
     } else if (r <= 26) {
@@ -270,12 +280,14 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "potion of antidote";
         i.kind = ItemKind::PotionAntidote;
         i.glyph = '!';
+        i.unicodeGlyph = "🧪";
         i.color = Color::Green;
     } else if (r <= 28 && d >= 10) {
         i.stableId = "item.potion_fire_resist";
         i.name = "potion of fire resistance";
         i.kind = ItemKind::PotionFireResist;
         i.glyph = '!';
+        i.unicodeGlyph = "🧪";
         i.color = Color::BrightRed;
     } else if (r <= 35) {
         auto& all = allItemTemplates();
@@ -289,6 +301,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = tmpl.name;
         i.kind = tmpl.kind;
         i.glyph = tmpl.glyph;
+        i.unicodeGlyph = tmpl.unicodeGlyph;
         i.color = tmpl.color;
         i.power = tmpl.basePower + rng_.range(0, 3) + (d > 30 ? (d - 30) / 5 : 0);
         i.slot = tmpl.slot;
@@ -313,6 +326,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
             i.name = tmpl.name;
             i.kind = tmpl.kind;
             i.glyph = tmpl.glyph;
+            i.unicodeGlyph = tmpl.unicodeGlyph;
             i.color = tmpl.color;
             i.power = tmpl.basePower + rng_.range(0, 2);
             i.slot = tmpl.slot;
@@ -323,6 +337,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "food ration";
         i.kind = ItemKind::Food;
         i.glyph = '%';
+        i.unicodeGlyph = "🍖";
         i.color = Color::Brown;
         i.power = 12;
     } else if (r <= 52) {
@@ -333,6 +348,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = foods[f];
         i.kind = kinds[f];
         i.glyph = '%';
+        i.unicodeGlyph = "🍖";
         i.color = f == 3 ? Color::BrightGreen : (f == 1 ? Color::BrightRed : Color::Brown);
         i.power = 8 + rng_.range(0, 8);
     } else if (r <= 58) {
@@ -340,6 +356,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "pile of gold";
         i.kind = ItemKind::Gold;
         i.glyph = '$';
+        i.unicodeGlyph = "💰";
         i.color = Color::Gold;
         i.power = rng_.range(4, 8 + d * 4);
         i.valueGold = i.power;
@@ -348,6 +365,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "ruby";
         i.kind = ItemKind::Ruby;
         i.glyph = '$';
+        i.unicodeGlyph = "💎";
         i.color = Color::BrightRed;
         i.power = 1;
         i.valueGold = rng_.range(1, 4 + d / 5);
@@ -356,6 +374,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "scroll of lightning";
         i.kind = ItemKind::ScrollLightning;
         i.glyph = '?';
+        i.unicodeGlyph = "📜";
         i.color = Color::BrightYellow;
         i.power = 18 + d * 2;
     } else if (r <= 70 && d >= 3) {
@@ -363,6 +382,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "scroll of fireball";
         i.kind = ItemKind::ScrollFireball;
         i.glyph = '?';
+        i.unicodeGlyph = "📜";
         i.color = Color::BrightRed;
         i.power = 30 + d * 2;
     } else if (r <= 74) {
@@ -370,30 +390,35 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "scroll of teleport";
         i.kind = ItemKind::ScrollTeleport;
         i.glyph = '?';
+        i.unicodeGlyph = "📜";
         i.color = Color::BrightMagenta;
     } else if (r <= 78) {
         i.stableId = "item.scroll_mapping";
         i.name = "scroll of magic mapping";
         i.kind = ItemKind::ScrollMapping;
         i.glyph = '?';
+        i.unicodeGlyph = "📜";
         i.color = Color::BrightCyan;
     } else if (r <= 82) {
         i.stableId = "item.scroll_identify";
         i.name = "scroll of identify";
         i.kind = ItemKind::ScrollIdentify;
         i.glyph = '?';
+        i.unicodeGlyph = "📜";
         i.color = Color::White;
     } else if (r <= 86 && d >= 10) {
         i.stableId = "item.scroll_enchant";
         i.name = "scroll of enchantment";
         i.kind = ItemKind::ScrollEnchant;
         i.glyph = '?';
+        i.unicodeGlyph = "📜";
         i.color = Color::Gold;
     } else if (r <= 88) {
         i.stableId = "item.bomb";
         i.name = "bomb";
         i.kind = ItemKind::Bomb;
         i.glyph = '*';
+        i.unicodeGlyph = "💣";
         i.color = Color::BrightRed;
         i.power = 25 + d * 2;
     } else if (r <= 92) {
@@ -401,6 +426,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "guide fragment";
         i.kind = ItemKind::GuideFragment;
         i.glyph = ';';
+        i.unicodeGlyph = "📖";
         i.color = Color::White;
         i.power = 1;
     } else if (r <= 95 && d >= 8) {
@@ -408,6 +434,7 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "ancient guide fragment";
         i.kind = ItemKind::GuideFragment;
         i.glyph = ';';
+        i.unicodeGlyph = "📖";
         i.color = Color::Gold;
         i.power = 2;
         i.rarity = ItemRarity::Rare;
@@ -416,12 +443,14 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.name = "lore scroll";
         i.kind = ItemKind::LoreScroll;
         i.glyph = '?';
+        i.unicodeGlyph = "📜";
         i.color = Color::BrightYellow;
     } else {
         i.stableId = "item.key";
         i.name = "iron key";
         i.kind = ItemKind::Key;
         i.glyph = '-';
+        i.unicodeGlyph = "🔑";
         i.color = Color::Steel;
     }
 
@@ -458,6 +487,7 @@ Monster GameSession::createMonster(const MonsterTemplate& t, Vec2 p, int depth) 
     m.stableId = t.stableId;
     m.name = t.name;
     m.glyph = t.glyph;
+    m.unicodeGlyph = t.unicodeGlyph;
     m.color = t.color;
     m.pos = p;
     int scale = monsterScaleForDepth(depth);
@@ -485,6 +515,48 @@ Monster GameSession::createMonster(const MonsterTemplate& t, Vec2 p, int depth) 
     return m;
 }
 
+void GameSession::populateShop(int depth) {
+    Floor& f = floors_[depth];
+    if (f.shopRoomIdx < 0 || f.shopRoomIdx >= static_cast<int>(f.dungeon.rooms.size())) return;
+    auto& room = f.dungeon.rooms[f.shopRoomIdx];
+    f.shopItems.clear();
+    int shopCount = rng_.range(3, 6) + depth / 10;
+    if (shopCount > 10) shopCount = 10;
+    for (int i = 0; i < shopCount; ++i) {
+        Vec2 p{room.x + 1 + rng_.range(0, room.w - 3), room.y + 1 + rng_.range(0, room.h - 3)};
+        Item it = randomItem(p, depth + 2);
+        it.valueGold = std::max(5, it.power * 5 + rng_.range(5, 20 + depth * 2));
+        if (it.rarity == ItemRarity::Rare) it.valueGold += 30;
+        if (it.rarity == ItemRarity::Epic) it.valueGold += 80;
+        if (it.rarity == ItemRarity::Legendary) it.valueGold += 150;
+        it.pos = p;
+        f.shopItems.push_back(it);
+    }
+    Vec2 keeperPos = room.center();
+    auto* keeperT = findMonsterTemplate("monster.shopkeeper");
+    if (keeperT) {
+        f.monsters.push_back(createMonster(*keeperT, keeperPos, depth));
+        f.shopkeeperPos = keeperPos;
+        f.shopkeeperAlive = true;
+        auto* guardT = findMonsterTemplate("monster.shop_guard");
+        if (guardT && rng_.chance(60)) {
+            Vec2 gp = keeperPos + Vec2{rng_.range(-1,1), rng_.range(-1,1)};
+            if (f.dungeon.walkable(gp)) {
+                f.monsters.push_back(createMonster(*guardT, gp, depth));
+            }
+        }
+    }
+}
+
+void GameSession::trySpawnMimic(Vec2 pos) {
+    auto* mimicT = findMonsterTemplate(rng_.chance(50) ? "monster.mimic" : "monster.chest_mimic");
+    if (!mimicT) return;
+    Floor& f = floors_[depth_];
+    if (monsterAt(pos)) return;
+    f.monsters.push_back(createMonster(*mimicT, pos, depth_));
+    f.mimicCount++;
+}
+
 void GameSession::ensureFloor(int d) {
     if (d < 1 || d > kMaxDepth) return;
     Floor& f = floors_[d];
@@ -497,6 +569,7 @@ void GameSession::ensureFloor(int d) {
     f.region = regionForDepth(d);
     f.biome = f.dungeon.biome;
     f.monsterPowerScale = monsterScaleForDepth(d);
+    f.randomEventCooldown = rng_.range(50, 150);
 
     int count = 8 + d / 2 + rng_.range(0, 5);
     if (d >= 20) count += 4;
@@ -506,12 +579,16 @@ void GameSession::ensureFloor(int d) {
     std::vector<const MonsterTemplate*> eligible;
     for (auto& t : allMonsterTemplates()) {
         if (t.stableId == "monster.ancient_dragon" && d != kOriginalMaxDepth) continue;
+        if (t.stableId == "monster.shopkeeper" || t.stableId == "monster.shop_guard") continue;
+        if (t.stableId == "monster.mimic" || t.stableId == "monster.chest_mimic") continue;
         if (d >= t.minDepth && d <= t.maxDepth) eligible.push_back(&t);
         else if (d > 30 && t.maxDepth >= 25) eligible.push_back(&t);
     }
 
     if (d > 40) {
         for (auto& t : allMonsterTemplates()) {
+            if (t.stableId.find("shop") != std::string::npos) continue;
+            if (t.stableId.find("mimic") != std::string::npos) continue;
             if (t.minDepth >= 20) eligible.push_back(&t);
         }
     }
@@ -564,10 +641,51 @@ void GameSession::ensureFloor(int d) {
         frag.name = "guide fragment";
         frag.kind = ItemKind::GuideFragment;
         frag.glyph = ';';
+        frag.unicodeGlyph = "📖";
         frag.color = Color::White;
         frag.pos = p;
         frag.identified = true;
         f.items.push_back(frag);
+    }
+
+    if (d >= 2 && rng_.chance(35) && f.dungeon.rooms.size() >= 4) {
+        int idx = rng_.range(1, static_cast<int>(f.dungeon.rooms.size()) - 2);
+        f.hasShop = true;
+        f.shopRoomIdx = idx;
+        auto& room = f.dungeon.rooms[idx];
+        for (int y = room.y; y < room.y + room.h; ++y) {
+            for (int x = room.x; x < room.x + room.w; ++x) {
+                Vec2 p{x,y};
+                if (f.dungeon.inBounds(p) && f.dungeon.at(p) == Tile::Wall) {
+                    if (x == room.x || x == room.x + room.w - 1 || y == room.y || y == room.y + room.h - 1) continue;
+                    f.dungeon.set(p, Tile::Floor);
+                }
+            }
+        }
+        floors_[d] = f;
+        populateShop(d);
+    }
+
+    int chestCount = 0;
+    for (int y = 1; y < f.dungeon.mapH - 1; ++y) {
+        for (int x = 1; x < f.dungeon.mapW - 1; ++x) {
+            if (f.dungeon.tiles[y][x] == Tile::Chest) {
+                chestCount++;
+                if (rng_.chance(25)) {
+                    f.dungeon.tiles[y][x] = Tile::Floor;
+                    Vec2 pos{x,y};
+                    auto* mimicT = findMonsterTemplate(rng_.chance(60) ? "monster.chest_mimic" : "monster.mimic");
+                    if (mimicT) {
+                        bool occupied = false;
+                        for (auto& m : f.monsters) if (m.alive && m.pos == pos) occupied = true;
+                        if (!occupied) {
+                            f.monsters.push_back(createMonster(*mimicT, pos, d));
+                            f.mimicCount++;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     if (d == kOriginalMaxDepth) {
@@ -597,6 +715,7 @@ void GameSession::ensureFloor(int d) {
         a.name = "Amulet of Shadowdeep";
         a.kind = ItemKind::AmuletShadowdeep;
         a.glyph = '"';
+        a.unicodeGlyph = "🔮";
         a.color = Color::Gold;
         a.pos = amuletPos;
         a.rarity = ItemRarity::Mythic;
@@ -616,6 +735,10 @@ bool GameSession::movePlayer(int dx, int dy) {
 
     Monster* m = monsterAtPtr(target);
     if (m) {
+        if (m->stableId == "monster.shopkeeper") {
+            addMessage("The shopkeeper eyes you warily. Press 'b' to browse.", Color::BrightYellow);
+            return false;
+        }
         playerAttack(*m);
         return true;
     }
@@ -630,8 +753,354 @@ bool GameSession::movePlayer(int dx, int dy) {
 
     player_.pos = target;
     autoPickup();
+    handleTileEffects();
+    revealMimicsNear(target);
     return true;
 }
+
+void GameSession::revealMimicsNear(Vec2 pos) {
+    for (auto& mon : monsters()) {
+        if (!mon.alive) continue;
+        if (mon.stableId.find("mimic") == std::string::npos) continue;
+        if (mon.pos.chebyshev(pos) <= 1) {
+            if (!mon.aware) {
+                mon.aware = true;
+                mon.aiState = AiState::Hunting;
+                addMessage(std::string("The ") + mon.name + " reveals itself! It was a mimic!", Color::BrightRed);
+            }
+        }
+    }
+}
+
+void GameSession::handleTileEffects() {
+    Tile t = dungeon().at(player_.pos);
+    Floor& f = currentFloor();
+    if (t == Tile::Altar && !f.altarUsed) {
+        handleAltar();
+    } else if (t == Tile::Fountain && !f.fountainDry) {
+        handleFountain();
+    } else if (t == Tile::Chest) {
+        handleChestInteraction();
+    } else if (t == Tile::Trap) {
+        int dmg = rng_.range(5, 15 + depth_ * 2);
+        player_.stats.hp -= dmg;
+        addMessage(std::string("You trigger a trap for ") + std::to_string(dmg) + " damage!", Color::BrightRed);
+        dungeon().set(player_.pos, Tile::Floor);
+        if (rng_.chance(30)) {
+            player_.effects.add(EffectId::Bleeding, 5, 2, "trap");
+        }
+    } else if (t == Tile::Lava) {
+        int dmg = rng_.range(3, 8);
+        player_.stats.hp -= dmg;
+        addMessage(std::string("Lava sears you for ") + std::to_string(dmg) + " damage!", Color::BrightRed);
+    }
+}
+
+void GameSession::handleAltar() {
+    Floor& f = currentFloor();
+    if (f.altarUsed) {
+        addMessage("The altar is spent.", Color::Gray);
+        return;
+    }
+    addMessage("You kneel before a shadowed altar.", Color::Purple);
+    int roll = rng_.range(1, 100);
+    if (roll <= 25 && player_.stats.gold >= 20) {
+        player_.stats.gold -= 20;
+        player_.stats.maxHp += 5;
+        player_.stats.hp = player_.stats.maxHp;
+        addMessage("You offer gold. The altar blesses you: +5 max HP and full heal!", Color::BrightYellow);
+        codex_.unlockGuide("guide.altar_blessing");
+        f.altarUsed = true;
+        f.altarBlessing = 1;
+    } else if (roll <= 50) {
+        player_.stats.strength += 1;
+        addMessage("Shadow energy flows into you: +1 strength!", Color::BrightMagenta);
+        f.altarUsed = true;
+        f.altarBlessing = 2;
+    } else if (roll <= 70) {
+        Item frag;
+        frag.stableId = "item.guide_fragment_rare";
+        frag.name = "altar fragment";
+        frag.kind = ItemKind::GuideFragment;
+        frag.glyph = ';';
+        frag.unicodeGlyph = "📖";
+        frag.color = Color::Gold;
+        frag.pos = player_.pos;
+        frag.identified = true;
+        items().push_back(frag);
+        addMessage("The altar reveals a guide fragment!", Color::Gold);
+        f.altarUsed = true;
+    } else if (roll <= 85) {
+        player_.effects.add(EffectId::Cursed, 20, 1, "altar");
+        addMessage("The altar curses you! You feel weakened.", Color::BrightRed);
+        f.altarUsed = true;
+        f.altarBlessing = -1;
+    } else {
+        addMessage("The altar hums but nothing happens. It awaits a worthier offering.", Color::Gray);
+    }
+}
+
+void GameSession::handleFountain() {
+    Floor& f = currentFloor();
+    if (f.fountainDry) {
+        addMessage("The fountain is dry.", Color::Gray);
+        return;
+    }
+    addMessage("You find a shimmering fountain.", Color::BrightCyan);
+    int roll = rng_.range(1, 100);
+    if (roll <= 35) {
+        int heal = rng_.range(10, 30 + depth_ * 2);
+        player_.stats.hp = std::min(player_.stats.maxHp, player_.stats.hp + heal);
+        addMessage(std::string("You drink and recover ") + std::to_string(heal) + " HP!", Color::BrightGreen);
+        if (rng_.chance(20)) {
+            f.fountainDry = true;
+            addMessage("The fountain dries up.", Color::Gray);
+        }
+    } else if (roll <= 55) {
+        player_.stats.hunger = player_.stats.maxHunger;
+        player_.stats.saturation = player_.stats.maxSaturation;
+        addMessage("Refreshing water! Hunger and saturation fully restored!", Color::BrightCyan);
+        f.fountainDry = rng_.chance(30);
+    } else if (roll <= 70) {
+        player_.effects.add(EffectId::Poison, 8, 2, "fountain");
+        addMessage("The water was tainted! You are poisoned!", Color::Green);
+        f.fountainDry = true;
+    } else if (roll <= 85) {
+        player_.stats.maxHp += 3;
+        player_.stats.hp += 3;
+        addMessage("The fountain grants vitality: +3 max HP!", Color::BrightYellow);
+        f.fountainDry = true;
+    } else {
+        Item it = randomItem(player_.pos, depth_ + 1);
+        it.pos = player_.pos;
+        items().push_back(it);
+        addMessage(std::string("Something glints in the fountain: ") + it.name + "!", Color::Gold);
+        f.fountainDry = rng_.chance(50);
+    }
+    codex_.addFragment("guide.fountain", "fountain");
+}
+
+void GameSession::handleChestInteraction() {
+    Tile t = dungeon().at(player_.pos);
+    if (t != Tile::Chest) return;
+    addMessage("You open a chest!", Color::Gold);
+    dungeon().set(player_.pos, Tile::Floor);
+    int roll = rng_.range(1, 100);
+    if (roll <= 20 && rng_.chance(30)) {
+        trySpawnMimic(player_.pos);
+        addMessage("It was a mimic!", Color::BrightRed);
+        return;
+    }
+    for (int i = 0; i < rng_.range(1, 3); ++i) {
+        Item it = randomItem(player_.pos, depth_ + 1);
+        it.pos = player_.pos;
+        items().push_back(it);
+        addMessage(std::string("Chest contains: ") + it.name, it.color);
+    }
+    if (rng_.chance(30)) {
+        int g = rng_.range(10, 30 + depth_ * 5);
+        Item gold;
+        gold.stableId = "item.gold";
+        gold.name = "pile of gold";
+        gold.kind = ItemKind::Gold;
+        gold.glyph = '$';
+        gold.unicodeGlyph = "💰";
+        gold.color = Color::Gold;
+        gold.power = g;
+        gold.valueGold = g;
+        gold.pos = player_.pos;
+        items().push_back(gold);
+    }
+}
+
+void GameSession::triggerRandomEvent() {
+    Floor& f = currentFloor();
+    if (f.randomEventCooldown > 0) {
+        f.randomEventCooldown--;
+        return;
+    }
+    if (!rng_.chance(5)) return;
+    int ev = rng_.range(1, 10);
+    switch (ev) {
+        case 1: {
+            addMessage("You hear distant scratching... a swarm approaches!", Color::BrightRed);
+            for (int i = 0; i < rng_.range(2, 5); ++i) {
+                Vec2 p = randomWalkable();
+                auto* t = findMonsterTemplate("monster.giant_rat");
+                if (t) f.monsters.push_back(createMonster(*t, p, depth_));
+            }
+            break;
+        }
+        case 2: {
+            addMessage("A hidden cache is revealed!", Color::Gold);
+            Vec2 p = randomWalkable();
+            Item it = randomItem(p, depth_ + 3);
+            it.rarity = ItemRarity::Rare;
+            items().push_back(it);
+            break;
+        }
+        case 3: {
+            addMessage("You feel a cold wind from the void...", Color::Purple);
+            if (depth_ > 20) player_.stats.hunger -= 50;
+            break;
+        }
+        case 4: {
+            addMessage("Your guide fragment glows faintly.", Color::BrightCyan);
+            codex_.addFragment("guide.random_event", "random event");
+            break;
+        }
+        case 5: {
+            if (rng_.chance(30)) {
+                int g = rng_.range(5, 15);
+                player_.stats.gold += g;
+                goldEarned_ += g;
+                addMessage(std::string("You find ") + std::to_string(g) + " gold on the ground!", Color::Gold);
+            }
+            break;
+        }
+        case 6: {
+            addMessage("The shadows shift...", Color::Gray);
+            computeFov();
+            break;
+        }
+        case 7: {
+            if (player_.stats.hungerState() == HungerState::Full) {
+                addMessage("You feel overfull and lose some saturation.", Color::Brown);
+                player_.stats.saturation -= 100;
+            }
+            break;
+        }
+        case 8: {
+            addMessage("A distant roar echoes through the dungeon!", Color::BrightRed);
+            for (auto& m : monsters()) if (m.alive) m.aware = true;
+            break;
+        }
+        case 9: {
+            addMessage("You sense treasure nearby.", Color::Gold);
+            for (int y = 0; y < dungeon().mapH; ++y) for (int x = 0; x < dungeon().mapW; ++x) dungeon().explored[y][x] = dungeon().explored[y][x] || rng_.chance(5);
+            break;
+        }
+        default: break;
+    }
+    f.randomEventCooldown = rng_.range(80, 200);
+}
+
+bool GameSession::isInShop() const {
+    const Floor& f = floors_[depth_];
+    if (!f.hasShop) return false;
+    if (f.shopRoomIdx < 0 || f.shopRoomIdx >= static_cast<int>(f.dungeon.rooms.size())) return false;
+    auto& room = f.dungeon.rooms[f.shopRoomIdx];
+    return room.contains(player_.pos);
+}
+
+const std::vector<Item>& GameSession::shopItems() const {
+    return floors_[depth_].shopItems;
+}
+
+int GameSession::shopRoomIndex() const {
+    return floors_[depth_].shopRoomIdx;
+}
+
+bool GameSession::buyShopItem(size_t idx) {
+    return buyItemFromShop(idx);
+}
+
+bool GameSession::buyItemFromShop(size_t idx) {
+    Floor& f = floors_[depth_];
+    if (!isInShop()) {
+        addMessage("You are not in a shop.", Color::Gray);
+        return false;
+    }
+    if (idx >= f.shopItems.size()) {
+        addMessage("No such item.", Color::Gray);
+        return false;
+    }
+    Item it = f.shopItems[idx];
+    if (player_.stats.gold < it.valueGold) {
+        addMessage(std::string("Not enough gold. Need ") + std::to_string(it.valueGold) + ".", Color::BrightRed);
+        return false;
+    }
+    if (!player_.inventory.hasSpace()) {
+        addMessage("Inventory full.", Color::BrightRed);
+        return false;
+    }
+    player_.stats.gold -= it.valueGold;
+    it.pos = {0,0};
+    player_.inventory.add(it);
+    addMessage(std::string("You buy ") + it.name + " for " + std::to_string(it.valueGold) + " gold.", Color::Gold);
+    f.shopItems.erase(f.shopItems.begin() + idx);
+    return true;
+}
+
+void GameSession::useAltar() {
+    Tile t = dungeon().at(player_.pos);
+    if (t != Tile::Altar) {
+        for (int dy = -1; dy <= 1; ++dy) for (int dx = -1; dx <= 1; ++dx) {
+            Vec2 q = player_.pos + Vec2{dx, dy};
+            if (dungeon().inBounds(q) && dungeon().at(q) == Tile::Altar) {
+                player_.pos = q;
+                handleAltar();
+                return;
+            }
+        }
+        addMessage("No altar nearby.", Color::Gray);
+        return;
+    }
+    handleAltar();
+}
+
+void GameSession::drinkFountain() {
+    Tile t = dungeon().at(player_.pos);
+    if (t != Tile::Fountain) {
+        for (int dy = -1; dy <= 1; ++dy) for (int dx = -1; dx <= 1; ++dx) {
+            Vec2 q = player_.pos + Vec2{dx, dy};
+            if (dungeon().inBounds(q) && dungeon().at(q) == Tile::Fountain) {
+                player_.pos = q;
+                handleFountain();
+                return;
+            }
+        }
+        addMessage("No fountain nearby.", Color::Gray);
+        return;
+    }
+    handleFountain();
+}
+
+std::string GameSession::minimapString(int w, int h) const {
+    const auto& d = floors_[depth_].dungeon;
+    std::string out;
+    int stepX = std::max(1, d.mapW / w);
+    int stepY = std::max(1, d.mapH / h);
+    for (int my = 0; my < h; ++my) {
+        for (int mx = 0; mx < w; ++mx) {
+            int wx = mx * stepX;
+            int wy = my * stepY;
+            if (wx >= d.mapW) wx = d.mapW - 1;
+            if (wy >= d.mapH) wy = d.mapH - 1;
+            if (wx == player_.pos.x && wy == player_.pos.y) { out += '@'; continue; }
+            if (!d.explored[wy][wx]) { out += ' '; continue; }
+            Tile t = d.tiles[wy][wx];
+            char c = ' ';
+            switch (t) {
+                case Tile::Wall: c = '#'; break;
+                case Tile::Floor: case Tile::Corridor: c = '.'; break;
+                case Tile::DoorClosed: c = '+'; break;
+                case Tile::DoorOpen: c = '/'; break;
+                case Tile::StairsDown: c = '>'; break;
+                case Tile::StairsUp: c = '<'; break;
+                case Tile::Chest: c = 'C'; break;
+                case Tile::Altar: c = 'A'; break;
+                case Tile::Fountain: c = 'F'; break;
+                case Tile::Trap: c = '^'; break;
+                default: c = '.'; break;
+            }
+            out += c;
+        }
+        out += '\n';
+    }
+    return out;
+}
+
 
 void GameSession::autoPickup() {
     for (int i = 0; i < static_cast<int>(items().size()); ++i) {
@@ -807,6 +1276,7 @@ void GameSession::killMonster(Monster& m) {
         frag.name = "forbidden guide fragment";
         frag.kind = ItemKind::GuideFragment;
         frag.glyph = ';';
+        frag.unicodeGlyph = "📖";
         frag.color = Color::Purple;
         frag.pos = m.pos;
         frag.rarity = ItemRarity::Epic;
@@ -818,6 +1288,7 @@ void GameSession::killMonster(Monster& m) {
         lore.name = "codex of " + m.name;
         lore.kind = ItemKind::LoreScroll;
         lore.glyph = '?';
+        lore.unicodeGlyph = "📜";
         lore.color = Color::Gold;
         lore.pos = m.pos;
         lore.identified = true;
@@ -848,6 +1319,7 @@ void GameSession::killMonster(Monster& m) {
         gold.name = "pile of gold";
         gold.kind = ItemKind::Gold;
         gold.glyph = '$';
+        gold.unicodeGlyph = "💰";
         gold.color = Color::Gold;
         gold.power = rng_.range(2, 6 + depth_ * 2);
         gold.valueGold = gold.power;
@@ -879,6 +1351,13 @@ void GameSession::endTurn() {
         addMessage(std::string("You suffer ") + std::to_string(dmg) + " poison damage.", Color::Green);
     }
 
+    if (player_.effects.has(EffectId::Burning)) {
+        int dmg = player_.effects.getPower(EffectId::Burning);
+        if (dmg < 1) dmg = 1;
+        player_.stats.hp -= dmg;
+        addMessage(std::string("You burn for ") + std::to_string(dmg) + " damage.", Color::BrightRed);
+    }
+
     if (player_.effects.has(EffectId::Regeneration)) {
         int heal = player_.effects.getPower(EffectId::Regeneration);
         player_.stats.hp = std::min(player_.stats.maxHp, player_.stats.hp + heal);
@@ -894,11 +1373,26 @@ void GameSession::endTurn() {
         addMessage("Your saturation heals you.", Color::BrightGreen);
     }
 
+    if (player_.stats.turns % 30 == 0) {
+        triggerRandomEvent();
+    }
+
     if (!skipMonsterPhase) monsterTurns();
 
     if (player_.stats.hp <= 0) {
         dead_ = true;
         player_.stats.hp = 0;
+    }
+
+    auto& f = currentFloor();
+    if (f.hasShop && f.shopkeeperAlive) {
+        bool keeperAlive = false;
+        for (auto& m : f.monsters) if (m.alive && m.stableId == "monster.shopkeeper") keeperAlive = true;
+        if (!keeperAlive) {
+            f.shopkeeperAlive = false;
+            addMessage("The shopkeeper has been slain! The shop is now free loot, but guards are angry!", Color::BrightRed);
+            for (auto& m : f.monsters) if (m.alive && m.stableId == "monster.shop_guard") { m.aware = true; m.aiState = AiState::Hunting; }
+        }
     }
 }
 

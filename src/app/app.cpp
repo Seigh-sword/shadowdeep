@@ -303,7 +303,7 @@ void App::renderGameplay(const GameSession& session) {
         if (!dungeon.visible[it.pos.y][it.pos.x]) continue;
         if (!dungeon.isInViewport(it.pos)) continue;
         Vec2 scr = dungeon.camera.worldToScreen(it.pos);
-        screen_.put(mapLeft + 1 + scr.x, mapTop + 1 + scr.y, it.glyph, it.color, true);
+        screen_.set(mapLeft + 1 + scr.x, mapTop + 1 + scr.y, it.displayGlyph(), it.color, true);
     }
 
     for (auto& m : session.monsters()) {
@@ -312,7 +312,7 @@ void App::renderGameplay(const GameSession& session) {
         if (!dungeon.visible[m.pos.y][m.pos.x]) continue;
         if (!dungeon.isInViewport(m.pos)) continue;
         Vec2 scr = dungeon.camera.worldToScreen(m.pos);
-        screen_.put(mapLeft + 1 + scr.x, mapTop + 1 + scr.y, m.glyph, m.color, true);
+        screen_.set(mapLeft + 1 + scr.x, mapTop + 1 + scr.y, m.displayGlyph(), m.color, true);
     }
 
     if (dungeon.isInViewport(p.pos)) {
@@ -375,6 +375,49 @@ void App::renderGameplay(const GameSession& session) {
         screen_.text(sideLeft + 1, roomY + 3, "INFINITE DEPTH!", Color::Purple, true);
     }
 
+    int miniY = roomY + 4;
+    if (sideW >= 22 && miniY + 12 < sideTop + sideH) {
+        screen_.text(sideLeft + 1, miniY, "Minimap:", Color::BrightCyan, true);
+        std::string mini = session.minimapString(18, 10);
+        int line = 0;
+        for (char ch : mini) {
+            if (ch == '\n') { line++; continue; }
+            if (line >= 10) break;
+            if (sideLeft + 1 + (int)mini.find('\n') < w) {
+                // We'll render line by line simpler below
+            }
+        }
+        // render minimap line by line
+        std::string curLine;
+        int curRow = 0;
+        for (char ch : mini) {
+            if (ch == '\n') {
+                if (curRow < 10) {
+                    screen_.text(sideLeft + 1, miniY + 1 + curRow, curLine.substr(0, sideW - 2), Color::Gray);
+                    curRow++;
+                }
+                curLine.clear();
+            } else {
+                curLine += ch;
+            }
+        }
+    }
+
+    if (session.isInShop()) {
+        screen_.text(sideLeft + 1, sideTop + sideH - 4, "SHOP HERE! Press b", Color::Gold, true);
+        std::string goldInfo = "Gold: " + std::to_string(session.player().stats.gold);
+        screen_.text(sideLeft + 1, sideTop + sideH - 3, goldInfo.substr(0, sideW - 2), Color::Gold);
+    }
+
+    Tile curTile = dungeon.at(session.player().pos);
+    if (curTile == Tile::Altar) {
+        screen_.text(sideLeft + 1, sideTop + sideH - 2, "Altar! Press a", Color::BrightMagenta, true);
+    } else if (curTile == Tile::Fountain) {
+        screen_.text(sideLeft + 1, sideTop + sideH - 2, "Fountain! Press f", Color::BrightCyan, true);
+    } else if (curTile == Tile::Chest) {
+        screen_.text(sideLeft + 1, sideTop + sideH - 2, "Chest! Move onto", Color::Gold, true);
+    }
+
     int msgTop = mapTop + mapBoxH + 1;
     int msgBoxH = h - msgTop - 2;
     if (msgBoxH < 4) msgBoxH = 4;
@@ -391,7 +434,7 @@ void App::renderGameplay(const GameSession& session) {
         screen_.text(mapLeft + 2, msgTop + 1 + i, txt, msg.color);
     }
 
-    screen_.text(2, h - 1, "move hjkl/arrows g:get i:inv c:codex q:quaff r:read </>:stairs z:wait ?:help Q:quit", Color::Gray);
+    screen_.text(2, h - 1, "hjkl move g:get i:inv c:codex b:shop a:altar f:fountain m:minimap q:quaff r:read </> stairs ?:help", Color::Gray);
 }
 
 void App::renderInventory(GameSession& session, int cursor) {
@@ -461,20 +504,30 @@ void App::renderHelp() {
         "  c                          Codex / Guides / Lore",
         "  q                          Quaff potion (auto)",
         "  r                          Read scroll (auto)",
+        "  b                          Browse shop (when in shop)",
+        "  a                          Pray at altar (nearby)",
+        "  f                          Drink fountain (nearby)",
+        "  m                          Toggle minimap overlay",
         "",
         "SURVIVAL:",
         "  Hunger drains. Saturation heals HP slowly.",
         "  Eat food (%). Starving damages you.",
         "  Collect ; guide fragments to unlock guides.",
         "  Bosses drop epic fragments + lore scrolls (?).",
+        "  Altars A: sacrifice gold for blessing",
+        "  Fountains F: drink for random effect",
+        "  Chests C may be mimics! Careful!",
+        "  Shops: find shop room, buy with gold (b)",
         "",
         "MAP:",
         "  Huge maps 160x80 (grows to 200x200 deep). Viewport shows portion.",
         "  Camera follows you. Biomes change visuals.",
-        "  Explore for rooms, chests, altars, traps.",
+        "  Minimap shows explored layout scaled down.",
+        "  Rooms: shop, altar, fountain, chest, trap",
         "",
         "COLORS: HP Red  Lv Yellow  XP Magenta  Atk White  Def Gray  Gold Gold  Rubies Red",
         "  Hunger Brown->Green when sated. Biome colors vary.",
+        "  Shop Gold  Altar Magenta  Fountain Cyan  Mimic Brown",
         "",
         "Press any key to return."
     };
@@ -592,11 +645,11 @@ void App::renderChangelog() {
     screen_.drawHLine(0, 1, w, "-", Color::Gray);
 
     std::vector<std::string> lines = {
-        "Zv1 Infinite Depths Update",
+        "Zv1 Infinite Depths Update - Crazy Edition",
         "",
         "Added:",
         "  - 150+ items: weapons, armor, potions, food, scrolls, guide fragments, lore",
-        "  - 80+ monsters: 50 new enemies + 8 new bosses (goblin king, orc warlord, lich king, demon lord, shadow lord, void horror, titan, elder dragon)",
+        "  - 80+ monsters: 50 new enemies + 8 new bosses + shopkeeper + mimics",
         "  - Infinite depth beyond 30 with scaling (+power per depth, maps grow to 200x200)",
         "  - Huge maps 160x80 with viewport camera (only portion visible)",
         "  - Biomes: Stone, Fungal, Crystal, Infernal, Abyssal, Flooded, Frozen, Ruins, Void",
@@ -605,18 +658,29 @@ void App::renderChangelog() {
         "  - Guide fragments collectible unlocking codex guides",
         "  - Lore scrolls and boss lore drops with cutscenes",
         "  - Side inventory panel, top/bottom room info, improved layout",
-        "  - Predictable release URLs: github.com/.../download/(version)/(file)",
-        "  - Direct URL fallback in update checker",
+        "  - Unicode glyphs: monsters and items use emoji/extended (displayGlyph)",
+        "  - Shop rooms: random room becomes shop with shopkeeper and guard, buy with gold (o)",
+        "  - Mimics: chest tiles 25% are mimics, disguised until approached, chest interaction",
+        "  - Altar effects: sacrifice gold for blessing, stat boost, fragments, or curse (a)",
+        "  - Fountain effects: heal, saturation, poison, max HP, hidden treasure (f)",
+        "  - Minimap: scaled explored view in side panel + overlay (m)",
+        "  - Random events: swarms, caches, whispers, treasure sense every ~30 turns",
+        "  - Predictable release URLs: https://github.com/.../download/(version)/(file)",
+        "  - Direct URL fallback in update checker + auto-update --auto-update",
+        "  - Auto-install: Linux tar xzf and Windows batch updater with .bak backup",
         "",
         "Changed:",
         "  - Map size from 80x24 to 160x80, viewport 80x24",
         "  - Max depth from 30 to 200, original win at 30 still",
-        "  - Help menu essentials only",
+        "  - Help menu essentials only + shop/altar/fountain/minimap keys",
         "  - Food system expanded with bread, meat, rations, fruit",
+        "  - Rendering uses screen_.set with displayGlyph for Unicode",
         "",
         "Fixed:",
         "  - MSYS2 cstdint include, generator unused variable, paths xdgOrHome guard",
         "  - macOS runner macos-13 -> macos-14, release workflow log capture",
+        "  - monster.cpp double comma fix for unicodeGlyph insertion",
+        "  - cli.cpp missing kMapW/kMapH includes",
         "",
         "Press any key to return"
     };
@@ -1096,8 +1160,96 @@ int App::runGameplay(GameSession& session) {
         }
 
         bool tookTurn = false;
+        static int shopCursor = 0;
+        static bool showMinimapOverlay = false;
 
-        if (ev.code == static_cast<int>(KeyCode::Up) || ev.code == 'k') tookTurn = session.movePlayer(0, -1);
+        if (ev.code == 'm' || ev.code == 'M') {
+            showMinimapOverlay = !showMinimapOverlay;
+            if (showMinimapOverlay) {
+                int mw = 40;
+                int mh = 20;
+                int top = (screen_.height() - mh) / 2;
+                int left = (screen_.width() - mw) / 2;
+                screen_.drawBox(left, top, mw, mh, Color::BrightCyan, true);
+                screen_.text(left + 2, top, " MINIMAP ", Color::BrightYellow, true);
+                std::string mini = session.minimapString(mw - 4, mh - 4);
+                std::string line;
+                int row = 0;
+                for (char ch : mini) {
+                    if (ch == '\n') {
+                        screen_.text(left + 2, top + 1 + row, line.substr(0, mw - 4), Color::White);
+                        row++;
+                        line.clear();
+                        if (row >= mh - 2) break;
+                    } else {
+                        line += ch;
+                    }
+                }
+                screen_.text(left + 2, top + mh - 1, "Press any key", Color::Gray);
+                blit();
+                terminal_->waitKey();
+            }
+            continue;
+        }
+
+        if (ev.code == 'o' || ev.code == 'O') {
+            if (session.isInShop()) {
+                shopCursor = 0;
+                for (;;) {
+                    auto sz2 = terminal_->getSize();
+                    screen_.resize(sz2.cols, sz2.rows);
+                    screen_.clear();
+                    int w = 70;
+                    int h = 20;
+                    int top = (screen_.height() - h) / 2;
+                    int left = (screen_.width() - w) / 2;
+                    screen_.drawBox(left, top, w, h, Color::Gold, true);
+                    screen_.text(left + 2, top, " SHOP - Enter to buy, Esc to leave ", Color::BrightYellow, true);
+                    std::string goldStr = "Your Gold: " + std::to_string(session.player().stats.gold);
+                    screen_.text(left + 2, top + 1, goldStr, Color::Gold);
+                    auto& shopItems = session.shopItems();
+                    if (shopItems.empty()) {
+                        screen_.text(left + 2, top + 3, "(shop empty - you bought everything!)", Color::Gray);
+                    } else {
+                        int maxRows = h - 6;
+                        for (int i = 0; i < static_cast<int>(shopItems.size()) && i < maxRows; ++i) {
+                            auto& it = shopItems[i];
+                            bool sel = (i == shopCursor);
+                            std::string line = (sel ? "> " : "  ") + it.name + " - " + std::to_string(it.valueGold) + "g [" + std::to_string((int)it.rarity) + "]";
+                            if (line.size() > (size_t)(w - 4)) line = line.substr(0, w - 4);
+                            screen_.text(left + 2, top + 3 + i, line, sel ? Color::BrightWhite : it.color, sel);
+                        }
+                    }
+                    screen_.text(left + 2, top + h - 2, "Up/Down navigate Enter buy Esc leave", Color::Gray);
+                    blit();
+                    auto ev2 = terminal_->waitKey();
+                    if (ev2.code == static_cast<int>(KeyCode::Escape) || ev2.code == 'o' || ev2.code == 'O' || ev2.code == 'q') break;
+                    if (ev2.code == static_cast<int>(KeyCode::Up) || ev2.code == 'k') { if (shopCursor > 0) shopCursor--; }
+                    else if (ev2.code == static_cast<int>(KeyCode::Down) || ev2.code == 'j') { if (shopCursor + 1 < (int)shopItems.size()) shopCursor++; }
+                    else if (ev2.code == static_cast<int>(KeyCode::Enter) || ev2.code == '\r' || ev2.code == '\n') {
+                        if (!shopItems.empty()) {
+                            bool bought = session.buyItemFromShop(shopCursor);
+                            if (bought) {
+                                if (shopCursor >= (int)session.shopItems().size()) shopCursor = (int)session.shopItems().size() - 1;
+                                if (shopCursor < 0) shopCursor = 0;
+                            }
+                        }
+                    }
+                }
+                continue;
+            } else {
+                session.addMessage("No shop here. Find the shop room.", Color::Gray);
+                continue;
+            }
+        }
+
+        if (ev.code == 'a' || ev.code == 'A') {
+            session.useAltar();
+            tookTurn = true;
+        } else if (ev.code == 'f' || ev.code == 'F') {
+            session.drinkFountain();
+            tookTurn = true;
+        } else if (ev.code == static_cast<int>(KeyCode::Up) || ev.code == 'k') tookTurn = session.movePlayer(0, -1);
         else if (ev.code == static_cast<int>(KeyCode::Down) || ev.code == 'j') tookTurn = session.movePlayer(0, 1);
         else if (ev.code == static_cast<int>(KeyCode::Left) || ev.code == 'h') tookTurn = session.movePlayer(-1, 0);
         else if (ev.code == static_cast<int>(KeyCode::Right) || ev.code == 'l') tookTurn = session.movePlayer(1, 0);
@@ -1166,22 +1318,28 @@ int App::run() {
         return 0;
     }
 
-    if (opts_.doUpdate) {
-        std::cout << "Update requested.\n";
+    if (opts_.doUpdate || opts_.autoUpdate) {
+        bool autoInstall = opts_.autoUpdate;
+        std::cout << (autoInstall ? "Auto-update requested.\n" : "Update requested.\n");
         std::cout << "Platform: " << UpdateManager::getCurrentPlatformString() << "\n";
-        std::cout << "Direct URL pattern: " << kRepositoryUrl << "/releases/download/(version)/(file)\n";
+        std::cout << "Direct URL pattern: https://github.com/Seigh-sword/shadowdeep/releases/download/(version)/(file)\n";
+        std::cout << "Example: https://github.com/Seigh-sword/shadowdeep/releases/download/Zv1/shadowdeep-Zv1-linux-x86_64.tar.gz\n";
         UpdateManager mgr;
         auto infoOpt = mgr.checkForUpdate(std::string(kGameVersion));
         if (!infoOpt) {
             std::cout << "No update found via API, trying direct pattern for latest...\n";
             std::string direct = mgr.getDirectDownloadUrl(std::string(kGameVersion));
             std::cout << "Try manual download: " << direct << "\n";
-            std::cout << "Or visit: " << kRepositoryUrl << "/releases\n";
+            std::cout << "Or visit: https://github.com/Seigh-sword/shadowdeep/releases\n";
+            auto cands = UpdateManager::getCandidateArtifactNames();
+            for (auto& c : cands) {
+                std::cout << "  Direct: https://github.com/Seigh-sword/shadowdeep/releases/download/" << kGameVersion << "/" << c << "\n";
+            }
             return 0;
         }
         auto& info = *infoOpt;
         std::cout << "Downloading " << info.artifactName << " from " << info.downloadUrl << "\n";
-        std::cout << "Direct fallback URL: " << kRepositoryUrl << "/releases/download/" << info.version << "/" << info.artifactName << "\n";
+        std::cout << "Direct fallback URL: https://github.com/Seigh-sword/shadowdeep/releases/download/" << info.version << "/" << info.artifactName << "\n";
 
         std::string destDir;
         try {
@@ -1203,6 +1361,10 @@ int App::run() {
             if (!mgr.downloadUpdate(directInfo, destPath)) {
                 std::cout << "Download failed. Try manual download from: " << info.downloadUrl << "\n";
                 std::cout << "Or direct: " << directUrl << "\n";
+                std::cout << "All direct URLs for this version:\n";
+                for (auto& cand : UpdateManager::getCandidateArtifactNames()) {
+                    std::cout << "  https://github.com/Seigh-sword/shadowdeep/releases/download/" << info.version << "/" << cand << "\n";
+                }
                 return 1;
             }
         }
@@ -1223,11 +1385,23 @@ int App::run() {
             std::cout << "No checksum provided, size check done.\n";
         }
 
+        if (autoInstall) {
+            std::cout << "Attempting auto-install...\n";
+            std::cout << "Current exe: " << UpdateManager::getCurrentExecutablePath() << "\n";
+            if (mgr.attemptAutoInstall(destPath, info)) {
+                std::cout << "Auto-install succeeded! Restart the game.\n";
+                return 0;
+            } else {
+                std::cout << "Auto-install not possible (permissions or platform). Falling back to staged.\n";
+            }
+        }
+
         std::cout << "Update staged at: " << destPath << "\n";
         std::cout << "To install:\n";
         std::cout << "  - On Linux/macOS/BSD: tar xzf " << destPath << " and replace binary\n";
         std::cout << "  - On Windows: unzip " << destPath << " and replace .exe (close game first, staged updater will handle self-replace)\n";
         std::cout << "Your saves are never overwritten, they are in separate user data directory.\n";
+        std::cout << "Direct URLs are predictable: https://github.com/Seigh-sword/shadowdeep/releases/download/(version)/(file)\n";
         std::cout << "See DOCS/BUILDING.md for install instructions.\n";
         return 0;
     }

@@ -106,6 +106,7 @@ struct Item {
     ItemKind kind = ItemKind::None;
     ItemRarity rarity = ItemRarity::Common;
     char glyph = '?';
+    std::string unicodeGlyph;
     Color color = Color::White;
     int power = 0;
     int valueGold = 0;
@@ -121,6 +122,10 @@ struct Item {
     bool isConsumable() const;
     bool isStackable() const;
     std::string fullName() const;
+    std::string displayGlyph() const {
+        if (!unicodeGlyph.empty()) return unicodeGlyph;
+        return std::string(1, glyph);
+    }
 };
 
 struct ItemTemplate {
@@ -129,6 +134,7 @@ struct ItemTemplate {
     ItemKind kind;
     ItemRarity rarity;
     char glyph;
+    std::string unicodeGlyph;
     Color color;
     int minDepth;
     int maxDepth;
