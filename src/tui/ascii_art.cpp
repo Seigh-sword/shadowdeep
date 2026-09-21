@@ -1,3 +1,4 @@
+
 #include "shadowdeep/tui/ascii_art.hpp"
 #include <algorithm>
 #include <cmath>
@@ -66,6 +67,13 @@ void AsciiArtLibrary::initMonsters() {
         "  /  \\"
     }, Color::Magenta, Color::Default, false);
 
+    monsters_["monster.venom_spider"] = AsciiSprite({
+        " //  \\\\",
+        "(( \\/ ))",
+        " \\\\||//",
+        "  /\\/\\"
+    }, Color::BrightMagenta, Color::Default, true);
+
     monsters_["monster.skeleton"] = AsciiSprite({
         "  .--.",
         " ( o o)",
@@ -73,6 +81,13 @@ void AsciiArtLibrary::initMonsters() {
         "  / | \\",
         "  /_\\_\\"
     }, Color::BrightWhite, Color::Default, false);
+
+    monsters_["monster.skeleton_archer"] = AsciiSprite({
+        "  .--. /}",
+        " ( o o)/",
+        "  ( V )",
+        "  /_\\_\\"
+    }, Color::White, Color::Default, false);
 
     monsters_["monster.zombie"] = AsciiSprite({
         "  .--.",
@@ -82,6 +97,13 @@ void AsciiArtLibrary::initMonsters() {
         "   / \\"
     }, Color::Green, Color::Default, false);
 
+    monsters_["monster.ghoul"] = AsciiSprite({
+        "  .--.",
+        " ( x x)",
+        " (  ~ )",
+        "  /_\\_\\*"
+    }, Color::BrightRed, Color::Default, true);
+
     monsters_["monster.orc"] = AsciiSprite({
         "  ,---.",
         " ( O O )",
@@ -89,6 +111,29 @@ void AsciiArtLibrary::initMonsters() {
         "  \\_-_/",
         "   /|\\"
     }, Color::Green, Color::Default, true);
+
+    monsters_["monster.orc_warrior"] = AsciiSprite({
+        "  ,---.",
+        " ( O O )",
+        " (  ^  )#",
+        "  /_\\/_\\",
+        "   /|\\"
+    }, Color::BrightGreen, Color::Default, true);
+
+    monsters_["monster.orc_shaman"] = AsciiSprite({
+        "  ,---.*",
+        " ( O O )",
+        " (  ^  )~",
+        "  /_\\/_\\"
+    }, Color::BrightMagenta, Color::Default, true);
+
+    monsters_["monster.orc_warlord"] = AsciiSprite({
+        "  .-----.",
+        " ( O O O )",
+        " (  ===  )",
+        "  /_\\/_\\_\\",
+        "   /_V_\\"
+    }, Color::BrightGreen, Color::Default, true);
 
     monsters_["monster.ogre"] = AsciiSprite({
         "   .---.",
@@ -129,6 +174,13 @@ void AsciiArtLibrary::initMonsters() {
         " \\_----_/"
     }, Color::Green, Color::Default, false);
 
+    monsters_["monster.ooze"] = AsciiSprite({
+        "  .----.",
+        " / ~  ~ \\",
+        "|  o  o |",
+        " \\_----_/"
+    }, Color::BrightGreen, Color::Default, false);
+
     monsters_["monster.mimic"] = AsciiSprite({
         "  .----.",
         " | o  o |",
@@ -167,6 +219,13 @@ void AsciiArtLibrary::initMonsters() {
         "   /_\\/_\\"
     }, Color::Purple, Color::Default, false);
 
+    monsters_["monster.necromancer"] = AsciiSprite({
+        "   .--. *",
+        "  ( o o)",
+        "   ( V )",
+        "  / /_\\ \\ **"
+    }, Color::Purple, Color::Default, true);
+
     monsters_["monster.elemental_fire"] = AsciiSprite({
         "   (  )",
         "  (    )",
@@ -174,6 +233,38 @@ void AsciiArtLibrary::initMonsters() {
         "  ( \\/ )",
         "   (  )"
     }, Color::BrightRed, Color::Default, true);
+
+    monsters_["monster.elemental_frost"] = AsciiSprite({
+        "   (  )",
+        "  ( ** )",
+        " (  /\\  )",
+        "  ( \\/ )",
+        "   (  )"
+    }, Color::BrightCyan, Color::Default, true);
+
+    monsters_["monster.earth_elemental"] = AsciiSprite({
+        "  .-----.",
+        " | o   o |",
+        " |   #   |",
+        " |  \\_/  |",
+        "  \\_____/"
+    }, Color::Brown, Color::Default, true);
+
+    monsters_["monster.air_elemental"] = AsciiSprite({
+        "   .---.",
+        "  / ~ ~ \\",
+        " |   o   |",
+        "  \\ ~ ~ /",
+        "   `---'"
+    }, Color::White, Color::Default, false);
+
+    monsters_["monster.water_elemental"] = AsciiSprite({
+        "   .---.",
+        "  / ~ ~ \\",
+        " |  ~ ~  |",
+        "  \\ ~ ~ /",
+        "   `---'"
+    }, Color::BrightCyan, Color::Default, false);
 
     monsters_["monster.golem"] = AsciiSprite({
         "  .-----.",
@@ -183,6 +274,30 @@ void AsciiArtLibrary::initMonsters() {
         "  \\_____/"
     }, Color::Steel, Color::Default, true);
 
+    monsters_["monster.bone_golem"] = AsciiSprite({
+        "  .-----.",
+        " | o   o |",
+        " |  /_\\  |",
+        " |  \\_/  |",
+        "  \\_____/"
+    }, Color::White, Color::Default, true);
+
+    monsters_["monster.flesh_golem"] = AsciiSprite({
+        "  .-----.",
+        " | x   x |",
+        " |   ^   |",
+        " |  \\_/  |",
+        "  \\_____/ +"
+    }, Color::BrightRed, Color::Default, true);
+
+    monsters_["monster.iron_golem"] = AsciiSprite({
+        "  .=====.",
+        " | O   O |",
+        " |   ^   |",
+        " |  [_]  |",
+        "  \\=====/"
+    }, Color::Steel, Color::Default, true);
+
     monsters_["monster.dark_knight"] = AsciiSprite({
         "   .---.",
         "  /  o  \\",
@@ -190,6 +305,14 @@ void AsciiArtLibrary::initMonsters() {
         " |  [_]  |",
         "  \\_\\ /_/"
     }, Color::BrightWhite, Color::Default, true);
+
+    monsters_["monster.death_knight"] = AsciiSprite({
+        "   .---. *",
+        "  /  o  \\",
+        " |  /_\\  |",
+        " |  [_]  |",
+        "  \\_\\ /_/ !!"
+    }, Color::BrightRed, Color::Default, true);
 
     monsters_["monster.lich"] = AsciiSprite({
         "   .---.",
@@ -214,6 +337,35 @@ void AsciiArtLibrary::initMonsters() {
         "   \\_/_/"
     }, Color::BrightRed, Color::Default, true);
 
+    monsters_["monster.imp"] = AsciiSprite({
+        " /\\   /\\",
+        "(  o o )",
+        " \\  ^  /",
+        "  \\_/_/"
+    }, Color::BrightRed, Color::Default, false);
+
+    monsters_["monster.hellhound"] = AsciiSprite({
+        "  /\\   /\\*",
+        "(  o o )",
+        "  \\  ^  /",
+        "   /_\\_\\"
+    }, Color::BrightRed, Color::Default, true);
+
+    monsters_["monster.succubus"] = AsciiSprite({
+        "  .--. /\\",
+        " ( o o)",
+        " (  V  )",
+        "  /_\\_\\  /\\"
+    }, Color::BrightMagenta, Color::Default, true);
+
+    monsters_["monster.balor"] = AsciiSprite({
+        "  /\\   /\\",
+        " ( o   o )",
+        " (   V   )",
+        "  \\  _  /",
+        "   \\_/_/  !!"
+    }, Color::BrightRed, Color::Default, true);
+
     monsters_["monster.dragon_young"] = AsciiSprite({
         "      /\\",
         "  /\\ /  \\",
@@ -230,6 +382,29 @@ void AsciiArtLibrary::initMonsters() {
         "      \\__ \\_/_/ __/",
         "         \\_\\_/_/"
     }, Color::Gold, Color::Default, true);
+
+    monsters_["monster.ice_drake"] = AsciiSprite({
+        "      /\\ **",
+        "  /\\ /  \\",
+        " (  o o  )",
+        "  \\  ^  /",
+        "   \\_/_/\\"
+    }, Color::BrightCyan, Color::Default, true);
+
+    monsters_["monster.shadow_drake"] = AsciiSprite({
+        "      /\\ ~~",
+        "  /\\ /  \\",
+        " (  o o  )",
+        "  \\  ^  /",
+        "   \\_/_/\\"
+    }, Color::Purple, Color::Default, true);
+
+    monsters_["monster.wyvern"] = AsciiSprite({
+        "   /\\   /\\",
+        "  ( o   o )",
+        "   \\  ^  /\\",
+        "    \\_/_/  \\"
+    }, Color::Green, Color::Default, true);
 
     monsters_["monster.goblin_king"] = AsciiSprite({
         "   .--.--.",
@@ -295,12 +470,25 @@ void AsciiArtLibrary::initMonsters() {
         "         /_V_\\"
     }, Color::Gold, Color::Default, true);
 
+    monsters_["monster.giant_ant"] = AsciiSprite({
+        "  /\\_/\\",
+        " ( o o )--",
+        "  /_\\_\\"
+    }, Color::Brown, Color::Default, false);
+
     monsters_["monster.wolf"] = AsciiSprite({
         "  /\\   /\\",
         " (  o o )",
         "  \\  ^  /",
         "   /_\\_\\"
     }, Color::Gray, Color::Default, false);
+
+    monsters_["monster.dire_wolf"] = AsciiSprite({
+        "  /\\   /\\",
+        " (  O O )",
+        "  \\  ^  /",
+        "   /_\\_\\!!"
+    }, Color::BrightWhite, Color::Default, true);
 
     monsters_["monster.bear"] = AsciiSprite({
         "  /\\   /\\",
@@ -309,12 +497,47 @@ void AsciiArtLibrary::initMonsters() {
         "  \\_\\_/_/"
     }, Color::Brown, Color::Default, true);
 
+    monsters_["monster.giant_scorpion"] = AsciiSprite({
+        "  /\\   /\\",
+        " ( o   o )--",
+        "  \\  ^  /",
+        "   /_\\_\\"
+    }, Color::Yellow, Color::Default, false);
+
+    monsters_["monster.basilisk"] = AsciiSprite({
+        "  /\\   /\\",
+        " ( o   o )~~",
+        "  \\  ^  /",
+        "   /_\\_\\"
+    }, Color::Green, Color::Default, true);
+
+    monsters_["monster.cockatrice"] = AsciiSprite({
+        "  /\\  /\\",
+        " ( o o ) /\\",
+        "  \\ V /",
+        "   /_\\"
+    }, Color::BrightYellow, Color::Default, false);
+
     monsters_["monster.harpy"] = AsciiSprite({
         "  /\\   /\\",
         " (  o o  )",
         "  \\  V  /",
         "   /_\\_\\  /\\"
     }, Color::Gray, Color::Default, false);
+
+    monsters_["monster.manticore"] = AsciiSprite({
+        "  /\\   /\\",
+        " ( o   o )",
+        "  \\  ^  /\\/\\",
+        "   /_\\_\\"
+    }, Color::Brown, Color::Default, true);
+
+    monsters_["monster.chimera"] = AsciiSprite({
+        "  /\\ /\\ /\\",
+        " ( o o o )",
+        "  \\  ^  /",
+        "   /_\\_\\!!"
+    }, Color::BrightRed, Color::Default, true);
 
     monsters_["monster.bandit"] = AsciiSprite({
         "  .--.",
@@ -323,12 +546,54 @@ void AsciiArtLibrary::initMonsters() {
         "  /_\\_\\"
     }, Color::Yellow, Color::Default, false);
 
+    monsters_["monster.bandit_leader"] = AsciiSprite({
+        "  .--.--.",
+        " ( O  O )",
+        " (  --  )",
+        "  /_\\/_\\ ++"
+    }, Color::BrightYellow, Color::Default, true);
+
     monsters_["monster.assassin"] = AsciiSprite({
         "  .--.",
         " ( - -)",
         " (  V )",
         "  /_\\_\\  /"
     }, Color::Gray, Color::Default, false);
+
+    monsters_["monster.berserker"] = AsciiSprite({
+        "  .--.",
+        " ( O O)!!",
+        " (  V )",
+        "  /_\\_\\"
+    }, Color::BrightRed, Color::Default, true);
+
+    monsters_["monster.warlock"] = AsciiSprite({
+        "   .--. *",
+        "  ( o o)",
+        "   ( V )~",
+        "   /_\\_\\"
+    }, Color::Purple, Color::Default, true);
+
+    monsters_["monster.pyromancer"] = AsciiSprite({
+        "   .--. *",
+        "  ( o o)",
+        "   ( V )",
+        "   /_\\_\\  /\\"
+    }, Color::BrightRed, Color::Default, true);
+
+    monsters_["monster.cryomancer"] = AsciiSprite({
+        "   .--. **",
+        "  ( o o)",
+        "   ( V )",
+        "   /_\\_\\"
+    }, Color::BrightCyan, Color::Default, true);
+
+    monsters_["monster.druid"] = AsciiSprite({
+        "   .--.",
+        "  ( o o)",
+        "   ( V )",
+        "  / /_\\ \\ ^^"
+    }, Color::Green, Color::Default, false);
 
     monsters_["monster.spectre"] = AsciiSprite({
         "  .---.",
@@ -337,20 +602,69 @@ void AsciiArtLibrary::initMonsters() {
         "   \\|/"
     }, Color::BrightCyan, Color::Default, false);
 
-    monsters_["monster.imp"] = AsciiSprite({
-        " /\\   /\\",
-        "(  o o )",
-        " \\  ^  /",
-        "  \\_/_/"
-    }, Color::BrightRed, Color::Default, false);
+    monsters_["monster.banshee"] = AsciiSprite({
+        "  .---.",
+        " (  O  )!!",
+        "  \\ | /",
+        "   \\|/"
+    }, Color::BrightWhite, Color::Default, true);
 
-    monsters_["monster.balor"] = AsciiSprite({
+    monsters_["monster.revenant"] = AsciiSprite({
+        "  .---.",
+        " (  x  )",
+        "  \\_|_/",
+        "   / \\"
+    }, Color::Gray, Color::Default, true);
+
+    monsters_["monster.shadow_beast"] = AsciiSprite({
         "  /\\   /\\",
-        " ( o   o )",
-        " (   V   )",
-        "  \\  _  /",
-        "   \\_/_/  !!"
-    }, Color::BrightRed, Color::Default, true);
+        " (  o o  )~~",
+        "  \\  ^  /",
+        "   \\_/_/"
+    }, Color::Purple, Color::Default, true);
+
+    monsters_["monster.shadow_lurker"] = AsciiSprite({
+        "  .---.",
+        " ( o o )~~",
+        "  \\ | /",
+        "   \\|/  ~~"
+    }, Color::Purple, Color::Default, false);
+
+    monsters_["monster.mind_flayer"] = AsciiSprite({
+        "   .---.",
+        "  ( o o )",
+        "   ( V ) ~~~~",
+        "    /_\\"
+    }, Color::Purple, Color::Default, true);
+
+    monsters_["monster.beholder"] = AsciiSprite({
+        "   .-----.",
+        "  / o   o \\",
+        " |    O    |",
+        "  \\ o   o /",
+        "   `-----'"
+    }, Color::BrightMagenta, Color::Default, true);
+
+    monsters_["monster.ooze"] = AsciiSprite({
+        "  .----.",
+        " / ~~~~ \\",
+        " | o  o |",
+        " \\_----_/"
+    }, Color::Green, Color::Default, false);
+
+    monsters_["monster.carrion_crawler"] = AsciiSprite({
+        "  ~~~~~",
+        " ( o o )",
+        "  \\_^_/",
+        "   /_\\"
+    }, Color::Brown, Color::Default, false);
+
+    monsters_["monster.giant_worm"] = AsciiSprite({
+        "  .----.",
+        " ( o  o )~~~~",
+        "  \\_--_/",
+        "   /_\\"
+    }, Color::Brown, Color::Default, true);
 }
 
 void AsciiArtLibrary::initItems() {
@@ -375,6 +689,14 @@ void AsciiArtLibrary::initItems() {
         "/____|"
     }, Color::Steel, Color::Default, true);
 
+    items_["item.broadsword"] = AsciiSprite({
+        "    /|",
+        "   / |",
+        "  /  |==",
+        " /   |",
+        "/____|"
+    }, Color::Steel, Color::Default, true);
+
     items_["item.battle_axe"] = AsciiSprite({
         "  .--.",
         " /    \\",
@@ -382,6 +704,14 @@ void AsciiArtLibrary::initItems() {
         " \\____/",
         "   ||"
     }, Color::Steel, Color::Default, true);
+
+    items_["item.greataxe"] = AsciiSprite({
+        "  .--.--.",
+        " /  ::  \\",
+        "|   ::   |",
+        " \\_----_/",
+        "    ||"
+    }, Color::BrightWhite, Color::Default, true);
 
     items_["item.longbow"] = AsciiSprite({
         "  /}",
@@ -391,11 +721,30 @@ void AsciiArtLibrary::initItems() {
         "  \\}"
     }, Color::Brown, Color::Default, false);
 
+    items_["item.shortbow"] = AsciiSprite({
+        " /}",
+        "( }",
+        " \\}"
+    }, Color::Brown, Color::Default, false);
+
+    items_["item.crossbow"] = AsciiSprite({
+        "  --+--",
+        "    |",
+        "    +--}"
+    }, Color::Steel, Color::Default, false);
+
     items_["item.leather_armour"] = AsciiSprite({
         " .----.",
         "|      |",
         "|  []  |",
         " \\____/"
+    }, Color::Steel, Color::Default, false);
+
+    items_["item.chain_mail"] = AsciiSprite({
+        " .====.",
+        "| :::: |",
+        "| :::: |",
+        " \\====/"
     }, Color::Steel, Color::Default, false);
 
     items_["item.plate_armour"] = AsciiSprite({
@@ -411,17 +760,35 @@ void AsciiArtLibrary::initItems() {
         " `---'"
     }, Color::Steel, Color::Default, false);
 
+    items_["item.iron_shield"] = AsciiSprite({
+        " .---.",
+        "(  #  )",
+        " `---'"
+    }, Color::Steel, Color::Default, true);
+
     items_["item.helmet"] = AsciiSprite({
         " .---.",
         "/  o  \\",
         "|_____|"
     }, Color::Steel, Color::Default, false);
 
+    items_["item.great_helm"] = AsciiSprite({
+        " .====.",
+        "/  o  \\",
+        "|_____|"
+    }, Color::Steel, Color::Default, true);
+
     items_["item.ring_haste"] = AsciiSprite({
         " .---.",
         "(  o  )",
         " `---'"
     }, Color::Gold, Color::Default, false);
+
+    items_["item.ring_protection"] = AsciiSprite({
+        " .---.",
+        "(  +  )",
+        " `---'"
+    }, Color::BrightWhite, Color::Default, false);
 
     items_["item.amulet_protection"] = AsciiSprite({
         "  .--.",
@@ -443,12 +810,33 @@ void AsciiArtLibrary::initItems() {
         " |____|"
     }, Color::BrightRed, Color::Default, false);
 
+    items_["item.potion_greater_heal"] = AsciiSprite({
+        "  .--.",
+        " | ++ |",
+        " | ++ |",
+        " |____|"
+    }, Color::BrightRed, Color::Default, true);
+
     items_["item.potion_strength"] = AsciiSprite({
         "  .--.",
         " |    |",
         " | /\\ |",
         " |____|"
     }, Color::BrightMagenta, Color::Default, false);
+
+    items_["item.potion_haste"] = AsciiSprite({
+        "  .--.",
+        " | >> |",
+        " | >> |",
+        " |____|"
+    }, Color::BrightCyan, Color::Default, false);
+
+    items_["item.potion_mana"] = AsciiSprite({
+        "  .--.",
+        " | ~~ |",
+        " | ~~ |",
+        " |____|"
+    }, Color::BrightCyan, Color::Default, false);
 
     items_["item.food"] = AsciiSprite({
         " .----.",
@@ -461,6 +849,18 @@ void AsciiArtLibrary::initItems() {
         "(      )",
         " `----'"
     }, Color::Brown, Color::Default, false);
+
+    items_["item.meat"] = AsciiSprite({
+        " .----.",
+        "| #### |",
+        " `----'"
+    }, Color::BrightRed, Color::Default, false);
+
+    items_["item.fruit"] = AsciiSprite({
+        "  .--.",
+        " ( ++ )",
+        "  `--'"
+    }, Color::BrightGreen, Color::Default, false);
 
     items_["item.scroll_lightning"] = AsciiSprite({
         " .----.",
@@ -483,17 +883,43 @@ void AsciiArtLibrary::initItems() {
         " `----'"
     }, Color::BrightMagenta, Color::Default, false);
 
+    items_["item.scroll_mapping"] = AsciiSprite({
+        " .----.",
+        "| +--+ |",
+        "| +--+ |",
+        " `----'"
+    }, Color::BrightCyan, Color::Default, false);
+
+    items_["item.scroll_identify"] = AsciiSprite({
+        " .----.",
+        "|  ?? |",
+        "|  ?? |",
+        " `----'"
+    }, Color::White, Color::Default, false);
+
     items_["item.bomb"] = AsciiSprite({
         "  .--.",
         " (    )",
         "  `--'  *"
     }, Color::BrightRed, Color::Default, false);
 
+    items_["item.dynamite"] = AsciiSprite({
+        "  .--.--.",
+        " |  ||  | *",
+        "  `--||--'"
+    }, Color::BrightRed, Color::Default, true);
+
     items_["item.key"] = AsciiSprite({
         " .--.",
         " (  )--",
         " `--'"
     }, Color::Steel, Color::Default, false);
+
+    items_["item.gold_key"] = AsciiSprite({
+        " .--.",
+        " (  )--",
+        " `--' $"
+    }, Color::Gold, Color::Default, true);
 
     items_["item.guide_fragment_common"] = AsciiSprite({
         " .----.",
@@ -502,11 +928,32 @@ void AsciiArtLibrary::initItems() {
         " `----'"
     }, Color::White, Color::Default, false);
 
+    items_["item.guide_fragment_uncommon"] = AsciiSprite({
+        " .----.",
+        "| || | |",
+        "| || | |",
+        " `----' ~"
+    }, Color::BrightCyan, Color::Default, false);
+
     items_["item.guide_fragment_rare"] = AsciiSprite({
         " .====.",
         "| || | |",
         "| || | |",
         " `===='"
+    }, Color::Gold, Color::Default, true);
+
+    items_["item.guide_fragment_epic"] = AsciiSprite({
+        " .====.",
+        "| ||*| |",
+        "| || | |",
+        " `====' **"
+    }, Color::Purple, Color::Default, true);
+
+    items_["item.guide_fragment_legendary"] = AsciiSprite({
+        " .====.",
+        "| ||*| |",
+        "| ||*| |",
+        " `====' ++"
     }, Color::Gold, Color::Default, true);
 
     items_["item.lore_scroll"] = AsciiSprite({
@@ -515,6 +962,20 @@ void AsciiArtLibrary::initItems() {
         "| :: | |",
         " `----'"
     }, Color::BrightYellow, Color::Default, false);
+
+    items_["item.lore_tome"] = AsciiSprite({
+        " .====.",
+        "| :: | |",
+        "| :: | |",
+        " `===='"
+    }, Color::Gold, Color::Default, true);
+
+    items_["item.lore_codex"] = AsciiSprite({
+        " .====.",
+        "| ## | |",
+        "| ## | |",
+        " `====' **"
+    }, Color::Purple, Color::Default, true);
 
     items_["item.gold"] = AsciiSprite({
         " .--.",
@@ -528,6 +989,76 @@ void AsciiArtLibrary::initItems() {
         " \\  /",
         "  \\/"
     }, Color::BrightRed, Color::Default, true);
+
+    items_["item.torch"] = AsciiSprite({
+        "  .",
+        "  |\\",
+        "  | *",
+        "  |"
+    }, Color::BrightYellow, Color::Default, false);
+
+    items_["item.tool_torch"] = AsciiSprite({
+        "  .",
+        "  |\\",
+        "  | *",
+        "  |"
+    }, Color::BrightYellow, Color::Default, false);
+
+    items_["item.tool_rope"] = AsciiSprite({
+        "  ~~~",
+        " ~~~",
+        "  ~~~"
+    }, Color::Brown, Color::Default, false);
+
+    items_["item.tool_pickaxe"] = AsciiSprite({
+        " .--.",
+        "  \\/",
+        "  /\\",
+        "  ||"
+    }, Color::Steel, Color::Default, false);
+
+    items_["item.weapon_generic"] = AsciiSprite({
+        "   /|",
+        "  / |",
+        " /  |",
+        "/___|"
+    }, Color::Steel, Color::Default, false);
+
+    items_["item.armor_generic"] = AsciiSprite({
+        " .----.",
+        "| [][] |",
+        " \\____/"
+    }, Color::Steel, Color::Default, false);
+
+    items_["item.potion_generic"] = AsciiSprite({
+        "  .--.",
+        " |    |",
+        " |____|"
+    }, Color::BrightWhite, Color::Default, false);
+
+    items_["item.scroll_generic"] = AsciiSprite({
+        " .----.",
+        "|    |",
+        " `----'"
+    }, Color::White, Color::Default, false);
+
+    items_["item.food_generic"] = AsciiSprite({
+        " .--.",
+        "( () )",
+        " `--'"
+    }, Color::Brown, Color::Default, false);
+
+    items_["item.ring_generic"] = AsciiSprite({
+        " .--.",
+        "( () )",
+        " `--'"
+    }, Color::Gold, Color::Default, false);
+
+    items_["item.amulet_generic"] = AsciiSprite({
+        "  .--.",
+        " ( -- )",
+        "  `--'"
+    }, Color::Gold, Color::Default, false);
 }
 
 void AsciiArtLibrary::initTiles() {
@@ -538,6 +1069,9 @@ void AsciiArtLibrary::initTiles() {
     tiles_[16] = AsciiSprite({"A"}, Color::BrightMagenta, Color::Default, true);
     tiles_[17] = AsciiSprite({"F"}, Color::BrightCyan, Color::Default, true);
     tiles_[18] = AsciiSprite({"C"}, Color::Gold, Color::Default, true);
+    tiles_[19] = AsciiSprite({"#"}, Color::Brown, Color::Default, false);
+    tiles_[20] = AsciiSprite({"~"}, Color::BrightCyan, Color::Default, false);
+    tiles_[21] = AsciiSprite({"~"}, Color::BrightRed, Color::Default, true);
 }
 
 void AsciiArtLibrary::initBanners() {
@@ -559,6 +1093,33 @@ void AsciiArtLibrary::initBanners() {
         "                   |___/                                         "
     }, Color::Green, Color::Default, true);
 
+    banners_["crystal"] = AsciiSprite({
+        "   ____                _        _    ____                         ",
+        "  / ___|_ __ _   _ ___| |_ __ _| |  / ___|__ ___   ___ _ __ _ __  ",
+        " | |   | '__| | | / __| __/ _` | | | |   / _` \\ \\ / / _ \\ '__| | | ",
+        " | |___| |  | |_| \\__ \\ || (_| | | | |__| (_| |\\ V /  __/ |  |_| | ",
+        "  \\____|_|   \\__, |___/\\__\\__,_|_|  \\____\\__,_| \\_/ \\___|_|  (___) ",
+        "             |___/                                                "
+    }, Color::BrightCyan, Color::Default, true);
+
+    banners_["infernal"] = AsciiSprite({
+        "  ___        __                       _   _____                   ",
+        " |_ _|_ __  / _| ___ _ __ _ __   __ _| | |  ___|__  _   _ _ __   __",
+        "  | || '_ \\| |_ / _ \\ '__| '_ \\ / _` | | | |_ / _ \\| | | | '_ \\ / /",
+        "  | || | | |  _|  __/ |  | | | | (_| | | |  _| (_) | |_| | | | | | ",
+        " |___|_| |_|_|  \\___|_|  |_| |_|\\__,_|_| |_|  \\___/ \\__,_|_| |_| | ",
+        "                                                                   "
+    }, Color::BrightRed, Color::Default, true);
+
+    banners_["void"] = AsciiSprite({
+        " __     __    _     _   _____                     ",
+        "|  \\   /  |  (_)   | | |_   _|__  __ _ _ __      ",
+        "| |\\ / / |   _  __ | |   | |/ _ \\/ _` | '__|     ",
+        "| | \\ / / |_| |/ _` | |   | |  __/ (_| | |        ",
+        "|_|  \\_/ \\___/ \\__,_|_|   |_|\\___|\\__,_|_|        ",
+        "                                                   "
+    }, Color::Purple, Color::Default, true);
+
     banners_["title"] = AsciiSprite({
         "  ____  _   _    _    ____   _____        __  ____   _____ _____ ____  ",
         " / ___|| | | |  / \\  |  _ \\ / _ \\ \\      / / |  _ \\ | ____| ____|  _ \\ ",
@@ -578,12 +1139,108 @@ void AsciiArtLibrary::initBanners() {
 AsciiSprite AsciiArtLibrary::getMonsterSprite(const std::string& stableId) const {
     auto it = monsters_.find(stableId);
     if (it != monsters_.end()) return it->second;
+    if (stableId.find("goblin") != std::string::npos) {
+        auto it2 = monsters_.find("monster.goblin");
+        if (it2 != monsters_.end()) return it2->second;
+    }
+    if (stableId.find("orc") != std::string::npos) {
+        auto it2 = monsters_.find("monster.orc");
+        if (it2 != monsters_.end()) return it2->second;
+    }
+    if (stableId.find("skeleton") != std::string::npos) {
+        auto it2 = monsters_.find("monster.skeleton");
+        if (it2 != monsters_.end()) return it2->second;
+    }
+    if (stableId.find("spider") != std::string::npos) {
+        auto it2 = monsters_.find("monster.giant_spider");
+        if (it2 != monsters_.end()) return it2->second;
+    }
+    if (stableId.find("dragon") != std::string::npos || stableId.find("drake") != std::string::npos || stableId.find("wyvern") != std::string::npos) {
+        auto it2 = monsters_.find("monster.dragon_young");
+        if (it2 != monsters_.end()) return it2->second;
+    }
+    if (stableId.find("golem") != std::string::npos) {
+        auto it2 = monsters_.find("monster.golem");
+        if (it2 != monsters_.end()) return it2->second;
+    }
+    if (stableId.find("elemental") != std::string::npos) {
+        auto it2 = monsters_.find("monster.elemental_fire");
+        if (it2 != monsters_.end()) return it2->second;
+    }
+    if (stableId.find("wolf") != std::string::npos || stableId.find("bear") != std::string::npos || stableId.find("rat") != std::string::npos) {
+        auto it2 = monsters_.find("monster.wolf");
+        if (it2 != monsters_.end()) return it2->second;
+    }
     return AsciiSprite({"?"}, Color::White, Color::Default, false);
 }
 
 AsciiSprite AsciiArtLibrary::getItemSprite(const std::string& stableId) const {
     auto it = items_.find(stableId);
     if (it != items_.end()) return it->second;
+    if (stableId.find("sword") != std::string::npos || stableId.find("axe") != std::string::npos || stableId.find("mace") != std::string::npos || stableId.find("hammer") != std::string::npos || stableId.find("spear") != std::string::npos || stableId.find("halberd") != std::string::npos || stableId.find("glaive") != std::string::npos || stableId.find("dagger") != std::string::npos || stableId.find("katana") != std::string::npos || stableId.find("blade") != std::string::npos || stableId.find("staff") != std::string::npos || stableId.find("wand") != std::string::npos) {
+        auto it2 = items_.find("item.weapon_generic");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("bow") != std::string::npos || stableId.find("crossbow") != std::string::npos || stableId.find("sling") != std::string::npos || stableId.find("javelin") != std::string::npos || stableId.find("throwing") != std::string::npos) {
+        auto it2 = items_.find("item.longbow");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("armour") != std::string::npos || stableId.find("armor") != std::string::npos || stableId.find("mail") != std::string::npos || stableId.find("plate") != std::string::npos || stableId.find("cloak") != std::string::npos || stableId.find("robe") != std::string::npos || stableId.find("leather") != std::string::npos || stableId.find("chain") != std::string::npos) {
+        auto it2 = items_.find("item.armor_generic");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("shield") != std::string::npos) {
+        auto it2 = items_.find("item.buckler");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("helm") != std::string::npos || stableId.find("cap") != std::string::npos || stableId.find("crown") != std::string::npos) {
+        auto it2 = items_.find("item.helmet");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("boots") != std::string::npos || stableId.find("sandals") != std::string::npos) {
+        auto it2 = items_.find("item.armor_generic");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("ring") != std::string::npos) {
+        auto it2 = items_.find("item.ring_generic");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("amulet") != std::string::npos) {
+        auto it2 = items_.find("item.amulet_generic");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("potion") != std::string::npos) {
+        auto it2 = items_.find("item.potion_generic");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("scroll") != std::string::npos || stableId.find("lore") != std::string::npos || stableId.find("tome") != std::string::npos || stableId.find("codex") != std::string::npos) {
+        auto it2 = items_.find("item.scroll_generic");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("food") != std::string::npos || stableId.find("bread") != std::string::npos || stableId.find("meat") != std::string::npos || stableId.find("ration") != std::string::npos || stableId.find("fruit") != std::string::npos || stableId.find("cheese") != std::string::npos || stableId.find("jerky") != std::string::npos || stableId.find("soup") != std::string::npos || stableId.find("feast") != std::string::npos) {
+        auto it2 = items_.find("item.food_generic");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("bomb") != std::string::npos || stableId.find("dynamite") != std::string::npos) {
+        auto it2 = items_.find("item.bomb");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("key") != std::string::npos) {
+        auto it2 = items_.find("item.key");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("guide") != std::string::npos || stableId.find("fragment") != std::string::npos) {
+        auto it2 = items_.find("item.guide_fragment_common");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("gold") != std::string::npos) {
+        auto it2 = items_.find("item.gold");
+        if (it2 != items_.end()) return it2->second;
+    }
+    if (stableId.find("ruby") != std::string::npos) {
+        auto it2 = items_.find("item.ruby");
+        if (it2 != items_.end()) return it2->second;
+    }
     return AsciiSprite({"?"}, Color::White, Color::Default, false);
 }
 

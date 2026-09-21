@@ -1,6 +1,7 @@
 #include "shadowdeep/app/app.hpp"
 #include "shadowdeep/version.hpp"
 #include "shadowdeep/tui/ascii_art.hpp"
+#include "shadowdeep/entities/monster.hpp"
 #include "shadowdeep/world/tile.hpp"
 #include "shadowdeep/entities/player.hpp"
 #include "shadowdeep/update/update_manager.hpp"
@@ -685,25 +686,44 @@ void App::renderCodex(GameSession& session, int tab, int cursor) {
             }
         }
     } else {
-        std::vector<std::string> monsterIds = {"monster.giant_rat", "monster.goblin", "monster.skeleton", "monster.orc", "monster.troll", "monster.dragon_young", "monster.ancient_dragon", "monster.goblin_king", "monster.lich_king", "monster.demon_lord", "monster.shopkeeper", "monster.mimic"};
-        int visible = std::min(listH, static_cast<int>(monsterIds.size()));
-        int cIdx = std::clamp(cursor, 0, static_cast<int>(monsterIds.size()) - 1);
+        auto& allM = allMonsterTemplates();
+        std::vector<std::string> monsterIds;
+        monsterIds.reserve(allM.size());
+        for (auto& t : allM) monsterIds.push_back(t.stableId);
+        std::sort(monsterIds.begin(), monsterIds.end());
+        int total = static_cast<int>(monsterIds.size());
+        int scroll = 0;
+        if (cursor >= listH) scroll = cursor - listH + 1;
+        if (scroll < 0) scroll = 0;
+        int visible = std::min(listH, total - scroll);
+        int cIdx = std::clamp(cursor, 0, total - 1);
         for (int i = 0; i < visible; ++i) {
-            int idx = i;
-            if (idx >= static_cast<int>(monsterIds.size())) break;
+            int idx = scroll + i;
+            if (idx >= total) break;
             std::string mid = monsterIds[idx];
             bool sel = (idx == cIdx);
-            std::string line = (sel ? "> " : "  ") + mid;
+            auto* tmpl = findMonsterTemplate(mid);
+            std::string name = tmpl ? tmpl->name : mid;
+            std::string line = (sel ? "> " : "  ") + name + " (" + mid + ")";
+            if (line.size() > static_cast<size_t>(w - 40)) line = line.substr(0, w - 40);
             screen_.text(2, listTop + i, line, sel ? Color::BrightWhite : Color::White, sel);
             if (sel && w > 60) {
                 auto sprite = artLib.getMonsterSprite(mid);
-                int sx = w - sprite.width - 4;
+                int sx = w - sprite.width - 6;
                 int sy = listTop;
+                if (sx < w/2) sx = w/2;
                 ascii_draw::drawBoxStyled(screen_, sx - 1, sy - 1, sprite.width + 2, sprite.height + 2, sprite.fg, BoxStyle::Single, false);
                 ascii_draw::drawSprite(screen_, sx, sy, sprite);
-                screen_.text(sx, sy + sprite.height + 1, mid.substr(0, sprite.width + 2), sprite.fg, true);
+                screen_.text(sx, sy + sprite.height + 1, name.substr(0, sprite.width + 6), sprite.fg, true);
+                if (tmpl) {
+                    std::string stats = "HP:" + std::to_string(tmpl->baseHp) + " Atk:" + std::to_string(tmpl->baseAtk) + " Def:" + std::to_string(tmpl->baseDef) + " XP:" + std::to_string(tmpl->xp);
+                    screen_.text(sx, sy + sprite.height + 2, stats.substr(0, w - sx - 2), Color::Gray);
+                    std::string depthInfo = "Depth " + std::to_string(tmpl->minDepth) + "-" + std::to_string(tmpl->maxDepth) + (tmpl->baseHp > 100 ? " BOSS" : "");
+                    screen_.text(sx, sy + sprite.height + 3, depthInfo, Color::Gold);
+                }
             }
         }
+        screen_.text(2, listTop + visible, std::to_string(total) + " monsters - colored ASCII letters only, ASCII Art Library", Color::Gray);
     }
 
     ascii_draw::drawBoxStyled(screen_, 1, h - 3, w - 2, 3, Color::Gray, BoxStyle::Ascii, false);
@@ -1064,8 +1084,8 @@ int App::runHome() {
                     blit();
                     auto ev2 = terminal_->waitKey();
                     if (ev2.code == static_cast<int>(KeyCode::Escape) || ev2.code == 'q') break;
-                    if (ev2.code == '\t' || ev2.code == 'l' || ev2.code == static_cast<int>(KeyCode::Right)) tab = (tab + 1) % 4;
-                    if (ev2.code == 'h' || ev2.code == static_cast<int>(KeyCode::Left)) tab = (tab - 1 + 4) % 4;
+                    if (ev2.code == '\t' || ev2.code == 'l' || ev2.code == static_cast<int>(KeyCode::Right)) tab = (tab + 1) % 5;
+                    if (ev2.code == 'h' || ev2.code == static_cast<int>(KeyCode::Left)) tab = (tab - 1 + 5) % 5;
                     if (ev2.code == static_cast<int>(KeyCode::Up) || ev2.code == 'k' || ev2.code == 'w') { if (cur > 0) cur--; }
                     if (ev2.code == static_cast<int>(KeyCode::Down) || ev2.code == 'j' || ev2.code == 's') cur++;
                 }
@@ -1174,8 +1194,8 @@ int App::runGameplay(GameSession& session) {
             blit();
             auto ev = terminal_->waitKey();
             if (ev.code == static_cast<int>(KeyCode::Escape) || ev.code == 'c' || ev.code == 'C' || ev.code == 'q') { inCodex = false; continue; }
-            if (ev.code == '\t' || ev.code == 'l' || ev.code == static_cast<int>(KeyCode::Right)) { codexTab = (codexTab + 1) % 4; codexCursor = 0; }
-            else if (ev.code == 'h' || ev.code == static_cast<int>(KeyCode::Left)) { codexTab = (codexTab - 1 + 4) % 4; codexCursor = 0; }
+            if (ev.code == '\t' || ev.code == 'l' || ev.code == static_cast<int>(KeyCode::Right)) { codexTab = (codexTab + 1) % 5; codexCursor = 0; }
+            else if (ev.code == 'h' || ev.code == static_cast<int>(KeyCode::Left)) { codexTab = (codexTab - 1 + 5) % 5; codexCursor = 0; }
             else if (ev.code == static_cast<int>(KeyCode::Up) || ev.code == 'k' || ev.code == 'w') { if (codexCursor > 0) codexCursor--; }
             else if (ev.code == static_cast<int>(KeyCode::Down) || ev.code == 'j' || ev.code == 's') { codexCursor++; }
             continue;
