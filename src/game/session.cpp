@@ -78,8 +78,8 @@ void GameSession::newGame(const std::string& entryId, const std::string& charNam
     dagger.stableId = "item.dagger";
     dagger.name = "dagger";
     dagger.kind = ItemKind::Weapon;
-    dagger.glyph = '/';
-    dagger.unicodeGlyph = "⚔";
+    dagger.glyph = 'W';
+    dagger.unicodeGlyph = "";
     dagger.color = Color::Steel;
     dagger.power = 2 + (pclass == 1 ? 1 : 0);
     dagger.slot = EquipSlot::MainHand;
@@ -98,8 +98,8 @@ void GameSession::newGame(const std::string& entryId, const std::string& charNam
         scroll.stableId = "item.scroll_lightning";
         scroll.name = "scroll of lightning";
         scroll.kind = ItemKind::ScrollLightning;
-        scroll.glyph = '?';
-        scroll.unicodeGlyph = "📜";
+        scroll.glyph = 'S';
+        scroll.unicodeGlyph = "";
         scroll.color = Color::BrightYellow;
         scroll.power = 18;
         player_.inventory.add(scroll);
@@ -109,8 +109,8 @@ void GameSession::newGame(const std::string& entryId, const std::string& charNam
     ration.stableId = "item.food";
     ration.name = "food ration";
     ration.kind = ItemKind::Food;
-    ration.glyph = '%';
-    ration.unicodeGlyph = "🍖";
+    ration.glyph = 'F';
+    ration.unicodeGlyph = "";
     ration.color = Color::Brown;
     ration.power = 10;
     player_.inventory.add(ration);
@@ -210,8 +210,8 @@ Item GameSession::makeHealPotion(Vec2 pos) {
     i.stableId = "item.potion_heal";
     i.name = "potion of healing";
     i.kind = ItemKind::PotionHeal;
-    i.glyph = '!';
-    i.unicodeGlyph = "🧪";
+    i.glyph = 'P';
+    i.unicodeGlyph = "";
     i.color = Color::BrightRed;
     i.power = 18;
     i.pos = pos;
@@ -232,62 +232,62 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.stableId = "item.potion_greater_heal";
         i.name = "potion of greater healing";
         i.kind = ItemKind::PotionGreaterHeal;
-        i.glyph = '!';
-        i.unicodeGlyph = "🧪";
+        i.glyph = 'P';
+        i.unicodeGlyph = "";
         i.color = Color::BrightRed;
         i.power = 35;
     } else if (r <= 16 && d >= 3) {
         i.stableId = "item.potion_strength";
         i.name = "potion of strength";
         i.kind = ItemKind::PotionStrength;
-        i.glyph = '!';
-        i.unicodeGlyph = "🧪";
+        i.glyph = 'P';
+        i.unicodeGlyph = "";
         i.color = Color::BrightMagenta;
         i.power = 1;
     } else if (r <= 18 && d >= 3) {
         i.stableId = "item.potion_haste";
         i.name = "potion of haste";
         i.kind = ItemKind::PotionHaste;
-        i.glyph = '!';
-        i.unicodeGlyph = "🧪";
+        i.glyph = 'P';
+        i.unicodeGlyph = "";
         i.color = Color::BrightCyan;
         i.power = 18;
     } else if (r <= 20 && d >= 6) {
         i.stableId = "item.potion_rejuvenation";
         i.name = "potion of rejuvenation";
         i.kind = ItemKind::PotionRejuvenation;
-        i.glyph = '!';
-        i.unicodeGlyph = "🧪";
+        i.glyph = 'P';
+        i.unicodeGlyph = "";
         i.color = Color::BrightYellow;
     } else if (r <= 22 && d >= 8) {
         i.stableId = "item.potion_invisibility";
         i.name = "potion of invisibility";
         i.kind = ItemKind::PotionInvisibility;
-        i.glyph = '!';
-        i.unicodeGlyph = "🧪";
+        i.glyph = 'P';
+        i.unicodeGlyph = "";
         i.color = Color::Gray;
         i.power = 20;
     } else if (r <= 24) {
         i.stableId = "item.potion_mana";
         i.name = "potion of mana";
         i.kind = ItemKind::PotionMana;
-        i.glyph = '!';
-        i.unicodeGlyph = "🧪";
+        i.glyph = 'P';
+        i.unicodeGlyph = "";
         i.color = Color::BrightCyan;
         i.power = 15;
     } else if (r <= 26) {
         i.stableId = "item.potion_antidote";
         i.name = "potion of antidote";
         i.kind = ItemKind::PotionAntidote;
-        i.glyph = '!';
-        i.unicodeGlyph = "🧪";
+        i.glyph = 'P';
+        i.unicodeGlyph = "";
         i.color = Color::Green;
     } else if (r <= 28 && d >= 10) {
         i.stableId = "item.potion_fire_resist";
         i.name = "potion of fire resistance";
         i.kind = ItemKind::PotionFireResist;
-        i.glyph = '!';
-        i.unicodeGlyph = "🧪";
+        i.glyph = 'P';
+        i.unicodeGlyph = "";
         i.color = Color::BrightRed;
     } else if (r <= 35) {
         auto& all = allItemTemplates();
@@ -336,8 +336,8 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.stableId = "item.food";
         i.name = "food ration";
         i.kind = ItemKind::Food;
-        i.glyph = '%';
-        i.unicodeGlyph = "🍖";
+        i.glyph = 'F';
+        i.unicodeGlyph = "";
         i.color = Color::Brown;
         i.power = 12;
     } else if (r <= 52) {
@@ -347,16 +347,16 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.stableId = std::string("item.food_") + foods[f];
         i.name = foods[f];
         i.kind = kinds[f];
-        i.glyph = '%';
-        i.unicodeGlyph = "🍖";
+        i.glyph = 'F';
+        i.unicodeGlyph = "";
         i.color = f == 3 ? Color::BrightGreen : (f == 1 ? Color::BrightRed : Color::Brown);
         i.power = 8 + rng_.range(0, 8);
     } else if (r <= 58) {
         i.stableId = "item.gold";
         i.name = "pile of gold";
         i.kind = ItemKind::Gold;
-        i.glyph = '$';
-        i.unicodeGlyph = "💰";
+        i.glyph = 'G';
+        i.unicodeGlyph = "";
         i.color = Color::Gold;
         i.power = rng_.range(4, 8 + d * 4);
         i.valueGold = i.power;
@@ -364,8 +364,8 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.stableId = "item.ruby";
         i.name = "ruby";
         i.kind = ItemKind::Ruby;
-        i.glyph = '$';
-        i.unicodeGlyph = "💎";
+        i.glyph = 'R';
+        i.unicodeGlyph = "";
         i.color = Color::BrightRed;
         i.power = 1;
         i.valueGold = rng_.range(1, 4 + d / 5);
@@ -373,68 +373,68 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.stableId = "item.scroll_lightning";
         i.name = "scroll of lightning";
         i.kind = ItemKind::ScrollLightning;
-        i.glyph = '?';
-        i.unicodeGlyph = "📜";
+        i.glyph = 'S';
+        i.unicodeGlyph = "";
         i.color = Color::BrightYellow;
         i.power = 18 + d * 2;
     } else if (r <= 70 && d >= 3) {
         i.stableId = "item.scroll_fireball";
         i.name = "scroll of fireball";
         i.kind = ItemKind::ScrollFireball;
-        i.glyph = '?';
-        i.unicodeGlyph = "📜";
+        i.glyph = 'S';
+        i.unicodeGlyph = "";
         i.color = Color::BrightRed;
         i.power = 30 + d * 2;
     } else if (r <= 74) {
         i.stableId = "item.scroll_teleport";
         i.name = "scroll of teleport";
         i.kind = ItemKind::ScrollTeleport;
-        i.glyph = '?';
-        i.unicodeGlyph = "📜";
+        i.glyph = 'S';
+        i.unicodeGlyph = "";
         i.color = Color::BrightMagenta;
     } else if (r <= 78) {
         i.stableId = "item.scroll_mapping";
         i.name = "scroll of magic mapping";
         i.kind = ItemKind::ScrollMapping;
-        i.glyph = '?';
-        i.unicodeGlyph = "📜";
+        i.glyph = 'S';
+        i.unicodeGlyph = "";
         i.color = Color::BrightCyan;
     } else if (r <= 82) {
         i.stableId = "item.scroll_identify";
         i.name = "scroll of identify";
         i.kind = ItemKind::ScrollIdentify;
-        i.glyph = '?';
-        i.unicodeGlyph = "📜";
+        i.glyph = 'S';
+        i.unicodeGlyph = "";
         i.color = Color::White;
     } else if (r <= 86 && d >= 10) {
         i.stableId = "item.scroll_enchant";
         i.name = "scroll of enchantment";
         i.kind = ItemKind::ScrollEnchant;
-        i.glyph = '?';
-        i.unicodeGlyph = "📜";
+        i.glyph = 'S';
+        i.unicodeGlyph = "";
         i.color = Color::Gold;
     } else if (r <= 88) {
         i.stableId = "item.bomb";
         i.name = "bomb";
         i.kind = ItemKind::Bomb;
-        i.glyph = '*';
-        i.unicodeGlyph = "💣";
+        i.glyph = 'X';
+        i.unicodeGlyph = "";
         i.color = Color::BrightRed;
         i.power = 25 + d * 2;
     } else if (r <= 92) {
         i.stableId = "item.guide_fragment_common";
         i.name = "guide fragment";
         i.kind = ItemKind::GuideFragment;
-        i.glyph = ';';
-        i.unicodeGlyph = "📖";
+        i.glyph = 'G';
+        i.unicodeGlyph = "";
         i.color = Color::White;
         i.power = 1;
     } else if (r <= 95 && d >= 8) {
         i.stableId = "item.guide_fragment_rare";
         i.name = "ancient guide fragment";
         i.kind = ItemKind::GuideFragment;
-        i.glyph = ';';
-        i.unicodeGlyph = "📖";
+        i.glyph = 'G';
+        i.unicodeGlyph = "";
         i.color = Color::Gold;
         i.power = 2;
         i.rarity = ItemRarity::Rare;
@@ -442,15 +442,15 @@ Item GameSession::randomItem(Vec2 pos, int d) {
         i.stableId = "item.lore_scroll";
         i.name = "lore scroll";
         i.kind = ItemKind::LoreScroll;
-        i.glyph = '?';
-        i.unicodeGlyph = "📜";
+        i.glyph = 'L';
+        i.unicodeGlyph = "";
         i.color = Color::BrightYellow;
     } else {
         i.stableId = "item.key";
         i.name = "iron key";
         i.kind = ItemKind::Key;
-        i.glyph = '-';
-        i.unicodeGlyph = "🔑";
+        i.glyph = 'K';
+        i.unicodeGlyph = "";
         i.color = Color::Steel;
     }
 
@@ -640,8 +640,8 @@ void GameSession::ensureFloor(int d) {
         frag.stableId = "item.guide_fragment_common";
         frag.name = "guide fragment";
         frag.kind = ItemKind::GuideFragment;
-        frag.glyph = ';';
-        frag.unicodeGlyph = "📖";
+        frag.glyph = 'G';
+        frag.unicodeGlyph = "";
         frag.color = Color::White;
         frag.pos = p;
         frag.identified = true;
@@ -714,8 +714,8 @@ void GameSession::ensureFloor(int d) {
         a.stableId = "item.amulet_shadowdeep";
         a.name = "Amulet of Shadowdeep";
         a.kind = ItemKind::AmuletShadowdeep;
-        a.glyph = '"';
-        a.unicodeGlyph = "🔮";
+        a.glyph = 'U';
+        a.unicodeGlyph = "";
         a.color = Color::Gold;
         a.pos = amuletPos;
         a.rarity = ItemRarity::Mythic;
@@ -822,8 +822,8 @@ void GameSession::handleAltar() {
         frag.stableId = "item.guide_fragment_rare";
         frag.name = "altar fragment";
         frag.kind = ItemKind::GuideFragment;
-        frag.glyph = ';';
-        frag.unicodeGlyph = "📖";
+        frag.glyph = 'G';
+        frag.unicodeGlyph = "";
         frag.color = Color::Gold;
         frag.pos = player_.pos;
         frag.identified = true;
@@ -903,8 +903,8 @@ void GameSession::handleChestInteraction() {
         gold.stableId = "item.gold";
         gold.name = "pile of gold";
         gold.kind = ItemKind::Gold;
-        gold.glyph = '$';
-        gold.unicodeGlyph = "💰";
+        gold.glyph = 'G';
+        gold.unicodeGlyph = "";
         gold.color = Color::Gold;
         gold.power = g;
         gold.valueGold = g;
@@ -1275,8 +1275,8 @@ void GameSession::killMonster(Monster& m) {
         frag.stableId = "item.guide_fragment_epic";
         frag.name = "forbidden guide fragment";
         frag.kind = ItemKind::GuideFragment;
-        frag.glyph = ';';
-        frag.unicodeGlyph = "📖";
+        frag.glyph = 'G';
+        frag.unicodeGlyph = "";
         frag.color = Color::Purple;
         frag.pos = m.pos;
         frag.rarity = ItemRarity::Epic;
@@ -1285,10 +1285,11 @@ void GameSession::killMonster(Monster& m) {
 
         Item lore;
         lore.stableId = "item.lore_codex";
+        // glyph set via item
         lore.name = "codex of " + m.name;
         lore.kind = ItemKind::LoreScroll;
-        lore.glyph = '?';
-        lore.unicodeGlyph = "📜";
+        lore.glyph = 'L';
+        lore.unicodeGlyph = "";
         lore.color = Color::Gold;
         lore.pos = m.pos;
         lore.identified = true;
@@ -1318,8 +1319,8 @@ void GameSession::killMonster(Monster& m) {
         gold.stableId = "item.gold";
         gold.name = "pile of gold";
         gold.kind = ItemKind::Gold;
-        gold.glyph = '$';
-        gold.unicodeGlyph = "💰";
+        gold.glyph = 'G';
+        gold.unicodeGlyph = "";
         gold.color = Color::Gold;
         gold.power = rng_.range(2, 6 + depth_ * 2);
         gold.valueGold = gold.power;
