@@ -43,6 +43,7 @@ set(SHADOWDEEP_SOURCES
     src/save/save_manager.cpp
     src/config/config.cpp
     src/tui/screen.cpp
+    src/tui/ascii_art.cpp
     src/app/cli.cpp
     src/app/app.cpp
     src/game/session.cpp

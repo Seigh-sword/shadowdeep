@@ -1,5 +1,6 @@
 #include "shadowdeep/app/app.hpp"
 #include "shadowdeep/version.hpp"
+#include "shadowdeep/tui/ascii_art.hpp"
 #include "shadowdeep/world/tile.hpp"
 #include "shadowdeep/entities/player.hpp"
 #include "shadowdeep/update/update_manager.hpp"
@@ -87,20 +88,33 @@ void App::renderHome(int selected) {
     int w = screen_.width();
     int h = screen_.height();
 
-    std::string title = "S H A D O W D E E P";
-    int tx = (w - static_cast<int>(title.size())) / 2;
-    screen_.text(tx, 2, title, Color::BrightYellow, true);
+    auto& artLib = AsciiArtLibrary::instance();
+    auto titleArt = artLib.getTitleArt();
 
-    std::string ver = std::string(kGameVersion) + " - Infinite Depths";
+    int titleW = titleArt.width;
+    int titleX = (w - titleW) / 2;
+    int titleY = 1;
+    if (h > 30 && w > 90) {
+        ascii_draw::drawSprite(screen_, titleX, titleY, titleArt);
+        titleY += titleArt.height + 1;
+    } else {
+        std::string title = "S H A D O W D E E P";
+        int tx = (w - static_cast<int>(title.size())) / 2;
+        screen_.text(tx, 2, title, Color::BrightYellow, true);
+        titleY = 4;
+    }
+
+    std::string ver = std::string(kGameVersion) + " - Infinite Depths - ASCII Art Edition";
     int vx = (w - static_cast<int>(ver.size())) / 2;
-    screen_.text(vx, 3, ver, Color::BrightCyan, true);
+    screen_.text(vx, titleY, ver, Color::BrightCyan, true);
 
-    int boxW = 32;
-    int boxH = 12;
+    int boxW = 34;
+    int boxH = 14;
     int bx = (w - boxW) / 2;
-    int by = 6;
+    int by = titleY + 2;
 
-    screen_.drawBox(bx, by, boxW, boxH, Color::White, true);
+    ascii_draw::drawBoxStyled(screen_, bx, by, boxW, boxH, Color::White, BoxStyle::Single, true);
+    ascii_draw::drawBoxStyled(screen_, bx+1, by+1, boxW-2, boxH-2, Color::Gray, BoxStyle::Ascii, false);
     screen_.text(bx + 2, by, " MAIN MENU ", Color::BrightYellow, true);
 
     std::vector<std::string> items = {"Entries", "Codex / Guides", "Settings", "Changelog", "Credits", "Quit"};
@@ -110,11 +124,23 @@ void App::renderHome(int selected) {
         bool sel = (i == selected);
         std::string prefix = sel ? "> " : "  ";
         Color c = sel ? Color::BrightWhite : Color::White;
-        screen_.text(x, y, prefix + items[i], c, sel);
+        if (sel) {
+            ascii_draw::drawBorderedText(screen_, x, y, prefix + items[i], Color::BrightWhite, Color::Gold, true);
+        } else {
+            screen_.text(x, y, prefix + items[i], c, sel);
+        }
     }
 
-    screen_.text(2, h - 3, "Up/Down W/S navigate  Enter select  Q quit", Color::Gray);
-    screen_.text(2, h - 2, "Collect guide fragments | Infinite depth beyond 30 | Huge maps 160x80", Color::Gray);
+    int decoY = by + boxH + 1;
+    if (decoY + 6 < h) {
+        auto goblinArt = artLib.getMonsterSprite("monster.goblin");
+        ascii_draw::drawSprite(screen_, 4, decoY, goblinArt);
+        auto dragonArt = artLib.getMonsterSprite("monster.dragon_young");
+        ascii_draw::drawSprite(screen_, w - dragonArt.width - 4, decoY, dragonArt);
+    }
+
+    screen_.text(2, h - 3, "Up/Down W/S navigate  Enter select  Q quit  ASCII Art Library", Color::Gray);
+    screen_.text(2, h - 2, "Colored ASCII letters only | Shop o | Altar a | Fountain f | Minimap m | Huge maps 160x80 viewport 80x24", Color::Gray);
 
     std::string author = "github.com/Seigh-sword";
     screen_.text(w - static_cast<int>(author.size()) - 2, h - 2, author, Color::Gray);
@@ -326,11 +352,12 @@ void App::renderGameplay(const GameSession& session) {
     int sideTop = mapTop;
     int sideH = mapBoxH;
 
-    screen_.drawBox(sideLeft, sideTop, sideW, sideH, Color::Steel, true);
-    screen_.text(sideLeft + 2, sideTop, " INVENTORY & STATS ", Color::BrightYellow, true);
+    ascii_draw::drawBoxStyled(screen_, sideLeft, sideTop, sideW, sideH, Color::Steel, BoxStyle::Single, true);
+    ascii_draw::drawBoxStyled(screen_, sideLeft+1, sideTop+1, sideW-2, sideH-2, Color::Gray, BoxStyle::Ascii, false);
+    screen_.text(sideLeft + 2, sideTop, " INVENTORY & STATS - ASCII ", Color::BrightYellow, true);
 
     auto& inv = session.player().inventory.all();
-    int invLines = std::min(8, static_cast<int>(inv.size()));
+    int invLines = std::min(6, static_cast<int>(inv.size()));
     screen_.text(sideLeft + 1, sideTop + 2, "Items:", Color::White, true);
     if (inv.empty()) {
         screen_.text(sideLeft + 1, sideTop + 3, "(empty)", Color::Gray);
@@ -346,14 +373,14 @@ void App::renderGameplay(const GameSession& session) {
         }
     }
 
-    int eqY = sideTop + 12;
+    int eqY = sideTop + 9;
     auto& eq = session.player().equipment;
     screen_.text(sideLeft + 1, eqY, "Equipment:", Color::White, true);
     std::string weapon = "W: " + std::string(eq.mainHand ? eq.mainHand->fullName() : "fists");
     screen_.text(sideLeft + 1, eqY + 1, weapon.substr(0, sideW - 2), Color::Steel);
     std::string armor = "A: " + std::string(eq.body ? eq.body->fullName() : "none");
     screen_.text(sideLeft + 1, eqY + 2, armor.substr(0, sideW - 2), Color::Steel);
-    std::string shield = "S: " + std::string(eq.offHand ? eq.offHand->fullName() : "none");
+    std::string shield = "D: " + std::string(eq.offHand ? eq.offHand->fullName() : "none");
     screen_.text(sideLeft + 1, eqY + 3, shield.substr(0, sideW - 2), Color::Steel);
     std::string helm = "H: " + std::string(eq.head ? eq.head->fullName() : "none");
     screen_.text(sideLeft + 1, eqY + 4, helm.substr(0, sideW - 2), Color::Steel);
@@ -376,23 +403,14 @@ void App::renderGameplay(const GameSession& session) {
     }
 
     int miniY = roomY + 4;
-    if (sideW >= 22 && miniY + 12 < sideTop + sideH) {
+    if (sideW >= 22 && miniY + 12 < sideTop + sideH - 6) {
         screen_.text(sideLeft + 1, miniY, "Minimap:", Color::BrightCyan, true);
-        std::string mini = session.minimapString(18, 10);
-        int line = 0;
-        for (char ch : mini) {
-            if (ch == '\n') { line++; continue; }
-            if (line >= 10) break;
-            if (sideLeft + 1 + (int)mini.find('\n') < w) {
-                // We'll render line by line simpler below
-            }
-        }
-        // render minimap line by line
+        std::string mini = session.minimapString(18, 8);
         std::string curLine;
         int curRow = 0;
         for (char ch : mini) {
             if (ch == '\n') {
-                if (curRow < 10) {
+                if (curRow < 8) {
                     screen_.text(sideLeft + 1, miniY + 1 + curRow, curLine.substr(0, sideW - 2), Color::Gray);
                     curRow++;
                 }
@@ -401,10 +419,28 @@ void App::renderGameplay(const GameSession& session) {
                 curLine += ch;
             }
         }
+        // ASCII art for nearby monster if visible
+        if (sideW > 30) {
+            for (auto& m : session.monsters()) {
+                if (!m.alive) continue;
+                if (!dungeon.visible[m.pos.y][m.pos.x]) continue;
+                if (m.pos.chebyshev(p.pos) <= 5) {
+                    auto& artLib = AsciiArtLibrary::instance();
+                    auto sprite = artLib.getMonsterSprite(m.stableId);
+                    if (sprite.width <= sideW - 2 && miniY + 10 + sprite.height < sideTop + sideH) {
+                        ascii_draw::drawBoxStyled(screen_, sideLeft + 1, miniY + 9, sprite.width + 2, sprite.height + 2, m.color, BoxStyle::Single, false);
+                        ascii_draw::drawSprite(screen_, sideLeft + 2, miniY + 10, sprite);
+                        screen_.text(sideLeft + 1, miniY + 9 + sprite.height + 2, m.name.substr(0, sideW - 2), m.color, true);
+                        ascii_draw::drawProgressBar(screen_, sideLeft + 1, miniY + 10 + sprite.height + 2, sideW - 2, m.hp, m.maxHp, ascii_draw::healthColor(m.hp, m.maxHp), Color::Gray, Color::White);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     if (session.isInShop()) {
-        screen_.text(sideLeft + 1, sideTop + sideH - 4, "SHOP HERE! Press b", Color::Gold, true);
+        screen_.text(sideLeft + 1, sideTop + sideH - 4, "SHOP HERE! Press o", Color::Gold, true);
         std::string goldInfo = "Gold: " + std::to_string(session.player().stats.gold);
         screen_.text(sideLeft + 1, sideTop + sideH - 3, goldInfo.substr(0, sideW - 2), Color::Gold);
     }
@@ -416,6 +452,11 @@ void App::renderGameplay(const GameSession& session) {
         screen_.text(sideLeft + 1, sideTop + sideH - 2, "Fountain! Press f", Color::BrightCyan, true);
     } else if (curTile == Tile::Chest) {
         screen_.text(sideLeft + 1, sideTop + sideH - 2, "Chest! Move onto", Color::Gold, true);
+    }
+
+    // Health bar in side panel using ascii art library
+    if (sideTop + sideH - 6 > codexY) {
+        ascii_draw::drawProgressBar(screen_, sideLeft + 1, sideTop + sideH - 6, sideW - 2, p.stats.hp, p.stats.maxHp, ascii_draw::healthColor(p.stats.hp, p.stats.maxHp), Color::Gray, Color::White);
     }
 
     int msgTop = mapTop + mapBoxH + 1;
@@ -438,20 +479,21 @@ void App::renderGameplay(const GameSession& session) {
 }
 
 void App::renderInventory(GameSession& session, int cursor) {
-    int w = 70;
-    int h = std::min(screen_.height() - 4, std::max(18, static_cast<int>(session.player().inventory.size()) + 12));
+    int w = 80;
+    int h = std::min(screen_.height() - 4, std::max(22, static_cast<int>(session.player().inventory.size()) + 14));
     int top = (screen_.height() - h) / 2;
     int left = (screen_.width() - w) / 2;
 
-    screen_.drawBox(left, top, w, h, Color::BrightCyan, true);
-    screen_.text(left + 2, top, " INVENTORY - Side Panel View ", Color::BrightYellow, true);
+    ascii_draw::drawShadowBox(screen_, left, top, w, h, Color::BrightCyan, Color::Gray);
+    screen_.text(left + 2, top, " INVENTORY - ASCII Art View ", Color::BrightYellow, true);
 
     auto& inv = session.player().inventory.all();
+    auto& artLib = AsciiArtLibrary::instance();
 
     if (inv.empty()) {
         screen_.text(left + 3, top + 2, "(empty) - explore to find items, guide fragments, lore", Color::Gray);
     } else {
-        int maxRows = h - 8;
+        int maxRows = h - 10;
         for (int i = 0; i < static_cast<int>(inv.size()) && i < maxRows; ++i) {
             auto& it = inv[i];
             std::string s = (i == cursor ? "> " : "  ");
@@ -459,24 +501,37 @@ void App::renderInventory(GameSession& session, int cursor) {
             s += ") ";
             s += it.fullName();
             s += " [" + std::to_string(static_cast<int>(it.rarity)) + "]";
-            if (it.kind == ItemKind::GuideFragment) s += " - press Enter to unlock guide";
+            if (it.kind == ItemKind::GuideFragment) s += " - Enter unlock guide";
             if (it.kind == ItemKind::LoreScroll) s += " - lore";
-            if (s.size() > static_cast<size_t>(w - 4)) s = s.substr(0, w - 4);
+            if (s.size() > static_cast<size_t>(w - 28)) s = s.substr(0, w - 28);
             screen_.text(left + 2, top + 2 + i, s, it.color, i == cursor);
+        }
+        if (cursor >= 0 && cursor < static_cast<int>(inv.size())) {
+            auto& sel = inv[cursor];
+            auto sprite = artLib.getItemSprite(sel.stableId);
+            int artX = left + w - sprite.width - 3;
+            int artY = top + 2;
+            ascii_draw::drawBoxStyled(screen_, artX - 1, artY - 1, sprite.width + 2, sprite.height + 2, sel.color, BoxStyle::Single, false);
+            ascii_draw::drawSprite(screen_, artX, artY, sprite);
+            screen_.text(artX, artY + sprite.height + 1, sel.name.substr(0, sprite.width + 2), sel.color, true);
+            std::string rarityStr = "Rarity: " + std::to_string(static_cast<int>(sel.rarity));
+            screen_.text(artX, artY + sprite.height + 2, rarityStr.substr(0, sprite.width + 2), ascii_draw::rarityColor(static_cast<int>(sel.rarity)), false);
         }
     }
 
     auto& eq = session.player().equipment;
     std::string weapon = "Weapon: ";
     weapon += eq.mainHand ? eq.mainHand->fullName() : "bare fists";
-    screen_.text(left + 2, top + h - 5, weapon.substr(0, w - 4), Color::Steel);
+    screen_.text(left + 2, top + h - 6, weapon.substr(0, w - 30), Color::Steel);
 
     std::string armor = "Armour: ";
     armor += eq.body ? eq.body->fullName() : "no armour";
-    screen_.text(left + 2, top + h - 4, armor.substr(0, w - 4), Color::Steel);
+    screen_.text(left + 2, top + h - 5, armor.substr(0, w - 30), Color::Steel);
 
-    screen_.text(left + 2, top + h - 3, "Hunger: " + session.player().stats.hungerName() + " Sat: " + std::to_string(session.player().stats.saturation), Color::Brown);
-    screen_.text(left + 2, top + h - 2, "Enter/use x/drop a-z quick use i/Esc close", Color::Gray);
+    screen_.text(left + 2, top + h - 4, "Hunger: " + session.player().stats.hungerName() + " Sat: " + std::to_string(session.player().stats.saturation), Color::Brown);
+    ascii_draw::drawProgressBar(screen_, left + 2, top + h - 3, 30, session.player().stats.hp, session.player().stats.maxHp, Color::BrightRed, Color::Gray, Color::White);
+    screen_.text(left + 35, top + h - 3, "HP", Color::BrightRed, true);
+    screen_.text(left + 2, top + h - 2, "Enter/use x/drop a-z quick use i/Esc close  ASCII Art Library", Color::Gray);
 }
 
 void App::renderHelp() {
@@ -546,10 +601,11 @@ void App::renderCodex(GameSession& session, int tab, int cursor) {
     int w = screen_.width();
     int h = screen_.height();
 
-    screen_.text(2, 0, "Codex - Guides & Lore", Color::BrightYellow, true);
+    ascii_draw::drawBoxStyled(screen_, 0, 0, w, h, Color::BrightYellow, BoxStyle::Single, true);
+    screen_.text(2, 0, " Codex - Guides & Lore - ASCII Art Library ", Color::BrightYellow, true);
     screen_.drawHLine(0, 1, w, "-", Color::Gray);
 
-    std::vector<std::string> tabs = {"Guides", "Lore", "Fragments", "Biomes"};
+    std::vector<std::string> tabs = {"Guides", "Lore", "Fragments", "Biomes", "Bestiary"};
     int tx = 2;
     for (int i = 0; i < static_cast<int>(tabs.size()); ++i) {
         bool sel = (i == tab);
@@ -559,7 +615,8 @@ void App::renderCodex(GameSession& session, int tab, int cursor) {
     }
 
     int listTop = 4;
-    int listH = h - 6;
+    int listH = h - 8;
+    auto& artLib = AsciiArtLibrary::instance();
 
     if (tab == 0) {
         auto guides = session.codex().allGuides();
@@ -571,12 +628,16 @@ void App::renderCodex(GameSession& session, int tab, int cursor) {
             auto& g = guides[idx];
             bool sel = (idx == cursor);
             std::string line = (sel ? "> " : "  ") + g.title + (g.unlocked ? " [UNLOCKED]" : " [LOCKED]") + " - " + session.codex().categoryName(g.category);
-            if (line.size() > static_cast<size_t>(w - 4)) line = line.substr(0, w - 4);
+            if (line.size() > static_cast<size_t>(w - 30)) line = line.substr(0, w - 30);
             Color c = g.unlocked ? Color::BrightGreen : Color::Gray;
             if (sel) c = Color::BrightWhite;
             screen_.text(2, listTop + i, line, c, sel);
             if (sel && g.unlocked) {
-                screen_.text(2, listTop + visible + 1, g.description.substr(0, w - 4), Color::White);
+                ascii_draw::drawWrappedText(screen_, 2, listTop + visible + 1, w - 4, 3, g.description, Color::White, false);
+                if (w > 80) {
+                    auto itemSprite = artLib.getItemSprite("item.guide_fragment_common");
+                    ascii_draw::drawSprite(screen_, w - itemSprite.width - 4, listTop + 1, itemSprite);
+                }
             }
         }
     } else if (tab == 1) {
@@ -589,27 +650,64 @@ void App::renderCodex(GameSession& session, int tab, int cursor) {
             auto& l = lores[idx];
             bool sel = (idx == cursor);
             std::string line = (sel ? "> " : "  ") + l.title + " (Depth " + std::to_string(l.depthFound) + ")" + (l.isBossDrop ? " [BOSS]" : "");
-            if (line.size() > static_cast<size_t>(w - 4)) line = line.substr(0, w - 4);
+            if (line.size() > static_cast<size_t>(w - 30)) line = line.substr(0, w - 30);
             Color c = l.isBossDrop ? Color::Gold : Color::White;
             if (sel) c = Color::BrightWhite;
             screen_.text(2, listTop + i, line, c, sel);
             if (sel) {
-                screen_.text(2, listTop + visible + 1, l.text.substr(0, w - 4), Color::BrightYellow);
+                ascii_draw::drawWrappedText(screen_, 2, listTop + visible + 1, w - 4, 3, l.text, Color::BrightYellow, false);
             }
         }
     } else if (tab == 2) {
         screen_.text(2, listTop, "Total fragments collected: " + std::to_string(session.codex().totalFragments()), Color::BrightCyan, true);
-        screen_.text(2, listTop + 2, "Find ; fragments in dungeon. Bosses drop epic fragments.", Color::White);
+        screen_.text(2, listTop + 2, "Find G fragments in dungeon. Bosses drop epic fragments.", Color::White);
         screen_.text(2, listTop + 3, "Use fragment from inventory to unlock guides.", Color::Gray);
         screen_.text(2, listTop + 5, "Guides unlocked: " + std::to_string(session.codex().unlockedCount()) + "/" + std::to_string(session.codex().totalGuides()), Color::BrightGreen);
-    } else {
+        if (w > 70) {
+            auto fragArt = artLib.getItemSprite("item.guide_fragment_rare");
+            ascii_draw::drawSprite(screen_, w - fragArt.width - 10, listTop, fragArt);
+            auto loreArt = artLib.getItemSprite("item.lore_scroll");
+            ascii_draw::drawSprite(screen_, w - loreArt.width - 10, listTop + fragArt.height + 2, loreArt);
+        }
+    } else if (tab == 3) {
         std::vector<std::string> biomes = {"Stone Depths - Gray stone, basic", "Fungal Bloom - Green, poison", "Crystal Caverns - Cyan, magic", "Infernal Foundry - Red, fire", "Abyssal Temple - Purple, shadow", "Flooded Halls - Cyan, water", "Frozen Vault - White, frost", "Overgrown Ruins - Green, nature", "Ancient Ruins - Brown, old", "Void Tear - Magenta, infinite depth"};
         for (int i = 0; i < static_cast<int>(biomes.size()) && i < listH; ++i) {
             screen_.text(2, listTop + i, biomes[i], Color::White);
         }
+        if (w > 80) {
+            for (int i = 0; i < 5 && i < static_cast<int>(biomes.size()); ++i) {
+                std::string bName = "stone";
+                if (i == 1) bName = "fungal";
+                auto banner = artLib.getBiomeBanner(bName);
+                if (banner.width < 30) {
+                    ascii_draw::drawSprite(screen_, w - 35, listTop + i * 2, banner);
+                }
+            }
+        }
+    } else {
+        std::vector<std::string> monsterIds = {"monster.giant_rat", "monster.goblin", "monster.skeleton", "monster.orc", "monster.troll", "monster.dragon_young", "monster.ancient_dragon", "monster.goblin_king", "monster.lich_king", "monster.demon_lord", "monster.shopkeeper", "monster.mimic"};
+        int visible = std::min(listH, static_cast<int>(monsterIds.size()));
+        int cIdx = std::clamp(cursor, 0, static_cast<int>(monsterIds.size()) - 1);
+        for (int i = 0; i < visible; ++i) {
+            int idx = i;
+            if (idx >= static_cast<int>(monsterIds.size())) break;
+            std::string mid = monsterIds[idx];
+            bool sel = (idx == cIdx);
+            std::string line = (sel ? "> " : "  ") + mid;
+            screen_.text(2, listTop + i, line, sel ? Color::BrightWhite : Color::White, sel);
+            if (sel && w > 60) {
+                auto sprite = artLib.getMonsterSprite(mid);
+                int sx = w - sprite.width - 4;
+                int sy = listTop;
+                ascii_draw::drawBoxStyled(screen_, sx - 1, sy - 1, sprite.width + 2, sprite.height + 2, sprite.fg, BoxStyle::Single, false);
+                ascii_draw::drawSprite(screen_, sx, sy, sprite);
+                screen_.text(sx, sy + sprite.height + 1, mid.substr(0, sprite.width + 2), sprite.fg, true);
+            }
+        }
     }
 
-    screen_.text(2, h - 2, "Tab switch category  Up/Down navigate  Esc back", Color::Gray);
+    ascii_draw::drawBoxStyled(screen_, 1, h - 3, w - 2, 3, Color::Gray, BoxStyle::Ascii, false);
+    screen_.text(2, h - 2, "Tab switch category  Up/Down navigate  Esc back  ASCII Art Library draws all chars", Color::Gray);
 }
 
 void App::renderSettings() {
