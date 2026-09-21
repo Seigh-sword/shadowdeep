@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [aarch64, armv7, riscv64]
+        target: [aarch64, armv7, riscv64, rpi-aarch64, rpi-armv7]
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
@@ -36,6 +36,20 @@ jobs:
               docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
               docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:latest cmake --build build/${{ matrix.target }} --verbose
               ;;
+            rpi-aarch64)
+              echo "Building for Raspberry Pi 3/4/5 64-bit (aarch64)"
+              docker pull dockcross/linux-arm64:latest
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF -DSHADOWDEEP_RPI=ON
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake --build build/${{ matrix.target }} --verbose
+              ls -lh build/${{ matrix.target }}/shadowdeep || true
+              ;;
+            rpi-armv7)
+              echo "Building for Raspberry Pi Zero/1/2 32-bit (armv7)"
+              docker pull dockcross/linux-armv7:latest
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF -DSHADOWDEEP_RPI=ON
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake --build build/${{ matrix.target }} --verbose
+              ls -lh build/${{ matrix.target }}/shadowdeep || true
+              ;;
           esac
 
   freebsd:
@@ -51,3 +65,55 @@ jobs:
           run: |
             cmake -B build/freebsd -G Ninja -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
             cmake --build build/freebsd --verbose
+
+  raspberrypi:
+    name: Raspberry Pi ${{ matrix.arch }} (${{ matrix.model }})
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: aarch64
+            model: Pi 3/4/5 64-bit
+            dockcross: dockcross/linux-arm64:latest
+            artifact: shadowdeep-Zv1-raspberrypi-aarch64.tar.gz
+          - arch: armv7
+            model: Pi Zero/1/2 32-bit
+            dockcross: dockcross/linux-armv7:latest
+            artifact: shadowdeep-Zv1-raspberrypi-armv7.tar.gz
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Build Raspberry Pi
+        run: |
+          set -e
+          echo "Building for ${{ matrix.model }} ${{ matrix.arch }}"
+          docker pull ${{ matrix.dockcross }}
+          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake -B build/rpi-${{ matrix.arch }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF -DSHADOWDEEP_RPI=ON
+          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake --build build/rpi-${{ matrix.arch }} --verbose
+          mkdir -p dist
+          cp build/rpi-${{ matrix.arch }}/shadowdeep dist/ || true
+          ls -lh dist/ build/rpi-${{ matrix.arch }}/
+          echo "Raspberry Pi ${{ matrix.arch }} build OK"
+      - name: Package Raspberry Pi
+        run: |
+          mkdir -p dist/shadowdeep
+          cp build/rpi-${{ matrix.arch }}/shadowdeep dist/shadowdeep/ || cp build/rpi-aarch64/shadowdeep dist/shadowdeep/ || cp build/rpi-armv7/shadowdeep dist/shadowdeep/ || true
+          cp LICENSE dist/shadowdeep/
+          cp README.md dist/shadowdeep/
+          cp AGENTS.md dist/shadowdeep/ || true
+          cp -r DOCS dist/shadowdeep/DOCS || true
+          cp -r data dist/shadowdeep/data || true
+          cd dist
+          tar czf ${{ matrix.artifact }} shadowdeep || true
+          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || true
+          ls -lh
+      - name: Upload Raspberry Pi Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            dist/${{ matrix.artifact }}
+            dist/${{ matrix.artifact }}.sha256

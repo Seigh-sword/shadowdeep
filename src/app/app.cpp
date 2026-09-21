@@ -2,6 +2,7 @@
 #include "shadowdeep/version.hpp"
 #include "shadowdeep/world/tile.hpp"
 #include "shadowdeep/entities/player.hpp"
+#include "shadowdeep/update/update_manager.hpp"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -826,15 +827,90 @@ int App::run() {
 
     if (opts_.checkUpdate) {
         std::cout << "Checking for updates...\n";
-        std::cout << "Current version: " << kGameVersion << "\n";
+        std::cout << "Current version: " << kGameVersion << " Build " << kBuildRevision << "\n";
+        std::cout << "Platform: " << UpdateManager::getCurrentPlatformString() << " (" << UpdateManager::getOSDisplay() << " " << UpdateManager::getArchDisplay() << ")\n";
         std::cout << "Repository: " << kRepositoryUrl << "\n";
-        std::cout << "No update mechanism configured yet, please check GitHub Releases.\n";
+        std::cout << "API: " << UpdateManager::getLatestReleaseApiUrl() << "\n";
+
+        UpdateManager mgr;
+        auto infoOpt = mgr.checkForUpdate(std::string(kGameVersion));
+        if (!infoOpt) {
+            std::cout << "No update available or could not check. You are on " << kGameVersion << ".\n";
+            std::cout << "Check manually: " << UpdateManager::getReleasesPageUrl() << "\n";
+            auto cands = UpdateManager::getCandidateArtifactNames();
+            std::cout << "Expected artifact for your platform:\n";
+            for (auto& c : cands) std::cout << "  - " << c << "\n";
+            return 0;
+        }
+
+        auto& info = *infoOpt;
+        std::cout << "Update available!\n";
+        std::cout << "  Version: " << info.version << " Tag: " << info.tag << "\n";
+        std::cout << "  OS/Arch: " << info.os << "/" << info.arch << "\n";
+        std::cout << "  Artifact: " << info.artifactName << "\n";
+        std::cout << "  URL: " << info.downloadUrl << "\n";
+        std::cout << "  Size: " << info.size << " bytes\n";
+        if (!info.notes.empty()) {
+            std::cout << "  Notes: " << info.notes.substr(0, 500) << "\n";
+        }
+        std::cout << "Run with --update to download.\n";
         return 0;
     }
 
     if (opts_.doUpdate) {
         std::cout << "Update requested.\n";
-        std::cout << "Please download latest release from: " << kRepositoryUrl << "/releases\n";
+        std::cout << "Platform: " << UpdateManager::getCurrentPlatformString() << "\n";
+        UpdateManager mgr;
+        auto infoOpt = mgr.checkForUpdate(std::string(kGameVersion));
+        if (!infoOpt) {
+            std::cout << "No update found or could not check.\n";
+            std::cout << "Download manually from: " << kRepositoryUrl << "/releases\n";
+            return 0;
+        }
+        auto& info = *infoOpt;
+        std::cout << "Downloading " << info.artifactName << " from " << info.downloadUrl << "\n";
+
+        std::string destDir;
+        try {
+            auto paths = getAppPaths();
+            destDir = (paths.cacheDir / "updates").string();
+            std::filesystem::create_directories(destDir);
+        } catch (...) {
+            destDir = ".";
+        }
+        std::string destPath = destDir + "/" + info.artifactName;
+
+        std::cout << "Saving to: " << destPath << "\n";
+
+        if (!mgr.downloadUpdate(info, destPath)) {
+            std::cout << "Download failed. Try manual download from: " << info.downloadUrl << "\n";
+            return 1;
+        }
+
+        std::cout << "Download complete, verifying...\n";
+
+        if (!mgr.verifySize(destPath, info.size)) {
+            std::cout << "Size verification failed. Expected " << info.size << "\n";
+            std::cout << "File may be corrupted. Please try again or download manually.\n";
+            return 1;
+        }
+
+        if (!info.sha256.empty()) {
+            if (!mgr.verifyChecksum(destPath, info.sha256)) {
+                std::cout << "Checksum verification failed.\n";
+                return 1;
+            }
+            std::cout << "Checksum OK.\n";
+        } else {
+            std::cout << "No checksum provided, size OK.\n";
+        }
+
+        std::cout << "Update staged at: " << destPath << "\n";
+        std::cout << "To install:\n";
+        std::cout << "  - On Linux/macOS/BSD: tar xzf " << destPath << " and replace binary\n";
+        std::cout << "  - On Windows: unzip " << destPath << " and replace .exe (close game first, staged updater will handle self-replace)\n";
+        std::cout << "Your saves are never overwritten, they are in separate user data directory.\n";
+        std::cout << "See DOCS/BUILDING.md for install instructions.\n";
         return 0;
     }
 

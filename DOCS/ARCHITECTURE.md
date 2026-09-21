@@ -74,24 +74,24 @@ shadowdeep/
 
 ## Module Dependencies
 
-- `platform` — no deps, defines ITerminalBackend, PlatformPaths
-- `core` — Vec2, Rect, Rng
-- `terminal` — Color, Input, depends on platform
-- `tui` — ScreenBuffer virtual screen, diff rendering, depends on terminal
-- `world` — Tile, Dungeon, Generator, Fov, Region, depends on core
-- `entities` — Player, Monster, depends on core, world, effects, items
-- `items` — Item, Inventory, Equipment, Enchantment
-- `effects` — StatusEffect, EffectManager
-- `combat` — DamageType, Damage
-- `quests` — Quest, QuestManager
-- `npc` — Npc templates
-- `shops` — Shop, ShopItem
-- `codex` — Bestiary
-- `game` — GameSession, Floor, GameMessage, depends on all above
-- `save` — BinaryReader/Writer, SaveHeader, EntryMetadata, SaveManager, Migration
-- `config` — Config, ConfigManager
-- `app` — Cli, App (home, entries, gameplay, settings, changelog, credits)
-- `update` — UpdateManager (HTTPS, verification)
+- `platform` - no deps, defines ITerminalBackend, PlatformPaths
+- `core` - Vec2, Rect, Rng
+- `terminal` - Color, Input, depends on platform
+- `tui` - ScreenBuffer virtual screen, diff rendering, depends on terminal
+- `world` - Tile, Dungeon, Generator, Fov, Region, depends on core
+- `entities` - Player, Monster, depends on core, world, effects, items
+- `items` - Item, Inventory, Equipment, Enchantment
+- `effects` - StatusEffect, EffectManager
+- `combat` - DamageType, Damage
+- `quests` - Quest, QuestManager
+- `npc` - Npc templates
+- `shops` - Shop, ShopItem
+- `codex` - Bestiary
+- `game` - GameSession, Floor, GameMessage, depends on all above
+- `save` - BinaryReader/Writer, SaveHeader, EntryMetadata, SaveManager, Migration
+- `config` - Config, ConfigManager
+- `app` - Cli, App (home, entries, gameplay, settings, changelog, credits)
+- `update` - UpdateManager (HTTPS, verification)
 
 Dependency direction is strictly downward, no cycles. Platform code never leaks into gameplay.
 
@@ -123,9 +123,9 @@ See SAVE_FORMAT.md for details. Binary container with magic, versioning, chunk-b
 
 Data-driven where possible:
 
-- `data/regions/regions.json` — thematic regions
-- `data/monsters/monsters.json` — monster templates (stable IDs)
-- `data/items/` — item templates
+- `data/regions/regions.json` - thematic regions
+- `data/monsters/monsters.json` - monster templates (stable IDs)
+- `data/items/` - item templates
 - Hardcoded templates in `src/entities/monster.cpp`, `src/items/item.cpp` as fallback
 
 Stable IDs like `monster.ancient_dragon`, `item.amulet_shadowdeep` are used for save compatibility, not display names.

@@ -58,13 +58,13 @@ See DOCS/PORTING.md for details, and `.github/ISSUE_TEMPLATE/port_request.md` fo
 - Repository: https://github.com/Seigh-sword/shadowdeep
 - ISC License must be kept
 - Use `.github/pull_request_template.md`
-- If your PR is a port and fails CI, add a comment asking for help — maintainers will help fix it
+- If your PR is a port and fails CI, add a comment asking for help - maintainers will help fix it
 
 ## Issues
 
 - Bug reports: `.github/ISSUE_TEMPLATE/bug_report.md`
 - Feature requests: `.github/ISSUE_TEMPLATE/feature_request.md`
-- Port requests: `.github/ISSUE_TEMPLATE/port_request.md` — request SHADOWDEEP on your OS
+- Port requests: `.github/ISSUE_TEMPLATE/port_request.md` - request SHADOWDEEP on your OS
 
 ## Communication
 

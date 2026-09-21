@@ -11,9 +11,17 @@ on:
         description: "Version (e.g., Zv1)"
         required: true
         default: "Zv1"
+      prerelease:
+        description: "Prerelease?"
+        required: false
+        default: "false"
+        type: boolean
+
+permissions:
+  contents: write
 
 jobs:
-  build-release:
+  build-native:
     name: Build ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -36,10 +44,18 @@ jobs:
             arch: aarch64
             runner: ubuntu-22.04
             artifact: shadowdeep-Zv1-linux-aarch64.tar.gz
+          - os: linux
+            arch: arm64-rpi
+            runner: ubuntu-22.04
+            artifact: shadowdeep-Zv1-raspberrypi-aarch64.tar.gz
           - os: macos
             arch: arm64
             runner: macos-14
             artifact: shadowdeep-Zv1-macos-arm64.tar.gz
+          - os: macos
+            arch: x86_64
+            runner: macos-13
+            artifact: shadowdeep-Zv1-macos-x86_64.tar.gz
 
     steps:
       - uses: actions/checkout@v4
@@ -53,17 +69,21 @@ jobs:
       - name: Build Release
         run: cmake --build --preset release --config Release
 
-      - name: Package Windows (x86_64)
-        if: matrix.os == 'windows' && matrix.arch == 'x86_64'
+      - name: Package Windows
+        if: matrix.os == 'windows'
         run: |
           mkdir -p dist/shadowdeep
           cp build/release/shadowdeep.exe dist/shadowdeep/ || cp build/release/Release/shadowdeep.exe dist/shadowdeep/
           cp LICENSE dist/shadowdeep/
           cp README.md dist/shadowdeep/
-          cp DOCS/THIRD_PARTY.md dist/shadowdeep/ || cp DOCS/THIRD_PARTY.md dist/shadowdeep/THIRD_PARTY.md
+          cp AGENTS.md dist/shadowdeep/ || true
+          cp AGENT.md dist/shadowdeep/ || true
+          cp DOCS/THIRD_PARTY.md dist/shadowdeep/ || true
           cp -r DOCS dist/shadowdeep/DOCS
+          cp -r data dist/shadowdeep/data || true
           cd dist
           7z a ${{ matrix.artifact }} shadowdeep
+          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || shasum -a 256 ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256
         shell: bash
 
       - name: Package Linux
@@ -73,9 +93,24 @@ jobs:
           cp build/release/shadowdeep dist/shadowdeep/
           cp LICENSE dist/shadowdeep/
           cp README.md dist/shadowdeep/
+          cp AGENTS.md dist/shadowdeep/ || true
+          cp AGENT.md dist/shadowdeep/ || true
           cp -r DOCS dist/shadowdeep/DOCS
+          cp -r data dist/shadowdeep/data || true
           cd dist
           tar czf ${{ matrix.artifact }} shadowdeep
+          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256
+          # Also create alias for raspberry pi if aarch64
+          if [ "${{ matrix.arch }}" = "aarch64" ]; then
+            cp ${{ matrix.artifact }} shadowdeep-Zv1-linux-arm64.tar.gz
+            sha256sum shadowdeep-Zv1-linux-arm64.tar.gz > shadowdeep-Zv1-linux-arm64.tar.gz.sha256
+            cp ${{ matrix.artifact }} shadowdeep-Zv1-linux-arm64-rpi.tar.gz
+            sha256sum shadowdeep-Zv1-linux-arm64-rpi.tar.gz > shadowdeep-Zv1-linux-arm64-rpi.tar.gz.sha256
+          fi
+          if [ "${{ matrix.arch }}" = "arm64-rpi" ]; then
+            cp ${{ matrix.artifact }} shadowdeep-Zv1-linux-aarch64.tar.gz
+            sha256sum shadowdeep-Zv1-linux-aarch64.tar.gz > shadowdeep-Zv1-linux-aarch64.tar.gz.sha256 || true
+          fi
 
       - name: Package macOS
         if: matrix.os == 'macos'
@@ -84,28 +119,194 @@ jobs:
           cp build/release/shadowdeep dist/shadowdeep/
           cp LICENSE dist/shadowdeep/
           cp README.md dist/shadowdeep/
+          cp AGENTS.md dist/shadowdeep/ || true
           cp -r DOCS dist/shadowdeep/DOCS
+          cp -r data dist/shadowdeep/data || true
           cd dist
           tar czf ${{ matrix.artifact }} shadowdeep
+          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || shasum -a 256 ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: dist/${{ matrix.artifact }}
+          path: |
+            dist/${{ matrix.artifact }}
+            dist/${{ matrix.artifact }}.sha256
+            dist/*.tar.gz
+            dist/*.tar.gz.sha256
+
+  build-cross:
+    name: Cross Build ${{ matrix.target }} (${{ matrix.desc }})
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64
+            desc: linux-aarch64
+            artifact: shadowdeep-Zv1-linux-aarch64.tar.gz
+            dockcross: dockcross/linux-arm64:latest
+          - target: armv7
+            desc: linux-armv7-rpi
+            artifact: shadowdeep-Zv1-linux-armv7.tar.gz
+            dockcross: dockcross/linux-armv7:latest
+          - target: riscv64
+            desc: linux-riscv64
+            artifact: shadowdeep-Zv1-linux-riscv64.tar.gz
+            dockcross: dockcross/linux-riscv64:latest
+          - target: rpi-aarch64
+            desc: raspberrypi-aarch64
+            artifact: shadowdeep-Zv1-raspberrypi-aarch64.tar.gz
+            dockcross: dockcross/linux-arm64:latest
+          - target: rpi-armv7
+            desc: raspberrypi-armv7
+            artifact: shadowdeep-Zv1-raspberrypi-armv7.tar.gz
+            dockcross: dockcross/linux-armv7:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Build via Docker
+        run: |
+          set -e
+          docker pull ${{ matrix.dockcross }}
+          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
+          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake --build build/${{ matrix.target }} --verbose
+
+      - name: Package
+        run: |
+          mkdir -p dist/shadowdeep
+          cp build/${{ matrix.target }}/shadowdeep dist/shadowdeep/ || cp build/${{ matrix.target }}/shadowdeep.exe dist/shadowdeep/ || echo "binary not found, listing"; ls -R build/${{ matrix.target }} || true
+          cp LICENSE dist/shadowdeep/
+          cp README.md dist/shadowdeep/
+          cp AGENTS.md dist/shadowdeep/ || true
+          cp AGENT.md dist/shadowdeep/ || true
+          cp -r DOCS dist/shadowdeep/DOCS
+          cp -r data dist/shadowdeep/data || true
+          cd dist
+          tar czf ${{ matrix.artifact }} shadowdeep || zip -r ${{ matrix.artifact }} shadowdeep
+          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256
+          # Create alias names for compatibility
+          if [ "${{ matrix.target }}" = "aarch64" ]; then
+            cp ${{ matrix.artifact }} shadowdeep-Zv1-linux-arm64.tar.gz || true
+            sha256sum shadowdeep-Zv1-linux-arm64.tar.gz > shadowdeep-Zv1-linux-arm64.tar.gz.sha256 || true
+          fi
+          if [ "${{ matrix.target }}" = "rpi-aarch64" ]; then
+            cp ${{ matrix.artifact }} shadowdeep-Zv1-linux-aarch64.tar.gz || true
+            cp ${{ matrix.artifact }} shadowdeep-Zv1-linux-arm64.tar.gz || true
+            sha256sum shadowdeep-Zv1-linux-aarch64.tar.gz > shadowdeep-Zv1-linux-aarch64.tar.gz.sha256 || true
+            sha256sum shadowdeep-Zv1-linux-arm64.tar.gz > shadowdeep-Zv1-linux-arm64.tar.gz.sha256 || true
+          fi
+          if [ "${{ matrix.target }}" = "armv7" ]; then
+            cp ${{ matrix.artifact }} shadowdeep-Zv1-raspberrypi-armv7.tar.gz || true
+            cp ${{ matrix.artifact }} shadowdeep-Zv1-linux-armv7-rpi.tar.gz || true
+            sha256sum shadowdeep-Zv1-raspberrypi-armv7.tar.gz > shadowdeep-Zv1-raspberrypi-armv7.tar.gz.sha256 || true
+            sha256sum shadowdeep-Zv1-linux-armv7-rpi.tar.gz > shadowdeep-Zv1-linux-armv7-rpi.tar.gz.sha256 || true
+          fi
+          ls -lh
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            dist/${{ matrix.artifact }}
+            dist/${{ matrix.artifact }}.sha256
+            dist/*.tar.gz
+            dist/*.tar.gz.sha256
+
+  build-freebsd:
+    name: Build FreeBSD
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build FreeBSD x86_64
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: pkg install -y cmake ninja
+          run: |
+            cmake -B build/freebsd -G Ninja -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
+            cmake --build build/freebsd --verbose
+            mkdir -p dist/shadowdeep
+            cp build/freebsd/shadowdeep dist/shadowdeep/
+            cp LICENSE dist/shadowdeep/
+            cp README.md dist/shadowdeep/
+            cp -r DOCS dist/shadowdeep/DOCS
+            cp -r data dist/shadowdeep/data || true
+            cd dist
+            tar czf shadowdeep-Zv1-freebsd-x86_64.tar.gz shadowdeep
+            sha256sum shadowdeep-Zv1-freebsd-x86_64.tar.gz > shadowdeep-Zv1-freebsd-x86_64.tar.gz.sha256 || shasum -a 256 shadowdeep-Zv1-freebsd-x86_64.tar.gz > shadowdeep-Zv1-freebsd-x86_64.tar.gz.sha256
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shadowdeep-Zv1-freebsd-x86_64.tar.gz
+          path: |
+            dist/*.tar.gz
+            dist/*.tar.gz.sha256
+            build/freebsd/shadowdeep
+            dist/shadowdeep-Zv1-freebsd-x86_64.tar.gz
 
   release:
-    needs: build-release
+    needs: [build-native, build-cross, build-freebsd]
     runs-on: ubuntu-22.04
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+      - name: List artifacts
+        run: |
+          ls -R artifacts
+          mkdir -p release_files
+          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" -o -name "*.sha256" \) -exec cp {} release_files/ \;
+          ls -lh release_files
+          # Deduplicate
+          cd release_files
+          sha256sum * > SHA256SUMS || shasum -a 256 * > SHA256SUMS
+          cat SHA256SUMS
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: artifacts/**/*
+          files: release_files/*
           generate_release_notes: true
+          prerelease: ${{ inputs.prerelease == 'true' }}
+          body: |
+            SHADOWDEEP ${{ inputs.version || 'Zv1' }} Release
+
+            OS and Arch detection: update checker will automatically download correct artifact for your platform.
+
+            Artifacts:
+            - Windows x86_64: shadowdeep-Zv1-windows-x86_64.zip
+            - Windows ARM64: shadowdeep-Zv1-windows-arm64.zip
+            - Linux x86_64: shadowdeep-Zv1-linux-x86_64.tar.gz
+            - Linux AArch64: shadowdeep-Zv1-linux-aarch64.tar.gz (also linux-arm64)
+            - Linux ARMv7: shadowdeep-Zv1-linux-armv7.tar.gz (Raspberry Pi Zero/1/2)
+            - Linux RISC-V64: shadowdeep-Zv1-linux-riscv64.tar.gz
+            - Raspberry Pi AArch64: shadowdeep-Zv1-raspberrypi-aarch64.tar.gz (Pi 3/4/5)
+            - Raspberry Pi ARMv7: shadowdeep-Zv1-raspberrypi-armv7.tar.gz
+            - macOS ARM64: shadowdeep-Zv1-macos-arm64.tar.gz
+            - macOS x86_64: shadowdeep-Zv1-macos-x86_64.tar.gz
+            - FreeBSD x86_64: shadowdeep-Zv1-freebsd-x86_64.tar.gz
+
+            Each artifact includes LICENSE, README, AGENTS.md, DOCS/, data/.
+
+            Checksums in SHA256SUMS and individual .sha256 files.
+
+            To update: run `shadowdeep --check-update` to check OS/arch, then `shadowdeep --update` to download correct artifact.
+
+            For Raspberry Pi:
+            ```
+            tar xzf shadowdeep-Zv1-raspberrypi-aarch64.tar.gz
+            ./shadowdeep/shadowdeep --version
+            ```
+
+            Made by github.com/Seigh-sword
+            ISC License

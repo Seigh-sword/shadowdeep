@@ -51,6 +51,58 @@
         "CMAKE_BUILD_TYPE": "Release",
         "SHADOWDEEP_BUILD_TESTS": "OFF"
       }
+    },
+    {
+      "name": "rpi-aarch64",
+      "displayName": "Raspberry Pi 3/4/5 64-bit",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/rpi-aarch64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SHADOWDEEP_BUILD_TESTS": "OFF",
+        "SHADOWDEEP_RPI": "ON"
+      }
+    },
+    {
+      "name": "rpi-armv7",
+      "displayName": "Raspberry Pi Zero/1/2 32-bit",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/rpi-armv7",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SHADOWDEEP_BUILD_TESTS": "OFF",
+        "SHADOWDEEP_RPI": "ON"
+      }
+    },
+    {
+      "name": "linux-aarch64",
+      "displayName": "Linux AArch64",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/aarch64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SHADOWDEEP_BUILD_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "linux-armv7",
+      "displayName": "Linux ARMv7",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/armv7",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SHADOWDEEP_BUILD_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "linux-riscv64",
+      "displayName": "Linux RISC-V64",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/riscv64",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SHADOWDEEP_BUILD_TESTS": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -71,6 +123,26 @@
       "name": "release-windows",
       "configurePreset": "release-windows",
       "configuration": "Release"
+    },
+    {
+      "name": "rpi-aarch64",
+      "configurePreset": "rpi-aarch64"
+    },
+    {
+      "name": "rpi-armv7",
+      "configurePreset": "rpi-armv7"
+    },
+    {
+      "name": "aarch64",
+      "configurePreset": "linux-aarch64"
+    },
+    {
+      "name": "armv7",
+      "configurePreset": "linux-armv7"
+    },
+    {
+      "name": "riscv64",
+      "configurePreset": "linux-riscv64"
     }
   ],
   "testPresets": [
