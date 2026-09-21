@@ -34,11 +34,19 @@ struct Vec2 {
     }
 
     constexpr int manhattan(const Vec2& o) const {
-        return std::abs(x - o.x) + std::abs(y - o.y);
+        int dx = x - o.x;
+        int dy = y - o.y;
+        if (dx < 0) dx = -dx;
+        if (dy < 0) dy = -dy;
+        return dx + dy;
     }
 
     constexpr int chebyshev(const Vec2& o) const {
-        return std::max(std::abs(x - o.x), std::abs(y - o.y));
+        int dx = x - o.x;
+        int dy = y - o.y;
+        if (dx < 0) dx = -dx;
+        if (dy < 0) dy = -dy;
+        return dx > dy ? dx : dy;
     }
 
     constexpr int lengthSq() const {

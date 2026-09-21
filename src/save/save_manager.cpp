@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstdio>
+#include <ctime>
 
 namespace shadowdeep {
 
@@ -263,7 +264,15 @@ bool SaveManager::backupEntry(const std::string& entryId) {
         auto now = std::chrono::system_clock::now();
         auto t = std::chrono::system_clock::to_time_t(now);
         char buf[64];
-        std::strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", std::localtime(&t));
+#ifdef _WIN32
+        std::tm tmBuf{};
+        localtime_s(&tmBuf, &t);
+        std::strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tmBuf);
+#else
+        std::tm tmBuf{};
+        localtime_r(&t, &tmBuf);
+        std::strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tmBuf);
+#endif
         auto dest = paths_.backupsDir / (entryId + "_" + buf + ".bak");
         fs::copy_file(src, dest);
 

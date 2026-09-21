@@ -4,7 +4,6 @@ namespace shadowdeep {
 
 std::string ansiColorCode(Color c, bool bg) {
     int base = bg ? 40 : 30;
-    int brightBase = bg ? 100 : 90;
     switch (c) {
         case Color::Default: return bg ? "\033[49m" : "\033[39m";
         case Color::Black: return std::string("\033[") + std::to_string(base) + "m";
