@@ -12,6 +12,29 @@ Repository: https://github.com/Seigh-sword/shadowdeep
 
 Licensed under the ISC License.
 
+## Intentionally Built for Porting
+
+SHADOWDEEP was intentionally made for porting and to run anywhere while also being a real game.
+
+It is designed to work for:
+
+- Desktop users on Windows, Linux, macOS
+- CLI-based distros and minimal environments
+- BSDs and other Unix-like systems
+- Unusual and research operating systems where a TUI is possible
+
+Portability is architectural, not an afterthought. Platform-specific code lives only in `src/platform/` behind clear interfaces. Gameplay never includes `windows.h` or `termios.h` directly.
+
+If you want SHADOWDEEP on your OS, you are welcome to try.
+
+- You can create a PR for your own version or port
+- If the PR's CI fails, we will help fix the bugs ourselves if you request it
+- You can also open an ISSUE requesting a custom port and we will look into it
+
+See `DOCS/PORTING.md` for what a new backend needs to implement.
+
+We are always open to port contributions.
+
 ## Features
 
 - Turn-based tactical dungeon crawling
@@ -35,7 +58,7 @@ Licensed under the ISC License.
 - Entries: persistent save system with binary format, atomic saving, backups, import/export
 - Settings: color, theme, animations, keybindings
 - Seeded runs, --seed support
-- Cross-platform: Windows, Linux, macOS, BSDs
+- Cross-platform: Windows, Linux, macOS, BSDs, with Tier system
 
 ## Quick Start
 
@@ -104,11 +127,25 @@ Structure:
 
 ## Building
 
-See BUILDING.md
+See DOCS/BUILDING.md
 
 ## Porting
 
-See PORTING.md
+See DOCS/PORTING.md — intentionally designed for broad OS support.
+
+We welcome custom ports. Open an Issue with label `port-request` or a PR with your port. If CI fails, we will help fix it if you ask.
+
+## Documentation
+
+All docs are in DOCS/:
+
+- DOCS/BUILDING.md
+- DOCS/PORTING.md
+- DOCS/THIRD_PARTY.md
+- DOCS/CHANGELOG.md
+- DOCS/CONTRIBUTING.md
+- DOCS/ARCHITECTURE.md (coming)
+- DOCS/SAVE_FORMAT.md (coming)
 
 ## License
 
@@ -116,4 +153,8 @@ ISC License — see LICENSE
 
 ## Third Party
 
-See THIRD_PARTY.md
+See DOCS/THIRD_PARTY.md
+
+## Contributing
+
+See DOCS/CONTRIBUTING.md — we are always open to PRs, including ports to new platforms.

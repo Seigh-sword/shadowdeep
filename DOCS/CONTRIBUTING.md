@@ -15,7 +15,7 @@ Current public version is **Zv1** (Zero v1).
 - Clear names, small cohesive components, good file organization
 - RAII, no raw owning pointers
 - Use std::unique_ptr, std::vector, std::string, std::optional, etc.
-- No emojis in code or commits
+- No emojis in code or commits (except GitHub templates where appropriate)
 
 ## Architecture
 
@@ -28,11 +28,23 @@ Current public version is **Zv1** (Zero v1).
 
 - Project name: SHADOWDEEP
 - Save menu: Entries (not Games, Adventures, Profiles)
-- Internal code: SaveFile, SaveManager, SaveMetadata
+- Internal code: SaveFile, SaveManager, SaveMetadata, EntryMetadata
 
 ## Building
 
-See BUILDING.md
+See DOCS/BUILDING.md
+
+## Porting Intent
+
+SHADOWDEEP was intentionally made for porting and to run anywhere while also being a real game.
+
+We are always open to ports:
+
+- Create a PR for your own version or port
+- If CI fails, we will fix bugs ourselves if you request it
+- Or open an Issue with label `port-request`
+
+See DOCS/PORTING.md for details, and `.github/ISSUE_TEMPLATE/port_request.md` for the template.
 
 ## Tests
 
@@ -44,9 +56,18 @@ See BUILDING.md
 - Do not include age in credits
 - Keep attribution: github.com/Seigh-sword
 - Repository: https://github.com/Seigh-sword/shadowdeep
-- ISC License
+- ISC License must be kept
+- Use `.github/pull_request_template.md`
+- If your PR is a port and fails CI, add a comment asking for help — maintainers will help fix it
+
+## Issues
+
+- Bug reports: `.github/ISSUE_TEMPLATE/bug_report.md`
+- Feature requests: `.github/ISSUE_TEMPLATE/feature_request.md`
+- Port requests: `.github/ISSUE_TEMPLATE/port_request.md` — request SHADOWDEEP on your OS
 
 ## Communication
 
 - Explain architectural decisions clearly
 - If request creates security/portability problem, explain and propose better implementation
+- Be respectful: this project aims to be welcoming for CLI and desktop users alike

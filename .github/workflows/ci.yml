@@ -60,11 +60,11 @@ jobs:
         run: |
           set -o pipefail
           echo "Configuring debug-windows"
-          cmake --preset debug-windows --verbose 2>&1 | tee configure-debug.log
+          cmake --preset debug-windows 2>&1 | tee configure-debug.log
           echo "Configure debug exit code: ${PIPESTATUS[0]}"
           cat configure-debug.log
           echo "Configuring release-windows"
-          cmake --preset release-windows --verbose 2>&1 | tee configure-release.log
+          cmake --preset release-windows 2>&1 | tee configure-release.log
           echo "Configure release exit code: ${PIPESTATUS[0]}"
           cat configure-release.log
         shell: bash
@@ -180,7 +180,12 @@ jobs:
             }
 
       - name: Test
+        if: runner.os != 'Windows'
         run: ctest --preset debug --output-on-failure
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        run: ctest --preset debug-windows --output-on-failure
 
       - name: Check version
         run: |
@@ -195,6 +200,8 @@ jobs:
           path: |
             build-debug.log
             build-release.log
+            configure-debug.log
+            configure-release.log
 
   sanitizers:
     name: Sanitizers (Ubuntu Clang)

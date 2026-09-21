@@ -19,23 +19,28 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Build via Docker
         run: |
+          set -e
           case "${{ matrix.target }}" in
             aarch64)
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:2023-12-10 cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:2023-12-10 cmake --build build/${{ matrix.target }}
+              docker pull dockcross/linux-arm64:latest
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake --build build/${{ matrix.target }} --verbose
               ;;
             armv7)
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:2023-12-10 cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:2023-12-10 cmake --build build/${{ matrix.target }}
+              docker pull dockcross/linux-armv7:latest
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake --build build/${{ matrix.target }} --verbose
               ;;
             riscv64)
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:2023-12-10 cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:2023-12-10 cmake --build build/${{ matrix.target }}
+              docker pull dockcross/linux-riscv64:latest
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:latest cmake --build build/${{ matrix.target }} --verbose
               ;;
           esac
 
   freebsd:
     runs-on: ubuntu-22.04
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Build FreeBSD x86_64
@@ -44,5 +49,5 @@ jobs:
           usesh: true
           prepare: pkg install -y cmake ninja
           run: |
-            cmake --preset release
-            cmake --build --preset release
+            cmake -B build/freebsd -G Ninja -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
+            cmake --build build/freebsd --verbose

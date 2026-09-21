@@ -60,7 +60,8 @@ jobs:
           cp build/release/shadowdeep.exe dist/shadowdeep/ || cp build/release/Release/shadowdeep.exe dist/shadowdeep/
           cp LICENSE dist/shadowdeep/
           cp README.md dist/shadowdeep/
-          cp THIRD_PARTY.md dist/shadowdeep/
+          cp DOCS/THIRD_PARTY.md dist/shadowdeep/ || cp DOCS/THIRD_PARTY.md dist/shadowdeep/THIRD_PARTY.md
+          cp -r DOCS dist/shadowdeep/DOCS
           cd dist
           7z a ${{ matrix.artifact }} shadowdeep
         shell: bash
@@ -72,7 +73,7 @@ jobs:
           cp build/release/shadowdeep dist/shadowdeep/
           cp LICENSE dist/shadowdeep/
           cp README.md dist/shadowdeep/
-          cp THIRD_PARTY.md dist/shadowdeep/
+          cp -r DOCS dist/shadowdeep/DOCS
           cd dist
           tar czf ${{ matrix.artifact }} shadowdeep
 
@@ -83,7 +84,7 @@ jobs:
           cp build/release/shadowdeep dist/shadowdeep/
           cp LICENSE dist/shadowdeep/
           cp README.md dist/shadowdeep/
-          cp THIRD_PARTY.md dist/shadowdeep/
+          cp -r DOCS dist/shadowdeep/DOCS
           cd dist
           tar czf ${{ matrix.artifact }} shadowdeep
 

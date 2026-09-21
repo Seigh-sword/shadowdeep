@@ -83,6 +83,7 @@ endif()
 install(TARGETS shadowdeep DESTINATION bin)
 install(DIRECTORY data/ DESTINATION share/shadowdeep/data OPTIONAL)
 install(FILES LICENSE README.md DESTINATION share/doc/shadowdeep OPTIONAL)
+install(DIRECTORY DOCS/ DESTINATION share/doc/shadowdeep/DOCS OPTIONAL)
 
 set(CPACK_PACKAGE_NAME "shadowdeep")
 set(CPACK_PACKAGE_VERSION "Zv1")
