@@ -5,6 +5,10 @@ on:
     branches: [ main, arena/* ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   linux-cross:
     runs-on: ubuntu-22.04
@@ -23,34 +27,85 @@ jobs:
           case "${{ matrix.target }}" in
             aarch64)
               docker pull dockcross/linux-arm64:latest
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake --build build/${{ matrix.target }} --verbose
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF 2>&1 | tee configure-${{ matrix.target }}.log
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake --build build/${{ matrix.target }} --verbose 2>&1 | tee build-${{ matrix.target }}.log
               ;;
             armv7)
               docker pull dockcross/linux-armv7:latest
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake --build build/${{ matrix.target }} --verbose
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF 2>&1 | tee configure-${{ matrix.target }}.log
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake --build build/${{ matrix.target }} --verbose 2>&1 | tee build-${{ matrix.target }}.log
               ;;
             riscv64)
               docker pull dockcross/linux-riscv64:latest
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:latest cmake --build build/${{ matrix.target }} --verbose
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF 2>&1 | tee configure-${{ matrix.target }}.log
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-riscv64:latest cmake --build build/${{ matrix.target }} --verbose 2>&1 | tee build-${{ matrix.target }}.log
               ;;
             rpi-aarch64)
               echo "Building for Raspberry Pi 3/4/5 64-bit (aarch64)"
               docker pull dockcross/linux-arm64:latest
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF -DSHADOWDEEP_RPI=ON
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake --build build/${{ matrix.target }} --verbose
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF -DSHADOWDEEP_RPI=ON 2>&1 | tee configure-${{ matrix.target }}.log
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-arm64:latest cmake --build build/${{ matrix.target }} --verbose 2>&1 | tee build-${{ matrix.target }}.log
               ls -lh build/${{ matrix.target }}/shadowdeep || true
               ;;
             rpi-armv7)
               echo "Building for Raspberry Pi Zero/1/2 32-bit (armv7)"
               docker pull dockcross/linux-armv7:latest
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF -DSHADOWDEEP_RPI=ON
-              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake --build build/${{ matrix.target }} --verbose
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF -DSHADOWDEEP_RPI=ON 2>&1 | tee configure-${{ matrix.target }}.log
+              docker run --rm -v $PWD:/work -w /work dockcross/linux-armv7:latest cmake --build build/${{ matrix.target }} --verbose 2>&1 | tee build-${{ matrix.target }}.log
               ls -lh build/${{ matrix.target }}/shadowdeep || true
               ;;
           esac
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "=== Configure log ==="
+          cat configure-${{ matrix.target }}.log || true
+          echo "=== Build log ==="
+          tail -n 500 build-${{ matrix.target }}.log || true
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-logs-${{ matrix.target }}
+          path: |
+            configure-${{ matrix.target }}.log
+            build-${{ matrix.target }}.log
+
+      - name: Post log to issue on failure
+        if: failure()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let logs = [];
+            const files = [`configure-${{ matrix.target }}.log`, `build-${{ matrix.target }}.log`];
+            for (const f of files) {
+              try {
+                let content = fs.readFileSync(f, 'utf8');
+                content = content.slice(-4000);
+                logs.push("=== " + f + " ===\n" + content);
+              } catch (e) {
+                logs.push("=== " + f + " missing: " + e.message + " ===");
+              }
+            }
+            let combined = logs.join("\n\n");
+            combined = combined.slice(-12000);
+            const body = `Cross compile ${{ matrix.target }} failed for ${context.sha.slice(0,7)}:\n\`\`\`\n${combined}\n\`\`\`\n`;
+            console.log(body);
+            try {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Cross compile ${{ matrix.target }} failure ${context.sha.slice(0,7)}`,
+                body: body,
+                labels: ["bug", "port"]
+              });
+            } catch (err) {
+              console.log("Failed to create issue: " + err.message);
+            }
 
   freebsd:
     runs-on: ubuntu-22.04
@@ -61,10 +116,16 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           usesh: true
-          prepare: pkg install -y cmake ninja
+          prepare: pkg install -y cmake ninja curl
           run: |
-            cmake -B build/freebsd -G Ninja -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
-            cmake --build build/freebsd --verbose
+            cmake -B build/freebsd -G Ninja -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF 2>&1 | tee configure-freebsd.log
+            cmake --build build/freebsd --verbose 2>&1 | tee build-freebsd.log
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          cat configure-freebsd.log || true
+          tail -n 500 build-freebsd.log || true
 
   raspberrypi:
     name: Raspberry Pi ${{ matrix.arch }} (${{ matrix.model }})
@@ -91,8 +152,8 @@ jobs:
           set -e
           echo "Building for ${{ matrix.model }} ${{ matrix.arch }}"
           docker pull ${{ matrix.dockcross }}
-          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake -B build/rpi-${{ matrix.arch }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF -DSHADOWDEEP_RPI=ON
-          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake --build build/rpi-${{ matrix.arch }} --verbose
+          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake -B build/rpi-${{ matrix.arch }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF -DSHADOWDEEP_RPI=ON 2>&1 | tee configure-rpi-${{ matrix.arch }}.log
+          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake --build build/rpi-${{ matrix.arch }} --verbose 2>&1 | tee build-rpi-${{ matrix.arch }}.log
           mkdir -p dist
           cp build/rpi-${{ matrix.arch }}/shadowdeep dist/ || true
           ls -lh dist/ build/rpi-${{ matrix.arch }}/
@@ -110,10 +171,57 @@ jobs:
           tar czf ${{ matrix.artifact }} shadowdeep || true
           sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || true
           ls -lh
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          cat configure-rpi-${{ matrix.arch }}.log || true
+          tail -n 500 build-rpi-${{ matrix.arch }}.log || true
       - name: Upload Raspberry Pi Artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
           path: |
             dist/${{ matrix.artifact }}
             dist/${{ matrix.artifact }}.sha256
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpi-logs-${{ matrix.arch }}
+          path: |
+            configure-rpi-${{ matrix.arch }}.log
+            build-rpi-${{ matrix.arch }}.log
+      - name: Post log to issue on failure
+        if: failure()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let logs = [];
+            const files = [`configure-rpi-${{ matrix.arch }}.log`, `build-rpi-${{ matrix.arch }}.log`];
+            for (const f of files) {
+              try {
+                let content = fs.readFileSync(f, 'utf8');
+                content = content.slice(-4000);
+                logs.push("=== " + f + " ===\n" + content);
+              } catch (e) {
+                logs.push("=== " + f + " missing: " + e.message + " ===");
+              }
+            }
+            let combined = logs.join("\n\n");
+            combined = combined.slice(-12000);
+            const body = `Raspberry Pi ${{ matrix.arch }} build failed for ${context.sha.slice(0,7)}:\n\`\`\`\n${combined}\n\`\`\`\n`;
+            console.log(body);
+            try {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Raspberry Pi ${{ matrix.arch }} failure ${context.sha.slice(0,7)}`,
+                body: body,
+                labels: ["bug", "port-request"]
+              });
+            } catch (err) {
+              console.log("Failed to create issue: " + err.message);
+            }

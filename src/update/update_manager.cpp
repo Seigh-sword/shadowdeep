@@ -8,6 +8,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdint>
+#include <cstdio>
+#include <vector>
+#include <array>
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -25,7 +28,13 @@
 
 #if __has_include(<curl/curl.h>)
 #include <curl/curl.h>
+#ifndef SHADOWDEEP_HAS_CURL
 #define SHADOWDEEP_HAS_CURL 1
+#endif
+#endif
+
+#ifndef SHADOWDEEP_HAS_CURL
+#define SHADOWDEEP_HAS_CURL 0
 #endif
 
 namespace shadowdeep {
@@ -172,7 +181,7 @@ std::string UpdateManager::getReleasesPageUrl() {
     return "https://github.com/Seigh-sword/shadowdeep/releases";
 }
 
-#ifdef SHADOWDEEP_HAS_CURL
+#if SHADOWDEEP_HAS_CURL
 static size_t curlWriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     std::string* s = static_cast<std::string*>(userp);
     s->append(static_cast<char*>(contents), size * nmemb);
@@ -265,7 +274,7 @@ std::string UpdateManager::httpGet(const std::string& url) {
 
     return result;
 #else
-#ifdef SHADOWDEEP_HAS_CURL
+#if SHADOWDEEP_HAS_CURL
     CURL* curl = curl_easy_init();
     if (!curl) return "";
     std::string response;
@@ -385,7 +394,7 @@ bool UpdateManager::httpDownload(const std::string& url, const std::string& dest
     WinHttpCloseHandle(hSession);
     return ok;
 #else
-#ifdef SHADOWDEEP_HAS_CURL
+#if SHADOWDEEP_HAS_CURL
     CURL* curl = curl_easy_init();
     if (!curl) return false;
     std::ofstream out(destPath, std::ios::binary);
