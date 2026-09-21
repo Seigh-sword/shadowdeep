@@ -151,21 +151,20 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            let log = "";
-            try {
-              log = fs.readFileSync('configure-debug.log', 'utf8');
-            } catch (e) {
+            let logs = [];
+            const files = ['configure-debug.log','configure-release.log','build-debug.log','build-release.log'];
+            for (const f of files) {
               try {
-                log = fs.readFileSync('build-debug.log', 'utf8');
-              } catch (e2) {
-                log = "Could not read logs: " + e.message + " / " + e2.message;
-                try {
-                  log += "\n\nFiles in workspace:\n" + fs.readdirSync('.').join(', ');
-                } catch (e3) {}
+                let content = fs.readFileSync(f, 'utf8');
+                content = content.slice(-4000);
+                logs.push("=== " + f + " ===\n" + content);
+              } catch (e) {
+                logs.push("=== " + f + " missing: " + e.message + " ===");
               }
             }
-            log = log.slice(-8000);
-            const body = "Windows build failed log tail for " + context.sha.slice(0,7) + ":\n```\n" + log + "\n```\n";
+            let combined = logs.join("\n\n");
+            combined = combined.slice(-12000);
+            const body = "Windows build failed log tail for " + context.sha.slice(0,7) + ":\n```\n" + combined + "\n```\n";
             console.log(body);
             try {
               await github.rest.issues.create({
