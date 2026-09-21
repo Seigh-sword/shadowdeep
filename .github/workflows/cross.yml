@@ -161,24 +161,32 @@ jobs:
       - name: Package Raspberry Pi
         run: |
           set -e
-          mkdir -p dist/shadowdeep
-          cp build/rpi-${{ matrix.arch }}/shadowdeep dist/shadowdeep/ || cp build/rpi-aarch64/shadowdeep dist/shadowdeep/ || cp build/rpi-armv7/shadowdeep dist/shadowdeep/ || echo "binary copy fallback"
-          cp LICENSE dist/shadowdeep/ || true
-          cp README.md dist/shadowdeep/ || true
-          cp AGENTS.md dist/shadowdeep/ || true
-          cp AGENT.md dist/shadowdeep/ || true
-          cp -r DOCS dist/shadowdeep/DOCS || true
-          cp -r data dist/shadowdeep/data || true
-          cd dist
-          tar czf ${{ matrix.artifact }} shadowdeep || zip -r ${{ matrix.artifact }} shadowdeep || true
-          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || shasum -a 256 ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || true
-          ls -lh
-          echo "Package OK"
+          echo "Packaging ${{ matrix.arch }}" | tee package-rpi-${{ matrix.arch }}.log
+          mkdir -p dist/shadowdeep 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log
+          cp build/rpi-${{ matrix.arch }}/shadowdeep dist/shadowdeep/ 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log || cp build/rpi-aarch64/shadowdeep dist/shadowdeep/ 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log || cp build/rpi-armv7/shadowdeep dist/shadowdeep/ 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log || echo "binary copy fallback" | tee -a package-rpi-${{ matrix.arch }}.log
+          cp LICENSE dist/shadowdeep/ 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log || true
+          cp README.md dist/shadowdeep/ 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log || true
+          cp AGENTS.md dist/shadowdeep/ 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log || true
+          cp AGENT.md dist/shadowdeep/ 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log || true
+          cp -r DOCS dist/shadowdeep/DOCS 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log || true
+          cp -r data dist/shadowdeep/data 2>&1 | tee -a package-rpi-${{ matrix.arch }}.log || true
+          cd dist 2>&1 | tee -a ../package-rpi-${{ matrix.arch }}.log
+          tar czf ${{ matrix.artifact }} shadowdeep 2>&1 | tee -a ../package-rpi-${{ matrix.arch }}.log || zip -r ${{ matrix.artifact }} shadowdeep 2>&1 | tee -a ../package-rpi-${{ matrix.arch }}.log || true
+          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 2>&1 | tee -a ../package-rpi-${{ matrix.arch }}.log || shasum -a 256 ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 2>&1 | tee -a ../package-rpi-${{ matrix.arch }}.log || true
+          ls -lh 2>&1 | tee -a ../package-rpi-${{ matrix.arch }}.log
+          echo "Package OK" 2>&1 | tee -a ../package-rpi-${{ matrix.arch }}.log
+          cd ..
+          cat package-rpi-${{ matrix.arch }}.log
       - name: Show logs on failure
         if: failure()
         run: |
+          echo "=== Configure ==="
           cat configure-rpi-${{ matrix.arch }}.log || true
+          echo "=== Build ==="
           tail -n 500 build-rpi-${{ matrix.arch }}.log || true
+          echo "=== Package ==="
+          cat package-rpi-${{ matrix.arch }}.log || true
+          ls -R dist || true
       - name: Upload Raspberry Pi Artifact
         if: success() || failure()
         uses: actions/upload-artifact@v4
@@ -206,7 +214,7 @@ jobs:
           script: |
             const fs = require('fs');
             let logs = [];
-            const files = [`configure-rpi-${{ matrix.arch }}.log`, `build-rpi-${{ matrix.arch }}.log`];
+            const files = [`configure-rpi-${{ matrix.arch }}.log`, `build-rpi-${{ matrix.arch }}.log`, `package-rpi-${{ matrix.arch }}.log`];
             for (const f of files) {
               try {
                 let content = fs.readFileSync(f, 'utf8');
@@ -216,6 +224,11 @@ jobs:
                 logs.push("=== " + f + " missing: " + e.message + " ===");
               }
             }
+            try {
+              const { execSync } = require('child_process');
+              const ls = execSync('ls -R dist 2>&1 || true').toString().slice(-2000);
+              logs.push("=== ls -R dist ===\n" + ls);
+            } catch (e) {}
             let combined = logs.join("\n\n");
             combined = combined.slice(-12000);
             const body = `Raspberry Pi ${{ matrix.arch }} build failed for ${context.sha.slice(0,7)}:\n\`\`\`\n${combined}\n\`\`\`\n`;
