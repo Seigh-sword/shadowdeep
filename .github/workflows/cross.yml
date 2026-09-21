@@ -180,13 +180,16 @@ jobs:
           cat configure-rpi-${{ matrix.arch }}.log || true
           tail -n 500 build-rpi-${{ matrix.arch }}.log || true
       - name: Upload Raspberry Pi Artifact
-        if: success()
+        if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
           path: |
             dist/${{ matrix.artifact }}
             dist/${{ matrix.artifact }}.sha256
+            dist/*.tar.gz
+            dist/*.tar.gz.sha256
+          if-no-files-found: warn
       - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
