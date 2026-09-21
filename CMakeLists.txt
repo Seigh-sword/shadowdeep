@@ -55,14 +55,14 @@ set(SHADOWDEEP_SOURCES
 add_library(shadowdeep_lib STATIC ${SHADOWDEEP_SOURCES})
 target_include_directories(shadowdeep_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+add_executable(shadowdeep src/main.cpp)
+target_link_libraries(shadowdeep PRIVATE shadowdeep_lib)
+
 if(WIN32)
     target_link_libraries(shadowdeep_lib PUBLIC shlwapi shell32 ole32)
     target_compile_definitions(shadowdeep_lib PUBLIC NOMINMAX WIN32_LEAN_AND_MEAN)
     target_compile_definitions(shadowdeep PUBLIC NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
-
-add_executable(shadowdeep src/main.cpp)
-target_link_libraries(shadowdeep PRIVATE shadowdeep_lib)
 
 if(SHADOWDEEP_USE_FTXUI)
     include(FetchContent)
