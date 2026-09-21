@@ -5,16 +5,16 @@
 namespace shadowdeep {
 
 ScreenBuffer::ScreenBuffer(int w, int h) : w_(w), h_(h) {
-    cells_.resize(w * h);
-    prev_.resize(w * h);
+    cells_.resize(static_cast<size_t>(w) * static_cast<size_t>(h));
+    prev_.resize(static_cast<size_t>(w) * static_cast<size_t>(h));
     clear();
 }
 
 void ScreenBuffer::resize(int w, int h) {
     w_ = w;
     h_ = h;
-    cells_.assign(w * h, Cell{});
-    prev_.assign(w * h, Cell{});
+    cells_.assign(static_cast<size_t>(w) * static_cast<size_t>(h), Cell{});
+    prev_.assign(static_cast<size_t>(w) * static_cast<size_t>(h), Cell{});
     clear();
 }
 
@@ -34,7 +34,7 @@ void ScreenBuffer::clear() {
 
 void ScreenBuffer::set(int x, int y, const Cell& cell) {
     if (x < 0 || x >= w_ || y < 0 || y >= h_) return;
-    cells_[y * w_ + x] = cell;
+    cells_[static_cast<size_t>(y * w_ + x)] = cell;
 }
 
 void ScreenBuffer::set(int x, int y, const std::string& g, Color fg, bool bold) {
@@ -128,16 +128,16 @@ void ScreenBuffer::drawVLine(int x, int y, int h, const std::string& ch, Color c
 const Cell& ScreenBuffer::at(int x, int y) const {
     static Cell empty;
     if (x < 0 || x >= w_ || y < 0 || y >= h_) return empty;
-    return cells_[y * w_ + x];
+    return cells_[static_cast<size_t>(y * w_ + x)];
 }
 
 Cell& ScreenBuffer::at(int x, int y) {
-    return cells_[y * w_ + x];
+    return cells_[static_cast<size_t>(y * w_ + x)];
 }
 
 std::string ScreenBuffer::toAnsi(bool diff) {
     std::string out;
-    out.reserve(w_ * h_ * 4);
+    out.reserve(static_cast<size_t>(w_ * h_ * 4));
     out += "\033[H";
 
     Color lastFg = Color::Default;

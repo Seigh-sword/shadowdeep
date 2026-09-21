@@ -24,7 +24,7 @@ SaveHeader SaveHeader::makeNew(uint16_t schemaVersion) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<uint32_t> dis(0, 255);
-    for (int i = 0; i < 16; ++i) h.entryUuid[i] = static_cast<uint8_t>(dis(gen));
+    for (int i = 0; i < 16; ++i) h.entryUuid[static_cast<size_t>(i)] = static_cast<uint8_t>(dis(gen));
 
     return h;
 }

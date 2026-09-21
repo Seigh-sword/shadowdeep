@@ -30,7 +30,7 @@ bool BinaryReader::readU8(uint8_t& out) {
 
 bool BinaryReader::readU16(uint16_t& out) {
     if (pos_ + 2 > len_) return false;
-    out = static_cast<uint16_t>(data_[pos_]) | (static_cast<uint16_t>(data_[pos_ + 1]) << 8);
+    out = static_cast<uint16_t>(static_cast<uint16_t>(data_[pos_]) | (static_cast<uint16_t>(data_[pos_ + 1]) << 8));
     pos_ += 2;
     return true;
 }
@@ -49,7 +49,7 @@ bool BinaryReader::readU64(uint64_t& out) {
     if (pos_ + 8 > len_) return false;
     out = 0;
     for (int i = 0; i < 8; ++i) {
-        out |= static_cast<uint64_t>(data_[pos_ + i]) << (i * 8);
+        out |= static_cast<uint64_t>(data_[pos_ + i]) << static_cast<uint64_t>(i * 8);
     }
     pos_ += 8;
     return true;

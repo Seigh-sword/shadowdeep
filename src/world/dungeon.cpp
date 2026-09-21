@@ -34,9 +34,9 @@ Dungeon::Dungeon() {
 void Dungeon::clear() {
     for (int y = 0; y < kMapH; ++y) {
         for (int x = 0; x < kMapW; ++x) {
-            tiles[y][x] = Tile::Wall;
-            explored[y][x] = false;
-            visible[y][x] = false;
+            tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] = Tile::Wall;
+            explored[static_cast<size_t>(y)][static_cast<size_t>(x)] = false;
+            visible[static_cast<size_t>(y)][static_cast<size_t>(x)] = false;
         }
     }
     rooms.clear();
@@ -57,11 +57,11 @@ bool Dungeon::inBounds(Vec2 p) const {
 
 Tile Dungeon::at(Vec2 p) const {
     if (!inBounds(p)) return Tile::Wall;
-    return tiles[p.y][p.x];
+    return tiles[static_cast<size_t>(p.y)][static_cast<size_t>(p.x)];
 }
 
 void Dungeon::set(Vec2 p, Tile t) {
-    if (inBounds(p)) tiles[p.y][p.x] = t;
+    if (inBounds(p)) tiles[static_cast<size_t>(p.y)][static_cast<size_t>(p.x)] = t;
 }
 
 bool Dungeon::blocksMove(Vec2 p) const {
@@ -123,14 +123,14 @@ void Dungeon::computeFov(Vec2 origin, int radius) {
             int dy = y - origin.y;
             if (dx * dx + dy * dy > r2) continue;
             if (lineVisible(origin, p)) {
-                visible[y][x] = true;
-                explored[y][x] = true;
+                visible[static_cast<size_t>(y)][static_cast<size_t>(x)] = true;
+                explored[static_cast<size_t>(y)][static_cast<size_t>(x)] = true;
             }
         }
     }
     if (inBounds(origin)) {
-        visible[origin.y][origin.x] = true;
-        explored[origin.y][origin.x] = true;
+        visible[static_cast<size_t>(origin.y)][static_cast<size_t>(origin.x)] = true;
+        explored[static_cast<size_t>(origin.y)][static_cast<size_t>(origin.x)] = true;
     }
 }
 

@@ -126,7 +126,7 @@ void DungeonGenerator::generateRooms(Dungeon& d, int depth) {
         for (int y = r.y; y < r.y + r.h; ++y) {
             for (int x = r.x; x < r.x + r.w; ++x) {
                 Vec2 p{x, y};
-                if (d.inBounds(p)) d.tiles[y][x] = Tile::Floor;
+                if (d.inBounds(p)) d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] = Tile::Floor;
             }
         }
     }
@@ -181,7 +181,7 @@ void DungeonGenerator::generateBsp(Dungeon& d) {
         for (int yy = r.y; yy < r.y + r.h; ++yy) {
             for (int xx = r.x; xx < r.x + r.w; ++xx) {
                 Vec2 p{xx, yy};
-                if (d.inBounds(p)) d.tiles[yy][xx] = Tile::Floor;
+                if (d.inBounds(p)) d.tiles[static_cast<size_t>(yy)][static_cast<size_t>(xx)] = Tile::Floor;
             }
         }
     }
@@ -200,7 +200,7 @@ void DungeonGenerator::generateBsp(Dungeon& d) {
 void DungeonGenerator::generateCavern(Dungeon& d) {
     for (int y = 1; y < d.mapH - 1; ++y) {
         for (int x = 1; x < d.mapW - 1; ++x) {
-            d.tiles[y][x] = rng_.chance(46) ? Tile::Wall : Tile::Floor;
+            d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] = rng_.chance(46) ? Tile::Wall : Tile::Floor;
         }
     }
 
@@ -213,11 +213,11 @@ void DungeonGenerator::generateCavern(Dungeon& d) {
                     for (int dx = -1; dx <= 1; ++dx) {
                         if (dx == 0 && dy == 0) continue;
                         Vec2 p{x + dx, y + dy};
-                        if (!d.inBounds(p) || copy[p.y][p.x] == Tile::Wall) walls++;
+                        if (!d.inBounds(p) || copy[static_cast<size_t>(p.y)][static_cast<size_t>(p.x)] == Tile::Wall) walls++;
                     }
                 }
-                if (walls >= 5) copy[y][x] = Tile::Wall;
-                else copy[y][x] = Tile::Floor;
+                if (walls >= 5) copy[static_cast<size_t>(y)][static_cast<size_t>(x)] = Tile::Wall;
+                else copy[static_cast<size_t>(y)][static_cast<size_t>(x)] = Tile::Floor;
             }
         }
         d.tiles = copy;
@@ -228,12 +228,12 @@ void DungeonGenerator::generateCavern(Dungeon& d) {
 
     for (int y = 1; y < d.mapH - 1; ++y) {
         for (int x = 1; x < d.mapW - 1; ++x) {
-            if (visited[y][x]) continue;
-            if (d.tiles[y][x] == Tile::Wall) continue;
+            if (visited[static_cast<size_t>(y)][static_cast<size_t>(x)]) continue;
+            if (d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] == Tile::Wall) continue;
 
             std::queue<Vec2> q;
             q.push({x, y});
-            visited[y][x] = true;
+            visited[static_cast<size_t>(y)][static_cast<size_t>(x)] = true;
             int minX = x, maxX = x, minY = y, maxY = y;
             int count = 0;
 
@@ -249,9 +249,9 @@ void DungeonGenerator::generateCavern(Dungeon& d) {
                         if (std::abs(dx) + std::abs(dy) != 1) continue;
                         Vec2 n{cur.x + dx, cur.y + dy};
                         if (!d.inBounds(n)) continue;
-                        if (visited[n.y][n.x]) continue;
-                        if (d.tiles[n.y][n.x] == Tile::Wall) continue;
-                        visited[n.y][n.x] = true;
+                        if (visited[static_cast<size_t>(n.y)][static_cast<size_t>(n.x)]) continue;
+                        if (d.tiles[static_cast<size_t>(n.y)][static_cast<size_t>(n.x)] == Tile::Wall) continue;
+                        visited[static_cast<size_t>(n.y)][static_cast<size_t>(n.x)] = true;
                         q.push(n);
                     }
                 }
@@ -289,18 +289,18 @@ void DungeonGenerator::connectRooms(Dungeon& d) {
     for (int i = 0; i < extra; ++i) {
         int a = rng_.range(0, static_cast<int>(d.rooms.size()) - 1);
         int b = rng_.range(0, static_cast<int>(d.rooms.size()) - 1);
-        if (a != b) connectRects(d, d.rooms[a], d.rooms[b]);
+        if (a != b) connectRects(d, d.rooms[static_cast<size_t>(a)], d.rooms[static_cast<size_t>(b)]);
     }
 }
 
 void DungeonGenerator::placeDoors(Dungeon& d) {
     for (int y = 1; y < d.mapH - 1; ++y) {
         for (int x = 1; x < d.mapW - 1; ++x) {
-            if (d.tiles[y][x] != Tile::Corridor) continue;
+            if (d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] != Tile::Corridor) continue;
             if (!rng_.chance(10)) continue;
-            bool lr = d.tiles[y][x-1] != Tile::Wall && d.tiles[y][x+1] != Tile::Wall && d.tiles[y-1][x] == Tile::Wall && d.tiles[y+1][x] == Tile::Wall;
-            bool ud = d.tiles[y-1][x] != Tile::Wall && d.tiles[y+1][x] != Tile::Wall && d.tiles[y][x-1] == Tile::Wall && d.tiles[y][x+1] == Tile::Wall;
-            if (lr || ud) d.tiles[y][x] = Tile::DoorClosed;
+            bool lr = d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x-1)] != Tile::Wall && d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x+1)] != Tile::Wall && d.tiles[static_cast<size_t>(y-1)][static_cast<size_t>(x)] == Tile::Wall && d.tiles[static_cast<size_t>(y+1)][static_cast<size_t>(x)] == Tile::Wall;
+            bool ud = d.tiles[static_cast<size_t>(y-1)][static_cast<size_t>(x)] != Tile::Wall && d.tiles[static_cast<size_t>(y+1)][static_cast<size_t>(x)] != Tile::Wall && d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x-1)] == Tile::Wall && d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x+1)] == Tile::Wall;
+            if (lr || ud) d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] = Tile::DoorClosed;
         }
     }
 }
@@ -309,7 +309,7 @@ void DungeonGenerator::placeFeatures(Dungeon& d, int depth) {
     int rubble = rng_.range(4, 10 + depth / 3);
     for (int i = 0; i < rubble; ++i) {
         if (d.rooms.empty()) break;
-        auto& r = d.rooms[rng_.range(0, static_cast<int>(d.rooms.size()) - 1)];
+        auto& r = d.rooms[static_cast<size_t>(rng_.range(0, static_cast<int>(d.rooms.size()) - 1))];
         Vec2 p{rng_.range(r.x, r.x + r.w - 1), rng_.range(r.y, r.y + r.h - 1)};
         if (p != d.stairsUp && p != d.stairsDown && d.at(p) == Tile::Floor) d.set(p, Tile::Rubble);
     }
@@ -317,7 +317,7 @@ void DungeonGenerator::placeFeatures(Dungeon& d, int depth) {
     if (rng_.chance(30 + depth)) {
         for (int i = 0; i < rng_.range(1, 4); ++i) {
             if (d.rooms.empty()) break;
-            auto& r = d.rooms[rng_.range(0, static_cast<int>(d.rooms.size()) - 1)];
+            auto& r = d.rooms[static_cast<size_t>(rng_.range(0, static_cast<int>(d.rooms.size()) - 1))];
             Vec2 p{rng_.range(r.x, r.x + r.w - 1), rng_.range(r.y, r.y + r.h - 1)};
             if (p != d.stairsUp && p != d.stairsDown && d.at(p) == Tile::Floor) {
                 d.set(p, Tile::Water);
@@ -328,7 +328,7 @@ void DungeonGenerator::placeFeatures(Dungeon& d, int depth) {
     if (depth >= 8 && rng_.chance(30)) {
         for (int i = 0; i < rng_.range(1, 3); ++i) {
             if (d.rooms.empty()) break;
-            auto& r = d.rooms[rng_.range(0, static_cast<int>(d.rooms.size()) - 1)];
+            auto& r = d.rooms[static_cast<size_t>(rng_.range(0, static_cast<int>(d.rooms.size()) - 1))];
             Vec2 p{rng_.range(r.x, r.x + r.w - 1), rng_.range(r.y, r.y + r.h - 1)};
             if (p != d.stairsUp && p != d.stairsDown && d.at(p) == Tile::Floor) d.set(p, Tile::Lava);
         }
@@ -336,7 +336,7 @@ void DungeonGenerator::placeFeatures(Dungeon& d, int depth) {
 
     if (rng_.chance(20)) {
         if (!d.rooms.empty()) {
-            auto& r = d.rooms[rng_.range(0, static_cast<int>(d.rooms.size()) - 1)];
+            auto& r = d.rooms[static_cast<size_t>(rng_.range(0, static_cast<int>(d.rooms.size()) - 1))];
             Vec2 p{rng_.range(r.x, r.x + r.w - 1), rng_.range(r.y, r.y + r.h - 1)};
             if (p != d.stairsUp && p != d.stairsDown && d.at(p) == Tile::Floor) d.set(p, Tile::Fountain);
         }
@@ -344,7 +344,7 @@ void DungeonGenerator::placeFeatures(Dungeon& d, int depth) {
 
     if (rng_.chance(25)) {
         if (!d.rooms.empty()) {
-            auto& r = d.rooms[rng_.range(0, static_cast<int>(d.rooms.size()) - 1)];
+            auto& r = d.rooms[static_cast<size_t>(rng_.range(0, static_cast<int>(d.rooms.size()) - 1))];
             Vec2 p{rng_.range(r.x, r.x + r.w - 1), rng_.range(r.y, r.y + r.h - 1)};
             if (p != d.stairsUp && p != d.stairsDown && d.at(p) == Tile::Floor) d.set(p, Tile::Chest);
         }
@@ -352,7 +352,7 @@ void DungeonGenerator::placeFeatures(Dungeon& d, int depth) {
 
     if (depth >= 10 && rng_.chance(20)) {
         if (!d.rooms.empty()) {
-            auto& r = d.rooms[rng_.range(0, static_cast<int>(d.rooms.size()) - 1)];
+            auto& r = d.rooms[static_cast<size_t>(rng_.range(0, static_cast<int>(d.rooms.size()) - 1))];
             Vec2 p{rng_.range(r.x, r.x + r.w - 1), rng_.range(r.y, r.y + r.h - 1)};
             if (p != d.stairsUp && p != d.stairsDown && d.at(p) == Tile::Floor) d.set(p, Tile::Altar);
         }
@@ -360,7 +360,7 @@ void DungeonGenerator::placeFeatures(Dungeon& d, int depth) {
 
     if (depth >= 20 && rng_.chance(15)) {
         if (!d.rooms.empty()) {
-            auto& r = d.rooms[rng_.range(0, static_cast<int>(d.rooms.size()) - 1)];
+            auto& r = d.rooms[static_cast<size_t>(rng_.range(0, static_cast<int>(d.rooms.size()) - 1))];
             Vec2 p{rng_.range(r.x, r.x + r.w - 1), rng_.range(r.y, r.y + r.h - 1)};
             if (p != d.stairsUp && p != d.stairsDown && d.at(p) == Tile::Floor) d.set(p, Tile::Trap);
         }
@@ -371,7 +371,7 @@ void DungeonGenerator::carveH(Dungeon& d, int a, int b, int y) {
     if (a > b) std::swap(a, b);
     for (int x = a; x <= b; ++x) {
         if (x > 0 && x < d.mapW - 1 && y > 0 && y < d.mapH - 1) {
-            if (d.tiles[y][x] == Tile::Wall) d.tiles[y][x] = Tile::Corridor;
+            if (d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] == Tile::Wall) d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] = Tile::Corridor;
         }
     }
 }
@@ -380,7 +380,7 @@ void DungeonGenerator::carveV(Dungeon& d, int a, int b, int x) {
     if (a > b) std::swap(a, b);
     for (int y = a; y <= b; ++y) {
         if (x > 0 && x < d.mapW - 1 && y > 0 && y < d.mapH - 1) {
-            if (d.tiles[y][x] == Tile::Wall) d.tiles[y][x] = Tile::Corridor;
+            if (d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] == Tile::Wall) d.tiles[static_cast<size_t>(y)][static_cast<size_t>(x)] = Tile::Corridor;
         }
     }
 }
@@ -401,9 +401,9 @@ bool DungeonGenerator::validateConnectivity(const Dungeon& d) {
     if (!d.inBounds(d.stairsUp) || !d.inBounds(d.stairsDown)) return false;
 
     std::queue<Vec2> qq;
-    std::vector<std::vector<bool>> vis(d.mapH, std::vector<bool>(d.mapW, false));
+    std::vector<std::vector<bool>> vis(static_cast<size_t>(d.mapH), std::vector<bool>(static_cast<size_t>(d.mapW), false));
     qq.push(d.stairsUp);
-    vis[d.stairsUp.y][d.stairsUp.x] = true;
+    vis[static_cast<size_t>(d.stairsUp.y)][static_cast<size_t>(d.stairsUp.x)] = true;
 
     while (!qq.empty()) {
         Vec2 cur = qq.front(); qq.pop();
@@ -414,9 +414,9 @@ bool DungeonGenerator::validateConnectivity(const Dungeon& d) {
                 if (std::abs(dx) + std::abs(dy) == 2) continue;
                 Vec2 n{cur.x + dx, cur.y + dy};
                 if (!d.inBounds(n)) continue;
-                if (vis[n.y][n.x]) continue;
+                if (vis[static_cast<size_t>(n.y)][static_cast<size_t>(n.x)]) continue;
                 if (d.blocksMove(n)) continue;
-                vis[n.y][n.x] = true;
+                vis[static_cast<size_t>(n.y)][static_cast<size_t>(n.x)] = true;
                 qq.push(n);
             }
         }

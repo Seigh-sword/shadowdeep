@@ -208,9 +208,9 @@ public:
         if (tcgetattr(STDIN_FILENO, &orig_) != 0) return false;
 
         termios t = orig_;
-        t.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
-        t.c_oflag &= ~(OPOST);
-        t.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+        t.c_iflag &= static_cast<tcflag_t>(~(BRKINT | ICRNL | INPCK | ISTRIP | IXON));
+        t.c_oflag &= static_cast<tcflag_t>(~(OPOST));
+        t.c_lflag &= static_cast<tcflag_t>(~(ECHO | ICANON | IEXTEN | ISIG));
         t.c_cflag |= CS8;
         t.c_cc[VMIN] = 0;
         t.c_cc[VTIME] = 0;

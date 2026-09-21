@@ -351,19 +351,27 @@ jobs:
             OS and Arch detection: update checker will automatically download correct artifact for your platform.
 
             Artifacts:
-            - Windows x86_64: shadowdeep-Zv1-windows-x86_64.zip
-            - Windows x86 (32-bit): shadowdeep-Zv1-windows-x86.zip
-            - Windows ARM64: shadowdeep-Zv1-windows-arm64.zip
-            - Windows ARM32: shadowdeep-Zv1-windows-arm32.zip
-            - Linux x86_64: shadowdeep-Zv1-linux-x86_64.tar.gz
-            - Linux AArch64: shadowdeep-Zv1-linux-aarch64.tar.gz (also linux-arm64)
-            - Linux ARMv7: shadowdeep-Zv1-linux-armv7.tar.gz (Raspberry Pi Zero/1/2)
-            - Linux RISC-V64: shadowdeep-Zv1-linux-riscv64.tar.gz
-            - Raspberry Pi AArch64: shadowdeep-Zv1-raspberrypi-aarch64.tar.gz (Pi 3/4/5)
-            - Raspberry Pi ARMv7: shadowdeep-Zv1-raspberrypi-armv7.tar.gz
-            - macOS ARM64: shadowdeep-Zv1-macos-arm64.tar.gz
-            - macOS x86_64: shadowdeep-Zv1-macos-x86_64.tar.gz
-            - FreeBSD x86_64: shadowdeep-Zv1-freebsd-x86_64.tar.gz
+
+            **Windows:**
+            - **Windows x86_64**: [shadowdeep-Zv1-windows-x86_64.zip](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-windows-x86_64.zip)
+            - **Windows x86 (32-bit)**: [shadowdeep-Zv1-windows-x86.zip](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-windows-x86.zip)
+            - **Windows ARM64**: [shadowdeep-Zv1-windows-arm64.zip](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-windows-arm64.zip)
+            - **Windows ARM32**: [shadowdeep-Zv1-windows-arm32.zip](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-windows-arm32.zip)
+
+            **Linux:**
+            - **Linux x86_64**: [shadowdeep-Zv1-linux-x86_64.tar.gz](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-linux-x86_64.tar.gz)
+            - **Linux AArch64**: [shadowdeep-Zv1-linux-aarch64.tar.gz](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-linux-aarch64.tar.gz) (also `linux-arm64`)
+            - **Linux ARMv7**: [shadowdeep-Zv1-linux-armv7.tar.gz](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-linux-armv7.tar.gz) (Raspberry Pi Zero/1/2)
+            - **Linux RISC-V64**: [shadowdeep-Zv1-linux-riscv64.tar.gz](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-linux-riscv64.tar.gz)
+            - **Raspberry Pi AArch64**: [shadowdeep-Zv1-raspberrypi-aarch64.tar.gz](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-raspberrypi-aarch64.tar.gz) (Pi 3/4/5)
+            - **Raspberry Pi ARMv7**: [shadowdeep-Zv1-raspberrypi-armv7.tar.gz](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-raspberrypi-armv7.tar.gz)
+
+            **macOS:**
+            - **macOS ARM64**: [shadowdeep-Zv1-macos-arm64.tar.gz](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-macos-arm64.tar.gz)
+            - **macOS x86_64**: [shadowdeep-Zv1-macos-x86_64.tar.gz](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-macos-x86_64.tar.gz)
+
+            **BSD:**
+            - **FreeBSD x86_64**: [shadowdeep-Zv1-freebsd-x86_64.tar.gz](https://github.com/Seigh-sword/shadowdeep/releases/download/${{ inputs.version || 'Zv1' }}/shadowdeep-Zv1-freebsd-x86_64.tar.gz)
 
             Each artifact includes LICENSE, README, AGENTS.md, DOCS/, data/.
 
