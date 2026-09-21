@@ -28,6 +28,7 @@ jobs:
   build-native:
     name: Build ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -58,7 +59,7 @@ jobs:
             artifact: shadowdeep-Zv1-macos-arm64.tar.gz
           - os: macos
             arch: x86_64
-            runner: macos-13
+            runner: macos-14
             artifact: shadowdeep-Zv1-macos-x86_64.tar.gz
 
     steps:
@@ -312,7 +313,7 @@ jobs:
   release:
     needs: [build-native, build-cross, build-freebsd]
     runs-on: ubuntu-22.04
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    if: always() && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch')
     steps:
       - uses: actions/checkout@v4
       - name: Download all artifacts
