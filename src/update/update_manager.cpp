@@ -79,6 +79,8 @@ std::string UpdateManager::getOS() {
 std::string UpdateManager::getArch() {
 #if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__)
     return "x86_64";
+#elif defined(_M_IX86) || defined(__i386__) || defined(__i386) || defined(_X86_)
+    return "x86";
 #elif defined(_M_ARM64) || defined(__aarch64__)
     return "aarch64";
 #elif defined(__arm__) || defined(_M_ARM)
@@ -87,6 +89,8 @@ std::string UpdateManager::getArch() {
 #else
     return "armv7";
 #endif
+#elif defined(_M_ARM) || defined(__arm__)
+    return "armv7";
 #elif defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
     return "riscv64";
 #elif defined(__ppc64__) || defined(__powerpc64__)
@@ -134,6 +138,20 @@ std::vector<std::string> UpdateManager::getCandidateArtifactNames() {
         if (arch == "x86_64") {
             names.push_back("shadowdeep-Zv1-windows-x86_64.zip");
         }
+        if (arch == "x86") {
+            names.push_back("shadowdeep-Zv1-windows-x86.zip");
+            names.push_back("shadowdeep-Zv1-windows-x32.zip");
+            names.push_back("shadowdeep-Zv1-windows-i386.zip");
+        }
+        if (arch == "armv7" || arch == "arm") {
+            names.push_back("shadowdeep-Zv1-windows-arm32.zip");
+            names.push_back("shadowdeep-Zv1-windows-arm.zip");
+            names.push_back("shadowdeep-Zv1-windows-armv7.zip");
+        }
+        names.push_back("shadowdeep-Zv1-windows-x86_64.zip");
+        names.push_back("shadowdeep-Zv1-windows-arm64.zip");
+        names.push_back("shadowdeep-Zv1-windows-x86.zip");
+        names.push_back("shadowdeep-Zv1-windows-arm32.zip");
     } else {
         names.push_back("shadowdeep-Zv1-" + os + "-" + arch + ".tar.gz");
         if (os == "linux") {

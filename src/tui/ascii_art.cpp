@@ -679,7 +679,7 @@ void drawProgressBar(ScreenBuffer& screen, int x, int y, int w, int current, int
     if (pct < 0) pct = 0;
     if (pct > 1) pct = 1;
     int innerW = w - 2;
-    int filled = static_cast<int>(innerW * pct);
+    int filled = static_cast<int>(static_cast<float>(innerW) * pct);
     for (int i = 0; i < innerW; ++i) {
         if (i < filled) screen.set(x + 1 + i, y + 1, "#", fill, true);
         else screen.set(x + 1 + i, y + 1, "-", empty, false);
@@ -695,7 +695,7 @@ void drawVerticalBar(ScreenBuffer& screen, int x, int y, int h, int current, int
     float pct = static_cast<float>(current) / static_cast<float>(max);
     if (pct < 0) pct = 0;
     if (pct > 1) pct = 1;
-    int filled = static_cast<int>(h * pct);
+    int filled = static_cast<int>(static_cast<float>(h) * pct);
     for (int i = 0; i < h; ++i) {
         if (i < h - filled) screen.set(x, y + i, ".", empty, false);
         else screen.set(x, y + i, "#", fill, true);

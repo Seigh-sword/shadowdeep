@@ -38,9 +38,17 @@ jobs:
             runner: windows-2022
             artifact: shadowdeep-Zv1-windows-x86_64.zip
           - os: windows
+            arch: x86
+            runner: windows-2022
+            artifact: shadowdeep-Zv1-windows-x86.zip
+          - os: windows
             arch: arm64
             runner: windows-2022
             artifact: shadowdeep-Zv1-windows-arm64.zip
+          - os: windows
+            arch: arm32
+            runner: windows-2022
+            artifact: shadowdeep-Zv1-windows-arm32.zip
           - os: linux
             arch: x86_64
             runner: ubuntu-22.04
@@ -344,7 +352,9 @@ jobs:
 
             Artifacts:
             - Windows x86_64: shadowdeep-Zv1-windows-x86_64.zip
+            - Windows x86 (32-bit): shadowdeep-Zv1-windows-x86.zip
             - Windows ARM64: shadowdeep-Zv1-windows-arm64.zip
+            - Windows ARM32: shadowdeep-Zv1-windows-arm32.zip
             - Linux x86_64: shadowdeep-Zv1-linux-x86_64.tar.gz
             - Linux AArch64: shadowdeep-Zv1-linux-aarch64.tar.gz (also linux-arm64)
             - Linux ARMv7: shadowdeep-Zv1-linux-armv7.tar.gz (Raspberry Pi Zero/1/2)
