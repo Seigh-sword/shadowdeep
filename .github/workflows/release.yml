@@ -22,6 +22,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   build-native:
@@ -177,11 +178,12 @@ jobs:
         run: |
           set -e
           docker pull ${{ matrix.dockcross }}
-          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
-          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake --build build/${{ matrix.target }} --verbose
+          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake -B build/${{ matrix.target }} -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF 2>&1 | tee configure-${{ matrix.target }}.log
+          docker run --rm -v $PWD:/work -w /work ${{ matrix.dockcross }} cmake --build build/${{ matrix.target }} --verbose 2>&1 | tee build-${{ matrix.target }}.log
 
       - name: Package
         run: |
+          set -e
           mkdir -p dist/shadowdeep
           cp build/${{ matrix.target }}/shadowdeep dist/shadowdeep/ || cp build/${{ matrix.target }}/shadowdeep.exe dist/shadowdeep/ || echo "binary not found"; ls -R build/${{ matrix.target }} || true
           cp LICENSE dist/shadowdeep/ || true
@@ -210,6 +212,58 @@ jobs:
             sha256sum shadowdeep-Zv1-linux-armv7-rpi.tar.gz > shadowdeep-Zv1-linux-armv7-rpi.tar.gz.sha256 || true
           fi
           ls -lh
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "=== Configure ==="
+          cat configure-${{ matrix.target }}.log || true
+          echo "=== Build ==="
+          tail -n 500 build-${{ matrix.target }}.log || true
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-cross-logs-${{ matrix.target }}
+          path: |
+            configure-${{ matrix.target }}.log
+            build-${{ matrix.target }}.log
+          if-no-files-found: warn
+
+      - name: Post log to issue on failure
+        if: failure()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let logs = [];
+            const files = [`configure-${{ matrix.target }}.log`, `build-${{ matrix.target }}.log`];
+            for (const f of files) {
+              try {
+                let content = fs.readFileSync(f, 'utf8');
+                content = content.slice(-4000);
+                logs.push("=== " + f + " ===\n" + content);
+              } catch (e) {
+                logs.push("=== " + f + " missing: " + e.message + " ===");
+              }
+            }
+            let combined = logs.join("\n\n");
+            combined = combined.slice(-12000);
+            const body = `Release cross ${{ matrix.target }} failed for ${context.sha.slice(0,7)}:\n\`\`\`\n${combined}\n\`\`\`\n`;
+            console.log(body);
+            try {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Release cross ${{ matrix.target }} failure ${context.sha.slice(0,7)}`,
+                body: body,
+                labels: ["bug"]
+              });
+            } catch (err) {
+              console.log("Failed to create issue: " + err.message);
+            }
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
