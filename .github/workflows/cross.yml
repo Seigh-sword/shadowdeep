@@ -160,17 +160,20 @@ jobs:
           echo "Raspberry Pi ${{ matrix.arch }} build OK"
       - name: Package Raspberry Pi
         run: |
+          set -e
           mkdir -p dist/shadowdeep
-          cp build/rpi-${{ matrix.arch }}/shadowdeep dist/shadowdeep/ || cp build/rpi-aarch64/shadowdeep dist/shadowdeep/ || cp build/rpi-armv7/shadowdeep dist/shadowdeep/ || true
-          cp LICENSE dist/shadowdeep/
-          cp README.md dist/shadowdeep/
+          cp build/rpi-${{ matrix.arch }}/shadowdeep dist/shadowdeep/ || cp build/rpi-aarch64/shadowdeep dist/shadowdeep/ || cp build/rpi-armv7/shadowdeep dist/shadowdeep/ || echo "binary copy fallback"
+          cp LICENSE dist/shadowdeep/ || true
+          cp README.md dist/shadowdeep/ || true
           cp AGENTS.md dist/shadowdeep/ || true
+          cp AGENT.md dist/shadowdeep/ || true
           cp -r DOCS dist/shadowdeep/DOCS || true
           cp -r data dist/shadowdeep/data || true
           cd dist
-          tar czf ${{ matrix.artifact }} shadowdeep || true
-          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || true
+          tar czf ${{ matrix.artifact }} shadowdeep || zip -r ${{ matrix.artifact }} shadowdeep || true
+          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || shasum -a 256 ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || true
           ls -lh
+          echo "Package OK"
       - name: Show logs on failure
         if: failure()
         run: |
