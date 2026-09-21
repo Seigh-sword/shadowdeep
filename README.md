@@ -1,34 +1,24 @@
 # SHADOWDEEP
 
-![CI](https://github.com/Seigh-sword/shadowdeep/actions/workflows/ci.yml/badge.svg?branch=main)
-
-![Cross Compile](https://github.com/Seigh-sword/shadowdeep/actions/workflows/cross.yml/badge.svg?branch=main)
-
-![Release](https://github.com/Seigh-sword/shadowdeep/actions/workflows/release.yml/badge.svg)
-
-![License](https://img.shields.io/badge/license-ISC-blue.svg)
-
-![Version](https://img.shields.io/badge/version-Zv1-orange.svg)
-
-![C++](https://img.shields.io/badge/C%2B%2B-20-blue.svg)
-
-![CMake](https://img.shields.io/badge/CMake-3.20%2B-green.svg)
-
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20BSD-lightgrey.svg)
-
-![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-aarch64%20%7C%20armv7-C51A4A.svg)
-
-![Arch](https://img.shields.io/badge/arch-x86_64%20%7C%20ARM64%20%7C%20ARMv7%20%7C%20RISC--V64-yellow.svg)
-
-![TUI](https://img.shields.io/badge/TUI-ANSI%20%2B%20Unicode%20%2B%20FTXUI-informational.svg)
-
-![Save Format](https://img.shields.io/badge/save-binary%20%2B%20atomic%20%2B%20backups-success.svg)
-
-![No MTX](https://img.shields.io/badge/economy-no%20MTX%20%7C%20Gold%20%26%20Rubies-ff69b4.svg)
-
-![Offline](https://img.shields.io/badge/offline-capable-brightgreen.svg)
-
-![Portable](https://img.shields.io/badge/portability-intentional%20%2B%20Tier1--4-blueviolet.svg)
+<p align="center">
+<nobr>
+<img src="https://github.com/Seigh-sword/shadowdeep/actions/workflows/ci.yml/badge.svg?branch=main" height="20">
+<img src="https://github.com/Seigh-sword/shadowdeep/actions/workflows/cross.yml/badge.svg?branch=main" height="20">
+<img src="https://github.com/Seigh-sword/shadowdeep/actions/workflows/release.yml/badge.svg" height="20">
+<img src="https://img.shields.io/badge/license-ISC-blue.svg" height="20">
+<img src="https://img.shields.io/badge/version-Zv1-orange.svg" height="20">
+<img src="https://img.shields.io/badge/C%2B%2B-20-blue.svg" height="20">
+<img src="https://img.shields.io/badge/CMake-3.20%2B-green.svg" height="20">
+<img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20BSD-lightgrey.svg" height="20">
+<img src="https://img.shields.io/badge/Raspberry%20Pi-aarch64%20%7C%20armv7-C51A4A.svg" height="20">
+<img src="https://img.shields.io/badge/arch-x86_64%20%7C%20ARM64%20%7C%20ARMv7%20%7C%20RISC--V64-yellow.svg" height="20">
+<img src="https://img.shields.io/badge/TUI-ANSI%20%2B%20Unicode%20%2B%20FTXUI-informational.svg" height="20">
+<img src="https://img.shields.io/badge/save-binary%20%2B%20atomic%20%2B%20backups-success.svg" height="20">
+<img src="https://img.shields.io/badge/economy-no%20MTX%20%7C%20Gold%20%26%20Rubies-ff69b4.svg" height="20">
+<img src="https://img.shields.io/badge/offline-capable-brightgreen.svg" height="20">
+<img src="https://img.shields.io/badge/portability-intentional%20%2B%20Tier1--4-blueviolet.svg" height="20">
+</nobr>
+</p>
 
 **Zv1 - Zero v1 - Early Alpha**
 
