@@ -7,6 +7,7 @@
 #include "../tui/screen.hpp"
 #include "cli.hpp"
 #include <memory>
+#include <cstdint>
 
 namespace shadowdeep {
 

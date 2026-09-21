@@ -334,11 +334,9 @@ bool DungeonGenerator::validateConnectivity(const Dungeon& d) {
     std::vector<std::vector<bool>> vis(kMapH, std::vector<bool>(kMapW, false));
     qq.push(d.stairsUp);
     vis[d.stairsUp.y][d.stairsUp.x] = true;
-    int reached = 0;
 
     while (!qq.empty()) {
         Vec2 cur = qq.front(); qq.pop();
-        reached++;
         if (cur == d.stairsDown) return true;
         for (int dy = -1; dy <= 1; ++dy) {
             for (int dx = -1; dx <= 1; ++dx) {

@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <vector>
 #include <optional>
+#include <cstdint>
 #include "../platform/paths.hpp"
 #include "entry_metadata.hpp"
 

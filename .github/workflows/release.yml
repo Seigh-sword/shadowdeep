@@ -2,6 +2,9 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
+      - arena/*
     tags:
       - "Zv1*"
       - "v*"
@@ -100,7 +103,6 @@ jobs:
           cd dist
           tar czf ${{ matrix.artifact }} shadowdeep
           sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256
-          # Also create alias for raspberry pi if aarch64
           if [ "${{ matrix.arch }}" = "aarch64" ]; then
             cp ${{ matrix.artifact }} shadowdeep-Zv1-linux-arm64.tar.gz
             sha256sum shadowdeep-Zv1-linux-arm64.tar.gz > shadowdeep-Zv1-linux-arm64.tar.gz.sha256
@@ -135,6 +137,7 @@ jobs:
             dist/${{ matrix.artifact }}.sha256
             dist/*.tar.gz
             dist/*.tar.gz.sha256
+          if-no-files-found: warn
 
   build-cross:
     name: Cross Build ${{ matrix.target }} (${{ matrix.desc }})
@@ -180,17 +183,16 @@ jobs:
       - name: Package
         run: |
           mkdir -p dist/shadowdeep
-          cp build/${{ matrix.target }}/shadowdeep dist/shadowdeep/ || cp build/${{ matrix.target }}/shadowdeep.exe dist/shadowdeep/ || echo "binary not found, listing"; ls -R build/${{ matrix.target }} || true
-          cp LICENSE dist/shadowdeep/
-          cp README.md dist/shadowdeep/
+          cp build/${{ matrix.target }}/shadowdeep dist/shadowdeep/ || cp build/${{ matrix.target }}/shadowdeep.exe dist/shadowdeep/ || echo "binary not found"; ls -R build/${{ matrix.target }} || true
+          cp LICENSE dist/shadowdeep/ || true
+          cp README.md dist/shadowdeep/ || true
           cp AGENTS.md dist/shadowdeep/ || true
           cp AGENT.md dist/shadowdeep/ || true
-          cp -r DOCS dist/shadowdeep/DOCS
+          cp -r DOCS dist/shadowdeep/DOCS || true
           cp -r data dist/shadowdeep/data || true
           cd dist
           tar czf ${{ matrix.artifact }} shadowdeep || zip -r ${{ matrix.artifact }} shadowdeep
-          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256
-          # Create alias names for compatibility
+          sha256sum ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || shasum -a 256 ${{ matrix.artifact }} > ${{ matrix.artifact }}.sha256 || true
           if [ "${{ matrix.target }}" = "aarch64" ]; then
             cp ${{ matrix.artifact }} shadowdeep-Zv1-linux-arm64.tar.gz || true
             sha256sum shadowdeep-Zv1-linux-arm64.tar.gz > shadowdeep-Zv1-linux-arm64.tar.gz.sha256 || true
@@ -218,6 +220,7 @@ jobs:
             dist/${{ matrix.artifact }}.sha256
             dist/*.tar.gz
             dist/*.tar.gz.sha256
+          if-no-files-found: warn
 
   build-freebsd:
     name: Build FreeBSD
@@ -228,7 +231,7 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           usesh: true
-          prepare: pkg install -y cmake ninja
+          prepare: pkg install -y cmake ninja curl
           run: |
             cmake -B build/freebsd -G Ninja -DCMAKE_BUILD_TYPE=Release -DSHADOWDEEP_BUILD_TESTS=OFF
             cmake --build build/freebsd --verbose
@@ -236,7 +239,8 @@ jobs:
             cp build/freebsd/shadowdeep dist/shadowdeep/
             cp LICENSE dist/shadowdeep/
             cp README.md dist/shadowdeep/
-            cp -r DOCS dist/shadowdeep/DOCS
+            cp AGENTS.md dist/shadowdeep/ || true
+            cp -r DOCS dist/shadowdeep/DOCS || true
             cp -r data dist/shadowdeep/data || true
             cd dist
             tar czf shadowdeep-Zv1-freebsd-x86_64.tar.gz shadowdeep
@@ -249,8 +253,7 @@ jobs:
           path: |
             dist/*.tar.gz
             dist/*.tar.gz.sha256
-            build/freebsd/shadowdeep
-            dist/shadowdeep-Zv1-freebsd-x86_64.tar.gz
+          if-no-files-found: warn
 
   release:
     needs: [build-native, build-cross, build-freebsd]
@@ -268,9 +271,8 @@ jobs:
           mkdir -p release_files
           find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" -o -name "*.sha256" \) -exec cp {} release_files/ \;
           ls -lh release_files
-          # Deduplicate
           cd release_files
-          sha256sum * > SHA256SUMS || shasum -a 256 * > SHA256SUMS
+          sha256sum * > SHA256SUMS 2>&1 || shasum -a 256 * > SHA256SUMS 2>&1 || true
           cat SHA256SUMS
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -278,6 +280,8 @@ jobs:
           files: release_files/*
           generate_release_notes: true
           prerelease: ${{ inputs.prerelease == 'true' }}
+          tag_name: ${{ inputs.version || 'Zv1' }}
+          name: SHADOWDEEP ${{ inputs.version || 'Zv1' }}
           body: |
             SHADOWDEEP ${{ inputs.version || 'Zv1' }} Release
 

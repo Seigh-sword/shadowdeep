@@ -37,17 +37,13 @@ static fs::path homeDir() {
 #endif
 }
 
+#ifndef _WIN32
 static fs::path xdgOrHome(const char* envName, const fs::path& fallbackFromHome) {
-#ifdef _WIN32
-    (void)envName;
-    (void)fallbackFromHome;
-    return fs::path();
-#else
     const char* v = std::getenv(envName);
     if (v && *v) return fs::path(v);
     return homeDir() / fallbackFromHome;
-#endif
 }
+#endif
 
 AppPaths getAppPaths() {
     AppPaths p;
